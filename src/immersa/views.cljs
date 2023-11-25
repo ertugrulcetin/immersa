@@ -7,6 +7,7 @@
     ["@babylonjs/core/Lights/hemisphericLight" :refer [HemisphericLight]]
     ["@babylonjs/core/Meshes/meshBuilder" :refer [MeshBuilder]]
     ["@babylonjs/core/Materials/standardMaterial" :refer [StandardMaterial]]
+    [immersa.scene.api :as api]
     [applied-science.js-interop :as j]
     [re-frame.core :as re-frame]
     [immersa.styles :as styles]
@@ -18,26 +19,27 @@
    [:div (styles/content)
     [:div (styles/sidebar)]
     [:div (styles/canvas-container)
-     [:canvas
-      {:id "renderCanvas"
-       :ref (fn [canvas]
-              (js/console.log "Initializing canvas")
-              (let [engine (Engine. canvas true #js {:preserveDrawingBuffer true
-                                                     :stencil true})
-                    scene (Scene. engine)
-                    camera (FreeCamera. "camera1" (Vector3. 0 5 -10))
-                    light (HemisphericLight. "light1" (Vector3. 0 1 0))
-                    box (j/call MeshBuilder :CreateBox name #js {:size 1})]
-                (j/call MeshBuilder :CreateGround "ground1" #js {:width 6
-                                                                :height 6
-                                                                :subdivisions 2
-                                                                :updatable false})
-                (j/assoc! light :intensity 0.7)
-                (.setTarget camera (Vector3. 0 0 0))
-                (.attachControl camera canvas false)
-                (.runRenderLoop engine (fn [] (.render scene)))
-                ))
-       :class (styles/canvas)}]
+     [:div (styles/canvas-wrapper)
+      [:canvas
+       {:id "renderCanvas"
+        :ref (fn [canvas]
+               (js/console.log "Initializing canvas")
+               (let [engine (api/create-engine canvas)
+                     scene (Scene. engine)
+                     camera (FreeCamera. "camera1" (Vector3. 0 5 -10))
+                     light (HemisphericLight. "light1" (Vector3. 0 1 0))
+                     box (j/call MeshBuilder :CreateBox "my-box" #js {:size 1})
+                     ground (j/call MeshBuilder :CreateGround "ground1" #js {:width 6
+                                                                             :height 6
+                                                                             :subdivisions 2
+                                                                             :updatable false})]
+                 (js/console.log ground)
+                 (j/assoc! light :intensity 0.7)
+                 (.setTarget camera (Vector3. 0 0 0))
+                 (.attachControl camera canvas false)
+                 (.runRenderLoop engine (fn [] (.render scene)))
+                 ))
+        :class (styles/canvas)}]]
      [:div (styles/canvas-footer)
       [:p "selam"]]]
     [:div (styles/options-bar)]]])

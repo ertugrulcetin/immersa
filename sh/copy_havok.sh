@@ -4,7 +4,7 @@
 src="node_modules/@babylonjs/havok/lib/umd/HavokPhysics.wasm"
 src_js="node_modules/@babylonjs/havok/lib/umd/HavokPhysics_umd.js"
 dst="resources/public/js/compiled/"
-dst_vendor="src/vendor"
+dst_vendor="src/immersa/vendor"
 dst_vendor_js_old="$dst_vendor/HavokPhysics_umd.js"
 dst_vendor_js_new="$dst_vendor/havok.js"
 

@@ -76,18 +76,25 @@
            :position "relative"
            :display "flex"
            :justify-content "center"
+           :flex-direction "column"
            :align-items "center"})
+
+(defattrs canvas-wrapper []
+          {:position :relative
+           :width "100%"
+           :height "100%"})
 
 (defclass canvas []
           {:position :absolute
-           :top 0
-           :left 0
-           :width "100%"
-           :max-height "calc(100vh - 5%)"
-           :aspect-ratio "1.8 / 1"
+           :outline :none
+           :top "0"
+           :left "0"
+           :width "100%" ; Full width of the container
+           ;:aspect-ratio "1.77/1" ; Maintain a 1:1 aspect ratio
            :border "1px solid red"
            :background "#e9e9e9"})
 
+
 (defattrs canvas-footer []
           {:width "100%"
-           :border "1px solid blue"})
+           #_#_:border "1px solid blue"})
