@@ -4,11 +4,17 @@
     [immersa.events :as events]
     [immersa.views :as views]
     [re-frame.core :as re-frame]
+    [immersa.scene.api :as api]
+    [immersa.common.utils :as common.utils]
     [reagent.dom :as rdom]))
 
 (defn dev-setup []
   (when config/debug?
     (println "dev mode")))
+
+(defn ^:dev/before-load before-load []
+  (api/dispose-engine)
+  (common.utils/remove-element-listeners))
 
 (defn ^:dev/after-load mount-root []
   (re-frame/clear-subscription-cache!)

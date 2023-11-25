@@ -46,7 +46,7 @@
 
 (defn v3
   ([]
-   (v3 0))
+   (Vector3.))
   ([n]
    (Vector3. n n n))
   ([x y z]
@@ -54,7 +54,7 @@
 
 (defn v2
   ([]
-   (v2 0))
+   (Vector2.))
   ([n]
    (Vector2. n n))
   ([x z]
@@ -125,11 +125,11 @@
                                                                               :friction friction
                                                                               :restitution restitution})]
     (m/cond-doto agg
-                 gravity-factor (j/call-in [:body :setGravityFactor] gravity-factor)
-                 linear-damping (j/call-in [:body :setLinearDamping] linear-damping)
-                 angular-damping (j/call-in [:body :setAngularDamping] angular-damping)
-                 mass-props (j/call-in [:body :setMassProperties] (clj->js mass-props))
-                 motion-type (j/call-in [:body :setMotionType] (j/get PhysicsMotionType (name motion-type))))))
+      gravity-factor (j/call-in [:body :setGravityFactor] gravity-factor)
+      linear-damping (j/call-in [:body :setLinearDamping] linear-damping)
+      angular-damping (j/call-in [:body :setAngularDamping] angular-damping)
+      mass-props (j/call-in [:body :setMassProperties] (clj->js mass-props))
+      motion-type (j/call-in [:body :setMotionType] (j/get PhysicsMotionType (name motion-type))))))
 
 (defn standard-mat [name & {:keys [diffuse-texture
                                    diffuse-color
@@ -169,8 +169,8 @@
 (defn texture [path & {:keys [u-scale v-scale]}]
   (let [tex (Texture. path)]
     (m/cond-doto tex
-                 u-scale (j/assoc! :uScale u-scale)
-                 v-scale (j/assoc! :vScale v-scale))))
+      u-scale (j/assoc! :uScale u-scale)
+      v-scale (j/assoc! :vScale v-scale))))
 
 (defn key-pressed? [key]
   (j/get-in db [:input-map key] false))
@@ -190,8 +190,14 @@
 (defn get-object-center-world [mesh]
   (j/call-in mesh [:physicsBody :getObjectCenterWorld]))
 
-(defn directional-light [name & {:keys [dir pos]}]
+(defn directional-light [name & {:keys [dir pos]
+                                 :or {dir (v3 0 -1 0)}}]
   (let [light (DirectionalLight. name dir)]
+    (j/assoc! light :position pos)))
+
+(defn hemispheric-light [name & {:keys [dir pos]
+                                 :or {dir (v3 0 1 0)}}]
+  (let [light (HemisphericLight. name dir)]
     (j/assoc! light :position pos)))
 
 (defn shadow-generator [& {:keys [map-size light]
@@ -201,19 +207,13 @@
 (defn add-shadow-caster [shadow-generator mesh]
   (j/call shadow-generator :addShadowCaster mesh))
 
-(defn register-event-listener [element type f]
-  (j/call element :addEventListener type f)
-  (j/update! db :event-listeners (fnil conj []) [element type f])
-  f)
-
-(defn remove-element-listeners []
-  (doseq [[element type f] (m/get db :event-listeners)]
-    (j/call element :removeEventListener type f))
-  (j/assoc! db :event-listeners [])
-  (println "removed event listeners"))
+(defn create-free-camera [name pos]
+  (let [c (FreeCamera. name pos)]
+    (j/assoc! db :free-camera c)
+    c))
 
 (defn create-arc-camera [name & {:keys [canvas
-                                        player
+                                        target
                                         pos
                                         radius
                                         target-screen-offset
@@ -222,11 +222,11 @@
                                         collision-radius
                                         lower-radius-limit
                                         upper-radius-limit]}]
-  (let [camera (ArcRotateCamera. name 0 0 10 (v3))]
+  (let [camera (ArcRotateCamera. name 0 0 0 (v3))]
     (doto camera
       (j/call :setPosition pos)
       (j/call :attachControl canvas true)
-      (j/call :setTarget player))
+      (j/call :setTarget target))
     (j/assoc! camera
               :radius radius
               :targetScreenOffset target-screen-offset
@@ -235,7 +235,7 @@
               :collisionRadius collision-radius
               :lowerRadiusLimit lower-radius-limit
               :upperRadiusLimit upper-radius-limit)
-    (j/assoc! db :camera camera)
+    (j/assoc! db :arc-camera camera)
     camera))
 
 (defn raycast-result []
@@ -281,3 +281,6 @@
 
 (defn to-deg [angle]
   (j/call Tools :ToDegrees angle))
+
+(defn dispose-engine []
+  (j/call-in db [:engine :dispose]))
