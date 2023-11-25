@@ -1,10 +1,10 @@
 (ns immersa.core
   (:require
-   [reagent.dom :as rdom]
-   [re-frame.core :as re-frame]
-   [immersa.events :as events]
-   [immersa.views :as views]
-   [immersa.config :as config]))
+    [immersa.config :as config]
+    [immersa.events :as events]
+    [immersa.views :as views]
+    [re-frame.core :as re-frame]
+    [reagent.dom :as rdom]))
 
 (defn dev-setup []
   (when config/debug?

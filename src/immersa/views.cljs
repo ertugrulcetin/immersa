@@ -1,17 +1,17 @@
 (ns immersa.views
   (:require
-    ["@babylonjs/core/Engines/engine" :refer [Engine]]
-    ["@babylonjs/core/scene" :refer [Scene]]
-    ["@babylonjs/core/Maths/math" :refer [Vector3]]
     ["@babylonjs/core/Cameras/freeCamera" :refer [FreeCamera]]
+    ["@babylonjs/core/Engines/engine" :refer [Engine]]
     ["@babylonjs/core/Lights/hemisphericLight" :refer [HemisphericLight]]
-    ["@babylonjs/core/Meshes/meshBuilder" :refer [MeshBuilder]]
     ["@babylonjs/core/Materials/standardMaterial" :refer [StandardMaterial]]
-    [immersa.scene.api :as api]
+    ["@babylonjs/core/Maths/math" :refer [Vector3]]
+    ["@babylonjs/core/Meshes/meshBuilder" :refer [MeshBuilder]]
+    ["@babylonjs/core/scene" :refer [Scene]]
     [applied-science.js-interop :as j]
-    [re-frame.core :as re-frame]
+    [immersa.scene.api :as api]
     [immersa.styles :as styles]
-    [immersa.subs :as subs]))
+    [immersa.subs :as subs]
+    [re-frame.core :as re-frame]))
 
 (defn main-panel []
   [:div (styles/app-container)
@@ -37,8 +37,7 @@
                  (j/assoc! light :intensity 0.7)
                  (.setTarget camera (Vector3. 0 0 0))
                  (.attachControl camera canvas false)
-                 (.runRenderLoop engine (fn [] (.render scene)))
-                 ))
+                 (.runRenderLoop engine (fn [] (.render scene)))))
         :class (styles/canvas)}]]
      [:div (styles/canvas-footer)
       [:p "selam"]]]

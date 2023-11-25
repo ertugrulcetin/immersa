@@ -1,27 +1,27 @@
 (ns immersa.scene.api
   (:require
-    ["@babylonjs/core/Engines/engine" :refer [Engine]]
-    ["@babylonjs/core/scene" :refer [Scene]]
     ["@babylonjs/core/Actions/actionManager" :refer [ActionManager]]
-    ["@babylonjs/core/Actions/directActions":refer [ExecuteCodeAction]]
+    ["@babylonjs/core/Actions/directActions" :refer [ExecuteCodeAction]]
+    ["@babylonjs/core/Cameras/arcRotateCamera" :refer [ArcRotateCamera]]
+    ["@babylonjs/core/Cameras/freeCamera" :refer [FreeCamera]]
+    ["@babylonjs/core/Engines/engine" :refer [Engine]]
+    ["@babylonjs/core/Lights/Shadows/shadowGenerator" :refer [ShadowGenerator]]
+    ["@babylonjs/core/Lights/directionalLight" :refer [DirectionalLight]]
+    ["@babylonjs/core/Lights/hemisphericLight" :refer [HemisphericLight]]
+    ["@babylonjs/core/Loading/sceneLoader" :refer [SceneLoader]]
+    ["@babylonjs/core/Materials/Textures/cubeTexture" :refer [CubeTexture]]
+    ["@babylonjs/core/Materials/Textures/texture" :refer [Texture]]
+    ["@babylonjs/core/Materials/standardMaterial" :refer [StandardMaterial]]
     ["@babylonjs/core/Maths/math" :refer [Vector2 Vector3]]
     ["@babylonjs/core/Maths/math.color" :refer [Color3]]
-    ["@babylonjs/core/Misc/tools" :refer [Tools]]
-    ["@babylonjs/core/Cameras/freeCamera" :refer [FreeCamera]]
-    ["@babylonjs/core/Cameras/arcRotateCamera" :refer [ArcRotateCamera]]
-    ["@babylonjs/core/Lights/hemisphericLight" :refer [HemisphericLight]]
-    ["@babylonjs/core/Lights/directionalLight" :refer [DirectionalLight]]
-    ["@babylonjs/core/Lights/Shadows/shadowGenerator" :refer [ShadowGenerator]]
     ["@babylonjs/core/Meshes/meshBuilder" :refer [MeshBuilder]]
-    ["@babylonjs/core/Materials/standardMaterial" :refer [StandardMaterial]]
-    ["@babylonjs/gui/2D" :refer [AdvancedDynamicTexture]]
-    ["@babylonjs/gui/2D/controls" :refer [Button Image]]
-    ["@babylonjs/core/Loading/sceneLoader" :refer [SceneLoader]]
-    ["@babylonjs/core/Materials/Textures/texture" :refer [Texture]]
-    ["@babylonjs/core/Materials/Textures/cubeTexture" :refer [CubeTexture]]
+    ["@babylonjs/core/Misc/tools" :refer [Tools]]
     ["@babylonjs/core/Physics/physicsRaycastResult" :refer [PhysicsRaycastResult]]
     ["@babylonjs/core/Physics/v2/IPhysicsEnginePlugin" :refer [PhysicsMotionType PhysicsShapeType]]
     ["@babylonjs/core/Physics/v2/physicsAggregate" :refer [PhysicsAggregate]]
+    ["@babylonjs/core/scene" :refer [Scene]]
+    ["@babylonjs/gui/2D" :refer [AdvancedDynamicTexture]]
+    ["@babylonjs/gui/2D/controls" :refer [Button Image]]
     [applied-science.js-interop :as j])
   (:require-macros
     [immersa.scene.macros :as m]))
@@ -140,14 +140,14 @@
                                    disable-lighting?
                                    emissive-color]}]
   (cond-> (StandardMaterial. name)
-          diffuse-texture (j/assoc! :diffuseTexture diffuse-texture)
-          specular-color (j/assoc! :specularColor specular-color)
-          (some? back-face-culling?) (j/assoc! :backFaceCulling back-face-culling?)
-          reflection-texture (j/assoc! :reflectionTexture reflection-texture)
-          coordinates-mode (j/assoc-in! [:reflectionTexture :coordinatesMode] (j/get Texture coordinates-mode))
-          (some? disable-lighting?) (j/assoc! :disableLighting disable-lighting?)
-          diffuse-color (j/assoc! :diffuseColor diffuse-color)
-          emissive-color (j/assoc! :emissiveColor emissive-color)))
+    diffuse-texture (j/assoc! :diffuseTexture diffuse-texture)
+    specular-color (j/assoc! :specularColor specular-color)
+    (some? back-face-culling?) (j/assoc! :backFaceCulling back-face-culling?)
+    reflection-texture (j/assoc! :reflectionTexture reflection-texture)
+    coordinates-mode (j/assoc-in! [:reflectionTexture :coordinatesMode] (j/get Texture coordinates-mode))
+    (some? disable-lighting?) (j/assoc! :disableLighting disable-lighting?)
+    diffuse-color (j/assoc! :diffuseColor diffuse-color)
+    emissive-color (j/assoc! :emissiveColor emissive-color)))
 
 (defn create-sky-box []
   (let [skybox (box "skyBox" :size 5000.0)
