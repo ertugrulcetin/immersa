@@ -1,11 +1,11 @@
 (ns immersa.core
   (:require
+    [immersa.common.utils :as common.utils]
     [immersa.config :as config]
     [immersa.events :as events]
+    [immersa.scene.api :as api]
     [immersa.views :as views]
     [re-frame.core :as re-frame]
-    [immersa.scene.api :as api]
-    [immersa.common.utils :as common.utils]
     [reagent.dom :as rdom]))
 
 (defn dev-setup []

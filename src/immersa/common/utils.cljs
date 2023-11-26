@@ -1,5 +1,6 @@
 (ns immersa.common.utils
-  (:require [applied-science.js-interop :as j]))
+  (:require
+    [applied-science.js-interop :as j]))
 
 (defonce db (atom {}))
 

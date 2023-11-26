@@ -22,6 +22,7 @@
     ["@babylonjs/core/scene" :refer [Scene]]
     ["@babylonjs/gui/2D" :refer [AdvancedDynamicTexture]]
     ["@babylonjs/gui/2D/controls" :refer [Button Image]]
+    ["@babylonjs/materials/grid/gridMaterial" :refer [GridMaterial]]
     [applied-science.js-interop :as j])
   (:require-macros
     [immersa.scene.macros :as m]))
@@ -100,9 +101,10 @@
                                              (clj->js (update params :trigger #(j/get ActionManager (name %)))))
                                            callback)))
 
-(defn create-ground [name & {:keys [width height]}]
-  (j/call MeshBuilder :CreateGround name #js {:width width
-                                              :height height}))
+(defn create-ground [name & {:keys [width height mat]}]
+  (cond-> (j/call MeshBuilder :CreateGround name #js {:width width
+                                                      :height height})
+    mat (j/assoc! :material mat)))
 
 (defn create-ground-from-hm [name & {:keys [texture subdivisions width height max-height min-height on-ready]}]
   (j/call MeshBuilder :CreateGroundFromHeightMap name texture #js {:subdivisions subdivisions
@@ -148,6 +150,23 @@
     (some? disable-lighting?) (j/assoc! :disableLighting disable-lighting?)
     diffuse-color (j/assoc! :diffuseColor diffuse-color)
     emissive-color (j/assoc! :emissiveColor emissive-color)))
+
+(defn grid-mat [name & {:keys [major-unit-frequency
+                               minor-unit-visibility
+                               grid-ratio
+                               back-face-culling?
+                               main-color
+                               line-color
+                               opacity]}]
+  (let [mat (GridMaterial. name)]
+    (m/cond-doto mat
+      major-unit-frequency (j/assoc! :majorUnitFrequency major-unit-frequency)
+      minor-unit-visibility (j/assoc! :minorUnitVisibility minor-unit-visibility)
+      grid-ratio (j/assoc! :gridRatio grid-ratio)
+      (some? back-face-culling?) (j/assoc! :backFaceCulling back-face-culling?)
+      main-color (j/assoc! :mainColor main-color)
+      line-color (j/assoc! :lineColor line-color)
+      opacity (j/assoc! :opacity opacity))))
 
 (defn create-sky-box []
   (let [skybox (box "skyBox" :size 5000.0)
@@ -207,10 +226,19 @@
 (defn add-shadow-caster [shadow-generator mesh]
   (j/call shadow-generator :addShadowCaster mesh))
 
-(defn create-free-camera [name pos]
-  (let [c (FreeCamera. name pos)]
-    (j/assoc! db :free-camera c)
-    c))
+(defn create-free-camera [name & {:keys [pos speed]
+                                  :or {pos (v3 0 2 -10)
+                                       speed 0.5}}]
+  (let [camera (FreeCamera. name pos)]
+    (j/call-in camera [:keysUpward :push] 69)
+    (j/call-in camera [:keysDownward :push] 81)
+    (j/call-in camera [:keysUp :push] 87)
+    (j/call-in camera [:keysDown :push] 83)
+    (j/call-in camera [:keysLeft :push] 65)
+    (j/call-in camera [:keysRight :push] 68)
+    (j/assoc! camera :speed speed)
+    (j/assoc! db :free-camera camera)
+    camera))
 
 (defn create-arc-camera [name & {:keys [canvas
                                         target
