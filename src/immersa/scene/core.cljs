@@ -5,6 +5,12 @@
     [immersa.common.utils :as common.utils]
     [immersa.scene.api :as api :refer [v3 v4]]))
 
+(defn reset-camera []
+  (let [cam (api/active-camera)]
+    (j/assoc! cam
+              :position (api/clone (j/get cam :init-position))
+              :rotation (api/clone (j/get cam :init-rotation)))))
+
 (defn- create-box [name params]
   (let [columns 6
         rows 1
@@ -15,14 +21,13 @@
         mat (api/standard-mat "mat" :diffuse-texture texture)]
     (api/box name
              (assoc params
-               :face-uv face-uv
-               :wrap? true
-               :mat mat))))
+                    :face-uv face-uv
+                    :wrap? true
+                    :mat mat))))
 
 (defn create-focus-camera-anim [object-slide-info]
   (when-let [object-name (:focus object-slide-info)]
-    (let [_ (api/update-active-camera)
-          object (api/get-object-by-name object-name)
+    (let [object (api/get-object-by-name object-name)
           focus-type (:type object-slide-info)
           _ (j/call object :computeWorldMatrix true)
           bounding-box (j/get (j/call object :getBoundingInfo) :boundingBox)
@@ -33,20 +38,20 @@
           radius 1.5
           final-radius (* radius diagonal-size)
           final-position (v3 x y (- z final-radius))
-          easing-function (api/cubic-ease :EASINGMODE_EASEINOUT)
-          position-animation (api/animation "cameraPositionAnim"
+          easing-function (api/cubic-ease api/easing-ease-in-out)
+          position-animation (api/animation "camera-position-anim"
                                             :target-prop "position"
                                             :fps 30
-                                            :data-type :ANIMATIONTYPE_VECTOR3
-                                            :loop-mode :ANIMATIONLOOPMODE_CONSTANT
+                                            :data-type api/animation-type-v3
+                                            :loop-mode api/animation-loop-cons
                                             :keys [{:frame 0 :value (j/get camera :position)}
                                                    {:frame 30 :value final-position}]
                                             :easing easing-function)
-          target-animation (api/animation "cameraTargetAnim"
+          target-animation (api/animation "camera-target-anim"
                                           :target-prop "target"
-                                          :fps 15
-                                          :data-type :ANIMATIONTYPE_VECTOR3
-                                          :loop-mode :ANIMATIONLOOPMODE_CONSTANT
+                                          :fps 30
+                                          :data-type api/animation-type-v3
+                                          :loop-mode api/animation-loop-cons
                                           :keys [{:frame 0 :value (j/call camera :getTarget)}
                                                  {:frame 30 :value (case focus-type
                                                                      :left (v3 (+ x (* diagonal-size radius 0.35)) y z)
@@ -59,43 +64,53 @@
   (api/animation "position-animation"
                  :target-prop "position"
                  :fps 30
-                 :data-type :ANIMATIONTYPE_VECTOR3
-                 :loop-mode :ANIMATIONLOOPMODE_CONSTANT
+                 :data-type api/animation-type-v3
+                 :loop-mode api/animation-loop-cons
                  :keys [{:frame 0 :value start}
                         {:frame (* 30 duration) :value end}]
-                 :easing (api/cubic-ease :EASINGMODE_EASEINOUT)))
+                 :easing (api/cubic-ease api/easing-ease-in-out)))
 
 (defn create-rotation-animation [start end duration]
   (api/animation "rotation-animation"
                  :target-prop "rotation"
                  :fps 30
-                 :data-type :ANIMATIONTYPE_VECTOR3
-                 :loop-mode :ANIMATIONLOOPMODE_CONSTANT
+                 :data-type api/animation-type-v3
+                 :loop-mode api/animation-loop-cons
                  :keys [{:frame 0 :value start}
                         {:frame (* 30 duration) :value end}]
-                 :easing (api/cubic-ease :EASINGMODE_EASEINOUT)))
+                 :easing (api/cubic-ease api/easing-ease-in-out)))
 
 (defn- create-visibility-animation [start end duration]
   (api/animation "visibility-animation"
                  :target-prop "visibility"
                  :fps 30
                  :data-type :ANIMATIONTYPE_FLOAT
-                 :loop-mode :ANIMATIONLOOPMODE_CONSTANT
+                 :loop-mode api/animation-loop-cons
                  :keys [{:frame 0 :value start}
                         {:frame (* 30 duration) :value end}]
-                 :easing (api/cubic-ease :EASINGMODE_EASEINOUT)))
+                 :easing (api/cubic-ease api/easing-ease-in-out)))
 
 (defn- get-position-anim [object-slide-info object-name]
-  (let [last-pos (:position object-slide-info)
-        init-pos (some-> (api/get-object-by-name object-name) (j/get :position))]
-    (when (and init-pos last-pos (not (api/equals? init-pos last-pos)))
-      [object-name (create-position-animation init-pos last-pos 1)])))
+  (let [object (api/get-object-by-name object-name)
+        start-pos (j/get object :position)
+        end-pos (:position object-slide-info)]
+    (cond
+      (and start-pos end-pos (not (api/equals? start-pos end-pos)))
+      [object-name (create-position-animation start-pos end-pos 1)]
+
+      (and (= object-name :camera) (not (api/equals? start-pos (j/get object :init-position))))
+      [object-name (create-position-animation start-pos (api/clone (j/get object :init-position)) 1)])))
 
 (defn- get-rotation-anim [object-slide-info object-name]
-  (let [last-rotation (:rotation object-slide-info)
-        init-rotation (some-> (api/get-object-by-name object-name) (j/get :rotation))]
-    (when (and init-rotation last-rotation (not (api/equals? init-rotation last-rotation)))
-      [object-name (create-rotation-animation init-rotation last-rotation 1)])))
+  (let [object (api/get-object-by-name object-name)
+        start-rotation (j/get object :rotation)
+        end-rotation (:rotation object-slide-info)]
+    (cond
+      (and start-rotation end-rotation (not (api/equals? start-rotation end-rotation)))
+      [object-name (create-rotation-animation start-rotation end-rotation 1)]
+
+      (and (= object-name :camera) (not (api/equals? start-rotation (j/get object :init-rotation))))
+      [object-name (create-rotation-animation start-rotation (api/clone (j/get object :init-rotation)) 1)])))
 
 (defn- get-visibility-anim [object-slide-info object-name]
   (let [last-visibility (:visibility object-slide-info)
@@ -112,75 +127,95 @@
                                               :visibility (get-visibility-anim object-slide-info object-name)
                                               :focus (create-focus-camera-anim object-slide-info))]
         (cond-> acc
-                (and (not= object-name :camera) anim-vec)
-                (conj anim-vec)
+          (and (not= anim-type :focus) anim-vec)
+          (conj anim-vec)
 
-                (and (= object-name :camera) anim-vec)
-                (conj [object-name (first anim)] [object-name (second anim)]))))
+          (and (= anim-type :focus) anim-vec)
+          (conj [object-name (first anim)] [object-name (second anim)]))))
     acc
     [:position :rotation :visibility :focus]))
 
-(comment
-
-  (a/go-loop [slides [{:objects {"box" {:type :box
-                                        :position (v3 0 -5 0)}
-                                 "box2" {:type :box
-                                         :position (v3 2 0 0)}}
-                       :data {"box" {:position (v3 0 0 0)
-                                     :rotation (v3 0 2.4 0)
-                                     :visibility 0.5}}}
-                      {:data {"box" {:position (v3 -2 0 0)
-                                       :on-animation-end (fn [obj]
-                                                           (println "animation ended"))}}}
-                      {:data {"box" {:position (v3 0 2 0)
-                                       :rotation (v3 1.2 2.3 4.1)
-                                       :visibility 1}}}
-                      {:data {:camera {:focus "box"
-                                       :type :left}}}]]
-             (when-let [slide (first slides)]
-               (let [objects (:objects slide)
-                     object-names-from-slide-info (keys (:data slide))
-                     object-names-from-objects (-> slide :objects keys)
-                     objects-to-create (filter #(not (api/get-object-by-name %)) (concat object-names-from-slide-info
-                                                                                         object-names-from-objects))
-                     _ (doseq [name objects-to-create]
-                         (let [params (get objects name)
-                               type (:type params)
-                               params (dissoc params :type)]
-                           (case type
-                             :box (create-box name params)
-                             :text (api/text name params)
-                             nil)))
-                     animations (reduce
-                                  (fn [acc object-name]
-                                    (let [object-slide-info (get-in slide [:data object-name])]
-                                      (get-animations-from-slide-info acc object-slide-info object-name)))
-                                  []
-                                  object-names-from-slide-info)
-                     animations-data (vals
-                                       (reduce-kv
-                                         (fn [acc name animations]
-                                           (assoc acc name {:target (api/get-object-by-name name)
-                                                            :animations (mapv second animations)
-                                                            :from 0
-                                                            :to 30
-                                                            :delay 1000}))
-                                         {}
-                                         (group-by first animations)))
-                     channels (mapv #(api/begin-direct-animation %) animations-data)]
-                 (doseq [c channels]
-                   (a/<! c))
-                 (recur (rest slides))))))
-
-(defn reset-camera []
-  (let [cam (api/active-camera)]
-    (j/assoc! cam
-              :position (api/clone (j/get cam :init-position))
-              :rotation (api/clone (j/get cam :init-rotation)))))
+(def slides
+  [{:objects {"box" {:type :box
+                     :position (v3 0 -5 0)}
+              "box2" {:type :box
+                      :position (v3 2 0 0)}}
+    :data {"box" {:position (v3 0 0 0)
+                  :rotation (v3 0 2.4 0)
+                  :visibility 0.5}}}
+   {:data {"box" {:position (v3 -2 0 0)}}}
+   {:data {"box" {:position (v3 0 2 0)
+                  :rotation (v3 1.2 2.3 4.1)
+                  :visibility 1}}}
+   {:data {:camera {:focus "box"
+                    :type :left}}}
+   {:data {:camera {:focus "box"
+                    :type :right}}}
+   {:data {:camera {:position (v3 0 0 -10)
+                    :rotation (v3 0 0 0)}}}])
 
 (comment
-  (api/dispose-all (api/get-objects-by-type "box"))
-  (reset-camera)
+
+  (let [command-ch (a/chan)]
+    (api/dispose-all (api/get-objects-by-type "box"))
+    (reset-camera)
+    (api/detach-control (api/active-camera))
+    (common.utils/remove-element-listeners)
+
+    (common.utils/register-event-listener js/window "keydown"
+                                          (fn [e]
+                                            (when-not (j/get e :repeat)
+                                              (cond
+                                                (= (.-keyCode e) 39) (a/put! command-ch :next)
+                                                (= (.-keyCode e) 37) (a/put! command-ch :prev)))))
+    (a/go-loop [index -1]
+               (let [command (a/<! command-ch)
+                     next-index (case command
+                                  :next (inc index)
+                                  :prev (dec index))]
+                 (if (and (>= next-index 0) (< next-index (count slides)))
+                   (let [slide (slides next-index)
+                         objects (:objects slide)
+                         object-names-from-slide-info (set (conj (keys (:data slide)) :camera))
+                         _ (when (object-names-from-slide-info :camera)
+                             (api/update-active-camera))
+                         object-names-from-objects (-> slide :objects keys)
+                         objects-to-create (filter #(not (api/get-object-by-name %)) (concat object-names-from-slide-info
+                                                                                             object-names-from-objects))
+                         _ (doseq [name objects-to-create]
+                             (let [params (get objects name)
+                                   type (:type params)
+                                   params (dissoc params :type)]
+                               (case type
+                                 :box (create-box name params)
+                                 :text (api/text name params)
+                                 nil)))
+                         animations (reduce
+                                      (fn [acc object-name]
+                                        (let [object-slide-info (get-in slide [:data object-name])]
+                                          (get-animations-from-slide-info acc object-slide-info object-name)))
+                                      []
+                                      object-names-from-slide-info)
+                         animations-data (vals
+                                           (reduce-kv
+                                             (fn [acc name animations]
+                                               ;;TODO get the longest animation and use it as the duration (:to)
+                                               (assoc acc name {:target (api/get-object-by-name name)
+                                                                :animations (mapv second animations)
+                                                                :from 0
+                                                                :to 30}))
+                                             {}
+                                             (group-by first animations)))
+                         channels (mapv #(api/begin-direct-animation %) animations-data)]
+                     (doseq [c channels]
+                       (a/<! c))
+                     (recur next-index))
+                   (recur index))))))
+
+(comment
+  (do
+    (api/dispose-all (api/get-objects-by-type "box"))
+    (reset-camera))
 
   (api/dispose "box2")
   (do
@@ -196,7 +231,7 @@
                                  :target-prop "position.y"
                                  :fps 30
                                  :data-type :ANIMATIONTYPE_FLOAT
-                                 :loop-mode :ANIMATIONLOOPMODE_CONSTANT
+                                 :loop-mode api/animation-loop-cons
                                  :keys keys)]
     (api/begin-direct-animation :target box
                                 :animations animation

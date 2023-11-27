@@ -43,6 +43,15 @@
 (def v3-left (j/call Vector3 :Left))
 (def v3-right (j/call Vector3 :Right))
 
+(def animation-type-v3 :ANIMATIONTYPE_VECTOR3)
+(def animation-type-float :ANIMATIONTYPE_FLOAT)
+(def animation-loop-cons :ANIMATIONLOOPMODE_CONSTANT)
+(def animation-loop-cycle :ANIMATIONLOOPMODE_CYCLE)
+
+(def easing-ease-in :EASINGMODE_EASEIN)
+(def easing-ease-out :EASINGMODE_EASEOUT)
+(def easing-ease-in-out :EASINGMODE_EASEINOUT)
+
 (defn create-engine [canvas]
   (let [e (Engine. canvas true #js {:preserveDrawingBuffer true
                                     :stencil true})]
@@ -515,3 +524,6 @@
 
 (defn update-active-camera []
   (j/assoc-in! db [:nodes :camera :obj] (active-camera)))
+
+(defn detach-control [camera]
+  (j/call camera :detachControl))
