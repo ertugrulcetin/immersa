@@ -513,3 +513,5 @@
 (defn active-camera []
   (j/get-in db [:scene :activeCamera]))
 
+(defn update-active-camera []
+  (j/assoc-in! db [:nodes :camera :obj] (active-camera)))
