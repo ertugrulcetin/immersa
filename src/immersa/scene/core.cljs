@@ -2,6 +2,7 @@
   (:require
     [applied-science.js-interop :as j]
     [cljs.core.async :as a :refer [go go-loop <!]]
+    [clojure.set :as set]
     [immersa.common.utils :as common.utils]
     [immersa.scene.api :as api :refer [v3 v4]]))
 
@@ -21,9 +22,57 @@
         mat (api/standard-mat "mat" :diffuse-texture texture)]
     (api/box name
              (assoc params
-                    :face-uv face-uv
-                    :wrap? true
-                    :mat mat))))
+               :face-uv face-uv
+               :wrap? true
+               :mat mat))))
+
+(defn billboard [name & {:keys [text
+                                position
+                                width
+                                height
+                                visibility
+                                color
+                                scale
+                                resolution-scale
+                                font-weight
+                                rect-height
+                                rect-corner-radius
+                                rect-background]
+                         :or {width 1.2
+                              height 1
+                              scale 1
+                              resolution-scale 5
+                              color "white"
+                              rect-height "2500px"
+                              rect-corner-radius 500
+                              rect-background "rgba(128, 128, 128, 0.4)"}
+                         :as opts}]
+  (let [node (api/transform-node name (assoc opts :type :billboard))
+        plane (api/plane (str name "-plane")
+                         :width width
+                         :height height
+                         :position position
+                         :billboard-mode api/mesh-billboard-mode-all
+                         :visibility visibility
+                         :scale scale)
+        gui (api/gui-create-for-mesh plane :width (* resolution-scale 1024) :height (* resolution-scale 1024))
+        text (api/gui-text-block (str name "-text-block")
+                                 :text text
+                                 :font-size-in-pixels (* 60 resolution-scale)
+                                 :text-wrapping api/gui-text-wrapping-word-wrap
+                                 :text-horizontal-alignment api/gui-horizontal-align-left
+                                 :padding-left (* 50 resolution-scale)
+                                 :color color
+                                 :font-weight font-weight)
+        rect (api/gui-rectangle (str name "-rect")
+                                :corner-radius rect-corner-radius
+                                :height rect-height
+                                :background rect-background)]
+    (api/add-prop-to-db name :children [plane gui text rect])
+    (api/add-control gui rect)
+    (api/add-control rect text)
+    (j/assoc! plane :parent node)
+    node))
 
 (defn create-focus-camera-anim [object-slide-info]
   (when-let [object-name (:focus object-slide-info)]
@@ -127,37 +176,69 @@
                                               :visibility (get-visibility-anim object-slide-info object-name)
                                               :focus (create-focus-camera-anim object-slide-info))]
         (cond-> acc
-          (and (not= anim-type :focus) anim-vec)
-          (conj anim-vec)
+                (and (not= anim-type :focus) anim-vec)
+                (conj anim-vec)
 
-          (and (= anim-type :focus) anim-vec)
-          (conj [object-name (first anim)] [object-name (second anim)]))))
+                (and (= anim-type :focus) anim-vec)
+                (conj [object-name (first anim)] [object-name (second anim)]))))
     acc
     [:position :rotation :visibility :focus]))
 
 (def slides
-  [{:objects {"box" {:type :box
-                     :position (v3 0 -5 0)}
-              "box2" {:type :box
-                      :position (v3 2 0 0)}}
-    :data {"box" {:position (v3 0 0 0)
-                  :rotation (v3 0 2.4 0)
-                  :visibility 0.5}}}
-   {:data {"box" {:position (v3 -2 0 0)}}}
-   {:data {"box" {:position (v3 0 2 0)
-                  :rotation (v3 1.2 2.3 4.1)
-                  :visibility 1}}}
-   {:data {:camera {:focus "box"
-                    :type :left}}}
-   {:data {:camera {:focus "box"
-                    :type :right}}}
-   {:data {:camera {:position (v3 0 0 -10)
-                    :rotation (v3 0 0 0)}}}])
+  (let [slides [{:objects {"box" {:type :box
+                                  :position (v3 0 -5 0)}}
+                 :data {"box" {:position (v3 0 0 0)
+                               :rotation (v3 0 2.4 0)
+                               :visibility 0.5}}}
+                {:data {"box" {:position (v3 0 2 0)
+                               :rotation (v3 1.2 2.3 4.1)
+                               :visibility 1}}}
+                {:objects {"billboard-1" {:type :billboard
+                                          :text "\n❖ 3D Immersive Experience\n\n❖ Web-Based Accessibility\n\n❖ AI-Powered Features\n\n"
+                                          :scale 2
+                                          :font-weight "bold"}}
+                 :data {:camera {:focus "box"
+                                 :type :left}
+                        "billboard-1" {:position (v3 3 2.3 0)}
+                        "box" {}}}
+                {:objects {"billboard-2" {:type :billboard
+                                          :text "❖ Ready-Made Templates\n\n❖ High-Performance Render\n\n❖ User-Friendly UI/UX"
+                                          :scale 2
+                                          :font-weight "bold"}}
+                 :data {:camera {:focus "box"
+                                 :type :right}
+                        "billboard-2" {:position (v3 -3 2.3 0)}
+                        "box" {}}}
+                {:data {:camera {:position (v3 0 0 -10)
+                                 :rotation (v3 0 0 0)}
+                        "box" {}}}
+                {:data {:camera {:position (v3 0 0 50)}}}]
+        slides-vec (vec (map-indexed #(assoc %2 :index %1) slides))
+        props-to-copy [:position :rotation :visibility]
+        clone-if-exists (fn [data]
+                          (cond-> data
+                                  (:position data) (assoc :position (api/clone (:position data)))
+                                  (:rotation data) (assoc :rotation (api/clone (:rotation data)))))]
+    (reduce
+      (fn [slides-vec slide]
+        (let [prev-slide-data (get-in slides-vec [(dec (:index slide)) :data])
+              slide-data (:data slide)]
+          (conj slides-vec
+                (assoc slide :data
+                             (reduce-kv
+                               (fn [acc name objet-slide-data]
+                                 (if-let [prev-slide-data (get prev-slide-data name)]
+                                   (assoc acc name (merge (clone-if-exists (select-keys prev-slide-data props-to-copy)) objet-slide-data))
+                                   (assoc acc name objet-slide-data)))
+                               {}
+                               slide-data)))))
+      [(first slides-vec)]
+      (rest slides-vec))))
 
 (comment
-
+  api/db
   (let [command-ch (a/chan)]
-    (api/dispose-all (api/get-objects-by-type "box"))
+    (api/dispose-all (concat (api/get-objects-by-type "box") (api/get-objects-by-type "billboard")))
     (reset-camera)
     (api/detach-control (api/active-camera))
     (common.utils/remove-element-listeners)
@@ -182,6 +263,13 @@
                          object-names-from-objects (-> slide :objects keys)
                          objects-to-create (filter #(not (api/get-object-by-name %)) (concat object-names-from-slide-info
                                                                                              object-names-from-objects))
+                         object-names-to-dispose (when (> next-index 0)
+                                                   (let [prev-slide (slides (dec next-index))
+                                                         prev-slide-object-names (-> prev-slide :data keys set)
+                                                         current-slide-object-names (-> slide :data keys set)]
+                                                     (set/difference prev-slide-object-names current-slide-object-names #{:camera})))
+                         #_#__ (doseq [name object-names-to-dispose]
+                             (api/dispose name))
                          _ (doseq [name objects-to-create]
                              (let [params (get objects name)
                                    type (:type params)
@@ -189,6 +277,7 @@
                                (case type
                                  :box (create-box name params)
                                  :text (api/text name params)
+                                 :billboard (billboard name params)
                                  nil)))
                          animations (reduce
                                       (fn [acc object-name]
