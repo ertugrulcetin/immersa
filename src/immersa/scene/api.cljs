@@ -175,6 +175,7 @@
                           visibility
                           position
                           skybox?
+                          infinite-distance?
                           mat]
                    :as opts}]
   (let [b (j/call MeshBuilder :CreateBox name #js {:size size
@@ -189,7 +190,8 @@
     (cond-> b
       mat (j/assoc! :material mat)
       position (j/assoc! :position position)
-      visibility (j/assoc! :visibility visibility))))
+      visibility (j/assoc! :visibility visibility)
+      (some? infinite-distance?) (j/assoc! :infiniteDistance infinite-distance?))))
 
 (defn capsule [name & {:keys [height radius visibility]
                        :as opts}]
@@ -337,7 +339,10 @@
     opacity (j/assoc! :opacity opacity)))
 
 (defn create-sky-box []
-  (let [skybox (box "skyBox" :size 5000.0 :skybox? true)
+  (let [skybox (box "skyBox"
+                    :size 5000.0
+                    :skybox? true
+                    :infinite-distance? false)
         mat (standard-mat "skyBox"
                           :back-face-culling? false
                           :reflection-texture (CubeTexture. "" nil nil nil #js ["img/skybox/px.jpeg"
@@ -520,8 +525,15 @@
                                 data-type
                                 loop-mode
                                 easing
-                                keys]}]
-  (let [anim (Animation. name target-prop fps (j/get Animation data-type) (j/get Animation loop-mode))]
+                                from
+                                to
+                                duration
+                                keys]
+                         :or {fps 30
+                              duration 1.0}}]
+  (let [keys (or keys (and from to [{:frame 0 :value from}
+                                    {:frame (* duration fps) :value to}]))
+        anim (Animation. name target-prop fps (j/get Animation data-type) (j/get Animation loop-mode))]
     (m/cond-doto anim
       easing (j/call :setEasingFunction easing)
       keys (j/call :setKeys (clj->js keys)))))
