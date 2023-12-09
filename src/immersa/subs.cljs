@@ -21,3 +21,9 @@
       (if (> height-based-width max-width)
         {:width max-width :height width-based-height}
         {:width height-based-width :height max-height}))))
+
+(reg-sub
+  ::slide-info
+  (fn [db]
+    {:current-slide-index (:current-slide-index db "-")
+     :slide-count (:slide-count db "-")}))

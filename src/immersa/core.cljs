@@ -28,6 +28,7 @@
   (re-frame/dispatch-sync [::bp/set-breakpoints {:breakpoints [:mobile 768
                                                                :tablet 992
                                                                :small-monitor 1200
-                                                               :large-monitor]}])
+                                                               :large-monitor]
+                                                 :debounce-ms 166}])
   (dev-setup)
   (mount-root))

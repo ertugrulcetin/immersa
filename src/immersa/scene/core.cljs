@@ -4,8 +4,10 @@
     [cljs.core.async :as a :refer [go go-loop <!]]
     [clojure.set :as set]
     [immersa.common.utils :as common.utils]
+    [immersa.events :as events]
     [immersa.scene.api :as api :refer [v3 v4]]
-    [immersa.scene.macros :as m]))
+    [immersa.scene.macros :as m]
+    [re-frame.core :refer [dispatch]]))
 
 (defn reset-camera []
   (let [cam (api/active-camera)]
@@ -202,6 +204,9 @@
     acc
     [:position :rotation :visibility :alpha :focus]))
 
+(defn- notify-ui [index slides-count]
+  (dispatch [::events/update-slide-info index slides-count]))
+
 (defn get-slides []
   (let [slides [{:data {"immersa-text" {:type :text
                                         :text "IMMERSA"
@@ -326,7 +331,8 @@
                                   :prev (dec index))
                      slides (get-slides)]
                  (if (and (>= next-index 0) (< next-index (count slides)))
-                   (let [slide (slides next-index)
+                   (let [_ (notify-ui next-index (count slides))
+                         slide (slides next-index)
                          objects-data (:data slide)
                          object-names-from-slide-info (set (conj (keys (:data slide)) :camera))
                          _ (when (object-names-from-slide-info :camera)

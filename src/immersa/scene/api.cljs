@@ -74,6 +74,7 @@
                                     :stencil true
                                     :adaptToDeviceRatio true})]
     (j/assoc! db :engine e :canvas canvas)
+    (j/assoc! js/window :engine e)
     e))
 
 (defn create-scene [engine]

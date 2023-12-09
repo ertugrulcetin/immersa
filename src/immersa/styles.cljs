@@ -7,9 +7,13 @@
    :height "100%"
    :margin 0})
 
+(def body
+  (assoc defaults
+         :font-family "'Open Sans', sans-serif"))
+
 (defglobal html+body+app
   [:html (assoc defaults :background-color :white)]
-  [:body defaults]
+  [:body body]
   [:div#app defaults])
 
 (defattrs app-container []
@@ -45,7 +49,7 @@
 
 (defclass progress-bar []
   {:display "flex"
-   :justify-content "space-between"
+   :flex-direction "column"
    :align-items "center"
    :position "fixed"
    :bottom "0"
@@ -61,5 +65,30 @@
 (defclass progress-line []
   {:display :flex
    :width "100%"
-   :border "1px solid red"
-   :height "20px"})
+   :padding-top "7px"
+   :height "10px"})
+
+(defclass progress-controls []
+  {:display :flex
+   :display-direction :row
+   :justify-content :space-between
+   :width "100%"
+   :padding-top "7px"
+   :height "15px"})
+
+(defclass slide-controls []
+  {:display :flex
+   :flex-direction :row
+   :align-items :center
+   :margin-top "15px"
+   :gap "10px"})
+
+(defclass current-slide-indicator []
+  {:font-weight "bold"
+   :color "white"
+   :padding-bottom "2px"})
+
+(defclass right-controls []
+  {:display :flex
+   :flex-direction :row
+   :gap "10px"})
