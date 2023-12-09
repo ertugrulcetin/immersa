@@ -17,6 +17,22 @@
          :display :flex
          :flex-direction :column))
 
+(defclass content-container []
+  {:width "100%"
+   :height "calc(100vh - 64px)"
+   :margin 0
+   :padding 0
+   :box-sizing "border-box"
+   :display "flex"
+   :justify-content "center"
+   :align-items "center"
+   :background-color "rgb(13, 14, 19)"})
+
+(defclass canvas-container [{:keys [width height]}]
+  {:width (str width "px")
+   :height (str height "px")
+   :box-sizing "border-box"})
+
 (defclass canvas []
   {:width "100%"
    :height "100%"
@@ -47,19 +63,3 @@
    :width "100%"
    :border "1px solid red"
    :height "20px"})
-
-(defclass canvas-container [{:keys [width height]}]
-  {:width (str width "px")
-   :height (str height "px")
-   :box-sizing "border-box"})
-
-(defclass content-container []
-  {:width "100%"
-   :height "calc(100vh - 64px)"
-   :margin 0
-   :padding 0
-   :box-sizing "border-box"
-   :display "flex"
-   :justify-content "center"
-   :align-items "center"
-   :background-color "rgb(13, 14, 19)"})
