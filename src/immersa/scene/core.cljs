@@ -231,8 +231,6 @@
                                           :padding-top "70%"}}}
                 {:data {:camera {:focus "earth2"
                                  :type :center}
-                        ;; "earth2" {:position (v3 0 2 0)}
-                        ;; "cloud" {:position (v3 0 2 0)}
                         "immersa-text" {:type :text
                                         :alpha 0}
                         "immersa-text-2" {:type :text
@@ -324,74 +322,71 @@
                                                     (= (.-keyCode e) 40)) (a/put! command-ch :next)
                                                 (or (= (.-keyCode e) 37)
                                                     (= (.-keyCode e) 38)) (a/put! command-ch :prev)))))
-    (a/go-loop [index -1]
-               (let [command (a/<! command-ch)
-                     next-index (case command
-                                  :next (inc index)
-                                  :prev (dec index))
-                     slides (get-slides)]
-                 (if (and (>= next-index 0) (< next-index (count slides)))
-                   (let [_ (notify-ui next-index (count slides))
-                         slide (slides next-index)
-                         objects-data (:data slide)
-                         object-names-from-slide-info (set (conj (keys (:data slide)) :camera))
-                         _ (when (object-names-from-slide-info :camera)
-                             (api/update-active-camera))
-                         object-names-from-objects (-> slide :objects keys)
-                         objects-to-create (filter #(not (api/get-object-by-name %)) object-names-from-slide-info)
-                         object-names-to-dispose (when (> next-index 0)
-                                                   (let [prev-slide (slides (if (= command :next)
-                                                                              (dec next-index)
-                                                                              (inc next-index)))
-                                                         prev-slide-object-names (-> prev-slide :data keys set)
-                                                         current-slide-object-names (-> slide :data keys set)]
-                                                     (set/difference prev-slide-object-names current-slide-object-names #{:camera})))
+    (go-loop [index -1]
+             (let [command (a/<! command-ch)
+                   next-index (case command
+                                :next (inc index)
+                                :prev (dec index))
+                   slides (get-slides)]
+               (if (and (>= next-index 0) (< next-index (count slides)))
+                 (let [_ (notify-ui next-index (count slides))
+                       slide (slides next-index)
+                       objects-data (:data slide)
+                       object-names-from-slide-info (set (conj (keys (:data slide)) :camera))
+                       _ (when (object-names-from-slide-info :camera)
+                           (api/update-active-camera))
+                       object-names-from-objects (-> slide :objects keys)
+                       objects-to-create (filter #(not (api/get-object-by-name %)) object-names-from-slide-info)
+                       object-names-to-dispose (when (> next-index 0)
+                                                 (let [prev-slide (slides (if (= command :next)
+                                                                            (dec next-index)
+                                                                            (inc next-index)))
+                                                       prev-slide-object-names (-> prev-slide :data keys set)
+                                                       current-slide-object-names (-> slide :data keys set)]
+                                                   (set/difference prev-slide-object-names current-slide-object-names #{:camera})))
 
-                         #_#__ (doseq [name object-names-to-dispose]
-                                 (api/dispose name))
-                         _ (doseq [name objects-to-create]
-                             (let [params (get objects-data name)
-                                   type (:type params)
-                                   params (dissoc params :type)]
-                               (case type
-                                 :box (create-box name params)
-                                 :text3D (api/text name params)
-                                 :text (api/add-control
-                                         (api/get-advanced-texture)
-                                         (api/gui-text-block name params))
-                                 :billboard (billboard name params)
-                                 nil)))
-                         animations (reduce
-                                      (fn [acc object-name]
-                                        (let [object-slide-info (get-in slide [:data object-name])]
-                                          (get-animations-from-slide-info acc object-slide-info object-name)))
-                                      []
-                                      object-names-from-slide-info)
-                         animations-data (vals
-                                           (reduce-kv
-                                             (fn [acc name animations]
-                                               (let [animations (mapv second animations)
-                                                     max-fps (apply max (map (j/get :framePerSecond) animations))]
-                                                 (assoc acc name {:target (api/get-object-by-name name)
-                                                                  :animations animations
-                                                                  :from 0
-                                                                  :to max-fps})))
-                                             {}
-                                             (group-by first animations)))
-                         channels (mapv #(api/begin-direct-animation %) animations-data)]
-                     (doseq [c channels]
-                       (a/<! c))
-                     (recur next-index))
-                   (recur index))))))
+                       #_#__ (doseq [name object-names-to-dispose]
+                               (api/dispose name))
+                       _ (doseq [name objects-to-create]
+                           (let [params (get objects-data name)
+                                 type (:type params)
+                                 params (dissoc params :type)]
+                             (case type
+                               :box (create-box name params)
+                               :text3D (api/text name params)
+                               :text (api/add-control
+                                       (api/get-advanced-texture)
+                                       (api/gui-text-block name params))
+                               :billboard (billboard name params)
+                               nil)))
+                       animations (reduce
+                                    (fn [acc object-name]
+                                      (let [object-slide-info (get-in slide [:data object-name])]
+                                        (get-animations-from-slide-info acc object-slide-info object-name)))
+                                    []
+                                    object-names-from-slide-info)
+                       animations-data (vals
+                                         (reduce-kv
+                                           (fn [acc name animations]
+                                             (let [animations (mapv second animations)
+                                                   max-fps (apply max (map (j/get :framePerSecond) animations))]
+                                               (assoc acc name {:target (api/get-object-by-name name)
+                                                                :animations animations
+                                                                :from 0
+                                                                :to max-fps})))
+                                           {}
+                                           (group-by first animations)))
+                       channels (mapv #(api/begin-direct-animation %) animations-data)]
+                   (doseq [c channels]
+                     (a/<! c))
+                   (recur next-index))
+                 (recur index))))))
 
 (defn register-before-render []
-  (let [sky-box (api/get-object-by-name "sky-box")
-        earth (api/get-object-by-name "earth2")
-        cloud (api/get-object-by-name "cloud")
-        delta (api/get-delta-time)]
-    (j/update-in! sky-box [:rotation :y] #(+ % (* 0.008 delta)))
-    (j/update-in! earth [:rotation :y] #(- % (* 0.05 delta)))
-    (j/update-in! cloud [:rotation :y] #(- % (* 0.07 delta)))))
+  (let [delta (api/get-delta-time)]
+    (some-> (api/get-object-by-name "sky-box") (j/update-in! [:rotation :y] #(+ % (* 0.008 delta))))
+    (some-> (api/get-object-by-name "earth2") (j/update-in! [:rotation :y] #(- % (* 0.05 delta))))
+    (some-> (api/get-object-by-name "cloud") (j/update-in! [:rotation :y] #(- % (* 0.07 delta))))))
 
 (defn when-scene-ready [scene]
   (api/scene-clear-color api/color-white)
@@ -430,34 +425,28 @@
   (api/dispose "light2")
   (api/show-debug)
   (reset-camera)
-  (let [_ (api/dispose "earth" "earth2" "mat2" "cloud" "clouds")
-        gl (api/glow-layer "gl")
-        ;tn (api/transform-node "earth" :position (v3 0 -0.7 -8.5) :rotation (v3 0 0 js/Math.PI))
+  (let [gl (api/glow-layer "gl")
         mat (api/standard-mat "mat2"
                               :diffuse-texture (api/texture "img/texture/earth/diffuse2.png")
-                              ;:diffuse-color api/color-black
                               :emissive-texture (api/texture "img/texture/earth/emmisive.jpeg")
                               :specular-texture (api/texture "img/texture/earth/specular.jpeg")
                               :bump-texture (api/texture "img/texture/earth/bump.jpeg"))
         mat-clouds (api/standard-mat "clouds"
-                                     :opacity-texture (api/texture "img/texture/earth/clouds2.jpg") :get-alpha-from-rgb? true)
+                                     :opacity-texture (api/texture "img/texture/earth/clouds2.jpg")
+                                     :get-alpha-from-rgb? true)
+        tn (api/transform-node "earth-node" :position (v3 0 -0.7 -8.5))
         sp (api/sphere "earth2"
                        :mat mat
                        :scale 1.2
-                       :position (v3 0 -0.7 -8.5)
                        :rotation (v3 0 0 js/Math.PI))
         clouds (api/sphere "cloud"
                            :mat mat-clouds
                            :scale 1.21
-                           :position (v3 0 -0.7 -8.5)
                            :rotation (v3 0 0 js/Math.PI))
-        ;_ (j/assoc! clouds :renderingGroupId 1)
-        ;_ (j/assoc! sp :renderingGroupId 2)
         hl (api/highlight-layer "hl2"
-                                ;:inner-glow? true
-                                ;:outer-glow? true
                                 :blur-vertical-size 3
                                 :blur-horizontal-size 3)]
+    (api/add-children tn sp clouds)
     ;(j/call hl :addExcludedMesh (api/get-object-by-name "sky-box"))
     ;(j/call gl :addIncludedOnlyMesh sp)
     (j/call hl :addMesh clouds (api/color 0.3 0.74 0.94 0.82))

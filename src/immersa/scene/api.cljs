@@ -165,13 +165,13 @@
 (defn dispose-all [objs]
   (apply dispose objs))
 
-(defn- check-name-exists [name obj]
-  (when (j/get-in db [:nodes name])
+(defn- check-name-exists [name]
+  (when-let [obj (j/get-in db [:nodes name :obj])]
     (dispose obj)
-    (throw (js/Error. (str "Node with name " name " already exists")))))
+    #_(js/console.warn (str "Node with name " name " disposed"))))
 
 (defn add-node-to-db [name obj opts]
-  (check-name-exists name obj)
+  (check-name-exists name)
   (j/assoc-in! db [:nodes name] (clj->js (assoc opts :obj obj :name name)))
   obj)
 
@@ -358,20 +358,22 @@
                                    get-alpha-from-rgb?
                                    emissive-color]
                             :as opts}]
-  (cond-> (StandardMaterial. name)
-    diffuse-texture (j/assoc! :diffuseTexture diffuse-texture)
-    specular-texture (j/assoc! :specularTexture specular-texture)
-    emissive-texture (j/assoc! :emissiveTexture emissive-texture)
-    bump-texture (j/assoc! :bumpTexture bump-texture)
-    opacity-texture (j/assoc! :opacityTexture opacity-texture)
-    get-alpha-from-rgb? (j/assoc-in! [:opacityTexture :getAlphaFromRGB] get-alpha-from-rgb?)
-    specular-color (j/assoc! :specularColor specular-color)
-    (some? back-face-culling?) (j/assoc! :backFaceCulling back-face-culling?)
-    reflection-texture (j/assoc! :reflectionTexture reflection-texture)
-    coordinates-mode (j/assoc-in! [:reflectionTexture :coordinatesMode] (j/get Texture coordinates-mode))
-    (some? disable-lighting?) (j/assoc! :disableLighting disable-lighting?)
-    diffuse-color (j/assoc! :diffuseColor diffuse-color)
-    emissive-color (j/assoc! :emissiveColor emissive-color)))
+  (let [sm (StandardMaterial. name)]
+    (add-node-to-db name sm opts)
+    (cond-> sm
+      diffuse-texture (j/assoc! :diffuseTexture diffuse-texture)
+      specular-texture (j/assoc! :specularTexture specular-texture)
+      emissive-texture (j/assoc! :emissiveTexture emissive-texture)
+      bump-texture (j/assoc! :bumpTexture bump-texture)
+      opacity-texture (j/assoc! :opacityTexture opacity-texture)
+      get-alpha-from-rgb? (j/assoc-in! [:opacityTexture :getAlphaFromRGB] get-alpha-from-rgb?)
+      specular-color (j/assoc! :specularColor specular-color)
+      (some? back-face-culling?) (j/assoc! :backFaceCulling back-face-culling?)
+      reflection-texture (j/assoc! :reflectionTexture reflection-texture)
+      coordinates-mode (j/assoc-in! [:reflectionTexture :coordinatesMode] (j/get Texture coordinates-mode))
+      (some? disable-lighting?) (j/assoc! :disableLighting disable-lighting?)
+      diffuse-color (j/assoc! :diffuseColor diffuse-color)
+      emissive-color (j/assoc! :emissiveColor emissive-color))))
 
 (defn grid-mat [name & {:keys [major-unit-frequency
                                minor-unit-visibility
@@ -381,14 +383,16 @@
                                line-color
                                opacity]
                         :as opts}]
-  (m/cond-doto (GridMaterial. name)
-    major-unit-frequency (j/assoc! :majorUnitFrequency major-unit-frequency)
-    minor-unit-visibility (j/assoc! :minorUnitVisibility minor-unit-visibility)
-    grid-ratio (j/assoc! :gridRatio grid-ratio)
-    (some? back-face-culling?) (j/assoc! :backFaceCulling back-face-culling?)
-    main-color (j/assoc! :mainColor main-color)
-    line-color (j/assoc! :lineColor line-color)
-    opacity (j/assoc! :opacity opacity)))
+  (let [gm (GridMaterial. name)]
+    (add-node-to-db name gm opts)
+    (m/cond-doto (GridMaterial. name)
+      major-unit-frequency (j/assoc! :majorUnitFrequency major-unit-frequency)
+      minor-unit-visibility (j/assoc! :minorUnitVisibility minor-unit-visibility)
+      grid-ratio (j/assoc! :gridRatio grid-ratio)
+      (some? back-face-culling?) (j/assoc! :backFaceCulling back-face-culling?)
+      main-color (j/assoc! :mainColor main-color)
+      line-color (j/assoc! :lineColor line-color)
+      opacity (j/assoc! :opacity opacity))))
 
 (defn create-sky-box []
   (let [skybox (box "sky-box"
@@ -741,4 +745,9 @@
     (m/cond-doto tn
       position (j/assoc! :position position)
       rotation (j/assoc! :rotation rotation)
-      scaling (scaling scale))))
+      scale (scaling scale))))
+
+(defn add-children [parent & children]
+  (add-prop-to-db (j/get parent :name) :children children)
+  (doseq [c children]
+    (j/assoc! c :parent parent)))
