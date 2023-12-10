@@ -7,70 +7,11 @@
     [immersa.events :as events]
     [immersa.scene.api.animation :as api.animation]
     [immersa.scene.api.camera :as api.camera]
+    [immersa.scene.api.component :as api.component]
     [immersa.scene.api.core :as api.core :refer [v3 v4]]
+    [immersa.scene.api.material :as api.material]
+    [immersa.scene.api.mesh :as api.mesh]
     [re-frame.core :refer [dispatch]]))
-
-(defn- create-box [name params]
-  (let [columns 6
-        rows 1
-        face-uv (js/Array. columns)
-        _ (dotimes [i columns]
-            (aset face-uv i (v4 (/ i columns) 0 (/ (+ i 1) columns) (/ 1 rows))))
-        texture (api.core/texture "img/texture/numbers.jpg")
-        mat (api.core/standard-mat "mat" :diffuse-texture texture)]
-    (api.core/box name
-                  (assoc params
-                         :face-uv face-uv
-                         :wrap? true
-                         :mat mat))))
-
-(defn billboard [name & {:keys [text
-                                position
-                                rotation
-                                width
-                                height
-                                visibility
-                                color
-                                scale
-                                resolution-scale
-                                font-weight
-                                rect-height
-                                rect-corner-radius
-                                rect-background]
-                         :or {width 1.2
-                              height 1
-                              scale 1
-                              resolution-scale 5
-                              color "white"
-                              rect-height "2500px"
-                              rect-corner-radius 500
-                              rect-background "rgba(128, 128, 128, 0.4)"}}]
-  (let [plane (api.core/plane name
-                              :width width
-                              :height height
-                              :position position
-                              :rotation rotation
-                              :billboard-mode api.core/mesh-billboard-mode-all
-                              :visibility visibility
-                              :scale scale
-                              :type :billboard)
-        gui (api.core/gui-create-for-mesh plane :width (* resolution-scale 1024) :height (* resolution-scale 1024))
-        text (api.core/gui-text-block (str name "-text-block")
-                                      :text text
-                                      :font-size-in-pixels (* 60 resolution-scale)
-                                      :text-wrapping api.core/gui-text-wrapping-word-wrap
-                                      :text-horizontal-alignment api.core/gui-horizontal-align-left
-                                      :padding-left (* 50 resolution-scale)
-                                      :color color
-                                      :font-weight font-weight)
-        rect (api.core/gui-rectangle (str name "-rect")
-                                     :corner-radius rect-corner-radius
-                                     :height rect-height
-                                     :background rect-background)]
-    (api.core/add-prop-to-db name :children [plane gui text rect])
-    (api.core/add-control gui rect)
-    (api.core/add-control rect text)
-    plane))
 
 (defn- get-position-anim [object-slide-info object-name]
   (let [object (api.core/get-object-by-name object-name)
@@ -78,10 +19,12 @@
         end-pos (:position object-slide-info)]
     (cond
       (and start-pos end-pos (not (api.core/equals? start-pos end-pos)))
-      [object-name (api.animation/create-position-animation start-pos end-pos 1)]
+      [object-name (api.animation/create-position-animation {:start start-pos
+                                                             :end end-pos})]
 
       (and (= object-name :camera) (not (api.core/equals? start-pos (j/get object :init-position))))
-      [object-name (api.animation/create-position-animation start-pos (api.core/clone (j/get object :init-position)) 1)])))
+      [object-name (api.animation/create-position-animation {:start start-pos
+                                                             :end (api.core/clone (j/get object :init-position))})])))
 
 (defn- get-rotation-anim [object-slide-info object-name]
   (let [object (api.core/get-object-by-name object-name)
@@ -89,22 +32,26 @@
         end-rotation (:rotation object-slide-info)]
     (cond
       (and start-rotation end-rotation (not (api.core/equals? start-rotation end-rotation)))
-      [object-name (api.animation/create-rotation-animation start-rotation end-rotation 1)]
+      [object-name (api.animation/create-rotation-animation {:start start-rotation
+                                                             :end end-rotation})]
 
       (and (= object-name :camera) (not (api.core/equals? start-rotation (j/get object :init-rotation))))
-      [object-name (api.animation/create-rotation-animation start-rotation (api.core/clone (j/get object :init-rotation)) 1)])))
+      [object-name (api.animation/create-rotation-animation {:start start-rotation
+                                                             :end (api.core/clone (j/get object :init-rotation))})])))
 
 (defn- get-visibility-anim [object-slide-info object-name]
-  (let [last-visibility (:visibility object-slide-info)
-        init-visibility (j/get (api.core/get-object-by-name object-name) :visibility)]
-    (when (and last-visibility (not= init-visibility last-visibility))
-      [object-name (api.animation/create-visibility-animation init-visibility last-visibility 1)])))
+  (let [end-visibility (:visibility object-slide-info)
+        start-visibility (j/get (api.core/get-object-by-name object-name) :visibility)]
+    (when (and end-visibility (not= start-visibility end-visibility))
+      [object-name (api.animation/create-visibility-animation {:start start-visibility
+                                                               :end end-visibility})])))
 
 (defn- get-alpha-anim [object-slide-info object-name]
-  (let [last-alpha (:alpha object-slide-info)
-        init-alpha (j/get (api.core/get-object-by-name object-name) :alpha)]
-    (when (and last-alpha (not= init-alpha last-alpha))
-      [object-name (api.animation/create-alpha-animation init-alpha last-alpha 1)])))
+  (let [end-alpha (:alpha object-slide-info)
+        start-alpha (j/get (api.core/get-object-by-name object-name) :alpha)]
+    (when (and end-alpha (not= start-alpha end-alpha))
+      [object-name (api.animation/create-alpha-animation {:start start-alpha
+                                                          :end end-alpha})])))
 
 (defn- get-animations-from-slide-info [acc object-slide-info object-name]
   (reduce
@@ -149,7 +96,7 @@
                                           :text-horizontal-alignment api.core/gui-horizontal-align-center
                                           :text-vertical-alignment api.core/gui-vertical-align-center
                                           :padding-top "70%"}}}
-                {:data {:camera {:focus "earth2"
+                {:data {:camera {:focus "world-earth-sphere"
                                  :type :center}
                         "immersa-text" {:type :text
                                         :alpha 0}
@@ -272,12 +219,12 @@
                                  type (:type params)
                                  params (dissoc params :type)]
                              (case type
-                               :box (create-box name params)
-                               :text3D (api.core/text name params)
+                               :box (api.component/create-box-with-numbers name params)
+                               :text3D (api.mesh/text name params)
                                :text (api.core/add-control
                                        (api.core/get-advanced-texture)
                                        (api.core/gui-text-block name params))
-                               :billboard (billboard name params)
+                               :billboard (api.component/billboard name params)
                                nil)))
                        animations (reduce
                                     (fn [acc object-name]
@@ -305,11 +252,12 @@
 (defn register-before-render []
   (let [delta (api.core/get-delta-time)]
     (some-> (api.core/get-object-by-name "sky-box") (j/update-in! [:rotation :y] #(+ % (* 0.008 delta))))
+    (some-> (api.core/get-object-by-name "world-earth-node") (j/update-in! [:rotation :y] #(- % (* 0.05 delta))))
     (some-> (api.core/get-object-by-name "earth2") (j/update-in! [:rotation :y] #(- % (* 0.05 delta))))
     (some-> (api.core/get-object-by-name "cloud") (j/update-in! [:rotation :y] #(- % (* 0.07 delta))))))
 
 (defn when-scene-ready [scene]
-  (api.core/scene-clear-color api.core/color-white)
+  (api.core/clear-scene-color api.core/color-white)
   (j/assoc-in! (api.core/get-object-by-name "sky-box") [:rotation :y] js/Math.PI)
   (api.core/advanced-dynamic-texture)
   (j/call scene :registerBeforeRender (fn [] (register-before-render))))
@@ -322,19 +270,19 @@
         light2 (api.core/directional-light "light2"
                                            :position (v3 20)
                                            :dir (v3 -1 -2 0))
-        ground-material (api.core/grid-mat "grid-mat"
-                                           :major-unit-frequency 5
-                                           :minor-unit-visibility 0.45
-                                           :grid-ratio 2
-                                           :back-face-culling? false
-                                           :main-color (api.core/color 1 1 1)
-                                           :line-color (api.core/color 1 1 1)
-                                           :opacity 0.98)
-        ground (api.core/create-ground "ground"
+        ground-material (api.material/grid-mat "grid-mat"
+                                               :major-unit-frequency 5
+                                               :minor-unit-visibility 0.45
+                                               :grid-ratio 2
+                                               :back-face-culling? false
+                                               :main-color (api.core/color 1 1 1)
+                                               :line-color (api.core/color 1 1 1)
+                                               :opacity 0.98)
+        ground (api.mesh/create-ground "ground"
                                        :width 50
                                        :height 50
                                        :mat ground-material)
-        sky-box (api.core/create-sky-box)]
+        sky-box (api.component/create-sky-box)]
     (j/assoc! light :intensity 0.7)
     (j/call camera :setTarget (v3))
     (j/call camera :attachControl canvas false)
@@ -342,62 +290,10 @@
     (j/call scene :executeWhenReady #(when-scene-ready scene))))
 
 (comment
-  (api.core/dispose "light2")
-  (api.core/show-debug)
-  (reset-camera)
-  (let [gl (api.core/glow-layer "gl")
-        mat (api.core/standard-mat "mat2"
-                                   :diffuse-texture (api.core/texture "img/texture/earth/diffuse2.png")
-                                   :emissive-texture (api.core/texture "img/texture/earth/emmisive.jpeg")
-                                   :specular-texture (api.core/texture "img/texture/earth/specular.jpeg")
-                                   :bump-texture (api.core/texture "img/texture/earth/bump.jpeg"))
-        mat-clouds (api.core/standard-mat "clouds"
-                                          :opacity-texture (api.core/texture "img/texture/earth/clouds2.jpg")
-                                          :get-alpha-from-rgb? true)
-        tn (api.core/transform-node "earth-node" :position (v3 0 -0.7 -8.5))
-        sp (api.core/sphere "earth2"
-                            :mat mat
-                            :scale 1.2
-                            :rotation (v3 0 0 js/Math.PI))
-        clouds (api.core/sphere "cloud"
-                                :mat mat-clouds
-                                :scale 1.21
-                                :rotation (v3 0 0 js/Math.PI))
-        hl (api.core/highlight-layer "hl2"
-                                     :blur-vertical-size 3
-                                     :blur-horizontal-size 3)]
-    (api.core/add-children tn sp clouds)
-    ;(j/call hl :addExcludedMesh (api/get-object-by-name "sky-box"))
-    ;(j/call gl :addIncludedOnlyMesh sp)
-    (j/call hl :addMesh clouds (api.core/color 0.3 0.74 0.94 0.82))
-    ;(j/assoc! clouds :parent tn)
-    ;(j/assoc! sp :parent tn)
-    )
-
+  (api.camera/reset-camera)
+  (api.component/earth :name "world"
+                       :position (v3 0 -0.7 -8.5))
   (do
     (api.core/dispose-engine)
     (start-scene (js/document.getElementById "renderCanvas")))
-
-  (do
-    (api.core/dispose "immersa-text" "immersa-text-2")
-    (api.core/add-control
-      (api.core/get-advanced-texture)
-      (api.core/gui-text-block "immersa-text"
-                               :text "IMMERSA"
-                               :font-size 72
-                               :alpha 0.5
-                               ;:font-size-in-pixels (* 60 2)
-                               :color "white"
-                               :text-horizontal-alignment api.core/gui-horizontal-align-center
-                               :text-vertical-alignment api.core/gui-vertical-align-center))
-    (api.core/add-control
-      (api.core/get-advanced-texture)
-      (api.core/gui-text-block "immersa-text-2"
-                               :text "A 3D Presentation Tool"
-                               :font-size 72
-                               :padding-top 200
-                               ;:font-size-in-pixels (* 60 2)
-                               :color "white"
-                               :text-horizontal-alignment api.core/gui-horizontal-align-center
-                               :text-vertical-alignment api.core/gui-vertical-align-center)))
   )

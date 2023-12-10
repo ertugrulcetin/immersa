@@ -11,27 +11,17 @@
     ["@babylonjs/core/Lights/directionalLight" :refer [DirectionalLight]]
     ["@babylonjs/core/Lights/hemisphericLight" :refer [HemisphericLight]]
     ["@babylonjs/core/Loading/sceneLoader" :refer [SceneLoader]]
-    ["@babylonjs/core/Materials/Textures/cubeTexture" :refer [CubeTexture]]
     ["@babylonjs/core/Materials/Textures/dynamicTexture" :refer [DynamicTexture]]
     ["@babylonjs/core/Materials/Textures/texture" :refer [Texture]]
-    ["@babylonjs/core/Materials/standardMaterial" :refer [StandardMaterial]]
     ["@babylonjs/core/Maths/math" :refer [Vector2 Vector3 Vector4]]
     ["@babylonjs/core/Maths/math.color" :refer [Color3]]
-    ["@babylonjs/core/Meshes/mesh" :refer [Mesh]]
-    ["@babylonjs/core/Meshes/meshBuilder" :refer [MeshBuilder]]
     ["@babylonjs/core/Meshes/transformNode" :refer [TransformNode]]
     ["@babylonjs/core/Misc/tools" :refer [Tools]]
-    ["@babylonjs/core/Physics/physicsRaycastResult" :refer [PhysicsRaycastResult]]
-    ["@babylonjs/core/Physics/v2/IPhysicsEnginePlugin" :refer [PhysicsMotionType PhysicsShapeType]]
-    ["@babylonjs/core/Physics/v2/physicsAggregate" :refer [PhysicsAggregate]]
     ["@babylonjs/core/scene" :refer [Scene]]
     ["@babylonjs/gui/2D" :refer [AdvancedDynamicTexture Control TextWrapping]]
     ["@babylonjs/gui/2D/controls" :refer [Button Image Rectangle TextBlock]]
     ["@babylonjs/inspector"]
-    ["@babylonjs/materials/grid/gridMaterial" :refer [GridMaterial]]
-    ["earcut" :as earcut]
     [applied-science.js-interop :as j]
-    [cljs.core.async :as a :refer [go <!]]
     [immersa.scene.font :as font])
   (:require-macros
     [immersa.scene.macros :as m]))
@@ -41,10 +31,6 @@
 (def gui-horizontal-align-left :HORIZONTAL_ALIGNMENT_LEFT)
 (def gui-horizontal-align-center :HORIZONTAL_ALIGNMENT_CENTER)
 (def gui-vertical-align-center :VERTICAL_ALIGNMENT_CENTER)
-
-(def gui-text-wrapping-word-wrap :WordWrap)
-
-(def mesh-billboard-mode-all :BILLBOARDMODE_ALL)
 
 (def color-white (j/call Color3 :White))
 (def color-black (j/call Color3 :Black))
@@ -158,112 +144,6 @@
 (defn add-prop-to-db [name prop val]
   (j/assoc-in! db [:nodes name prop] val))
 
-(defn box [name & {:keys [size
-                          width
-                          height
-                          depth
-                          face-uv
-                          wrap?
-                          visibility
-                          position
-                          skybox?
-                          infinite-distance?
-                          mat]
-                   :as opts}]
-  (let [b (j/call MeshBuilder :CreateBox name #js {:size size
-                                                   :faceUV face-uv
-                                                   :wrap wrap?
-                                                   :width width
-                                                   :height height
-                                                   :depth depth})]
-    (add-node-to-db name b (assoc opts :type (if skybox?
-                                               :skybox
-                                               :box)))
-    (cond-> b
-      mat (j/assoc! :material mat)
-      position (j/assoc! :position position)
-      visibility (j/assoc! :visibility visibility)
-      (some? infinite-distance?) (j/assoc! :infiniteDistance infinite-distance?))))
-
-(defn sphere [name & {:keys [diameter
-                             segments
-                             updatable?
-                             arc
-                             slice
-                             visibility
-                             position
-                             rotation
-                             scale
-                             mat]
-                      :or {segments 32
-                           diameter 1
-                           arc 1
-                           slice 1
-                           updatable? false}
-                      :as opts}]
-  (let [s (j/call MeshBuilder :CreateSphere name #js {:diameter diameter
-                                                      :segments segments
-                                                      :arc arc
-                                                      :slice slice
-                                                      :updatable updatable?})]
-    (add-node-to-db name s opts)
-    (m/cond-doto s
-      mat (j/assoc! :material mat)
-      position (j/assoc! :position position)
-      rotation (j/assoc! :rotation rotation)
-      scale (scaling scale)
-      visibility (j/assoc! :visibility visibility))))
-
-(defn capsule [name & {:keys [height radius visibility]
-                       :as opts}]
-  (let [c (j/call MeshBuilder :CreateCapsule name #js {:height height
-                                                       :radius radius})]
-    (add-node-to-db name c opts)
-    (cond-> c
-      visibility (j/assoc! :visibility visibility))))
-
-(defn plane [name & {:keys [size
-                            position
-                            rotation
-                            width
-                            height
-                            billboard-mode
-                            visibility
-                            scale] :as opts}]
-  (let [p (j/call MeshBuilder :CreatePlane name #js {:size size
-                                                     :width width
-                                                     :height height})]
-    (m/cond-doto p
-      billboard-mode (j/assoc! :billboardMode (j/get Mesh billboard-mode))
-      visibility (j/assoc! :visibility visibility)
-      position (j/assoc! :position position)
-      rotation (j/assoc! :rotation rotation)
-      scale (scaling scale))
-    (add-node-to-db name p opts)))
-
-(defn text [name & {:keys [text
-                           size
-                           resolution
-                           depth
-                           visibility
-                           position]
-                    :or {size 1
-                         resolution 64
-                         depth 0.5}
-                    :as opts}]
-  (let [text (j/call MeshBuilder :CreateText name
-                     text
-                     font/droid
-                     #js {:size size
-                          :resolution resolution
-                          :depth depth}
-                     nil
-                     earcut)]
-    (add-node-to-db name text (assoc opts :type :text3D))
-    (cond-> text
-      visibility (j/assoc! :visibility visibility)
-      position (j/assoc! :position position))))
-
 (defn get-pos [obj]
   (j/call obj :getAbsolutePosition))
 
@@ -285,139 +165,12 @@
                                              (clj->js (update params :trigger #(j/get ActionManager (name %)))))
                                            callback)))
 
-(defn create-ground [name & {:keys [width height mat]
-                             :as opts}]
-  (let [ground (j/call MeshBuilder :CreateGround name #js {:width width
-                                                           :height height})]
-    (add-node-to-db name ground opts)
-    (cond-> ground
-      mat (j/assoc! :material mat))))
-
-(defn create-ground-from-hm [name & {:keys [texture subdivisions width height max-height min-height on-ready mat]
-                                     :as opts}]
-  (let [ground (j/call MeshBuilder :CreateGroundFromHeightMap name texture #js {:subdivisions subdivisions
-                                                                                :width width
-                                                                                :height height
-                                                                                :maxHeight max-height
-                                                                                :minHeight min-height
-                                                                                :onReady on-ready})]
-    (add-node-to-db name ground opts)
-    (cond-> ground
-      mat (j/assoc! :material mat))))
-
-(defn physics-agg [mesh & {:keys [type
-                                  mass
-                                  friction
-                                  restitution
-                                  motion-type
-                                  mass-props
-                                  linear-damping
-                                  angular-damping
-                                  gravity-factor]}]
-  (let [agg (PhysicsAggregate. mesh (j/get PhysicsShapeType (name type)) #js {:mass mass
-                                                                              :friction friction
-                                                                              :restitution restitution})]
-    (m/cond-doto agg
-      gravity-factor (j/call-in [:body :setGravityFactor] gravity-factor)
-      linear-damping (j/call-in [:body :setLinearDamping] linear-damping)
-      angular-damping (j/call-in [:body :setAngularDamping] angular-damping)
-      mass-props (j/call-in [:body :setMassProperties] (clj->js mass-props))
-      motion-type (j/call-in [:body :setMotionType] (j/get PhysicsMotionType (name motion-type))))))
-
-(defn standard-mat [name & {:keys [diffuse-texture
-                                   specular-texture
-                                   emissive-texture
-                                   bump-texture
-                                   opacity-texture
-                                   diffuse-color
-                                   specular-color
-                                   back-face-culling?
-                                   reflection-texture
-                                   coordinates-mode
-                                   disable-lighting?
-                                   get-alpha-from-rgb?
-                                   emissive-color]
-                            :as opts}]
-  (let [sm (StandardMaterial. name)]
-    (add-node-to-db name sm opts)
-    (cond-> sm
-      diffuse-texture (j/assoc! :diffuseTexture diffuse-texture)
-      specular-texture (j/assoc! :specularTexture specular-texture)
-      emissive-texture (j/assoc! :emissiveTexture emissive-texture)
-      bump-texture (j/assoc! :bumpTexture bump-texture)
-      opacity-texture (j/assoc! :opacityTexture opacity-texture)
-      get-alpha-from-rgb? (j/assoc-in! [:opacityTexture :getAlphaFromRGB] get-alpha-from-rgb?)
-      specular-color (j/assoc! :specularColor specular-color)
-      (some? back-face-culling?) (j/assoc! :backFaceCulling back-face-culling?)
-      reflection-texture (j/assoc! :reflectionTexture reflection-texture)
-      coordinates-mode (j/assoc-in! [:reflectionTexture :coordinatesMode] (j/get Texture coordinates-mode))
-      (some? disable-lighting?) (j/assoc! :disableLighting disable-lighting?)
-      diffuse-color (j/assoc! :diffuseColor diffuse-color)
-      emissive-color (j/assoc! :emissiveColor emissive-color))))
-
-(defn grid-mat [name & {:keys [major-unit-frequency
-                               minor-unit-visibility
-                               grid-ratio
-                               back-face-culling?
-                               main-color
-                               line-color
-                               opacity]
-                        :as opts}]
-  (let [gm (GridMaterial. name)]
-    (add-node-to-db name gm opts)
-    (m/cond-doto (GridMaterial. name)
-      major-unit-frequency (j/assoc! :majorUnitFrequency major-unit-frequency)
-      minor-unit-visibility (j/assoc! :minorUnitVisibility minor-unit-visibility)
-      grid-ratio (j/assoc! :gridRatio grid-ratio)
-      (some? back-face-culling?) (j/assoc! :backFaceCulling back-face-culling?)
-      main-color (j/assoc! :mainColor main-color)
-      line-color (j/assoc! :lineColor line-color)
-      opacity (j/assoc! :opacity opacity))))
-
-(defn create-sky-box []
-  (let [skybox (box "sky-box"
-                    :size 1000.0
-                    :skybox? true
-                    :infinite-distance? false)
-        mat (standard-mat "sky-box-mat"
-                          :back-face-culling? false
-                          :reflection-texture (CubeTexture. "" nil nil nil #js ["img/skybox/space2/px.png"
-                                                                                "img/skybox/space2/py.png"
-                                                                                "img/skybox/space2/pz.png"
-                                                                                "img/skybox/space2/nx.png"
-                                                                                "img/skybox/space2/ny.png"
-                                                                                "img/skybox/space2/nz.png"])
-                          :coordinates-mode :SKYBOX_MODE
-                          :diffuse-color (color 0 0 0)
-                          :specular-color (color 0 0 0)
-                          :disable-lighting? true)]
-    (j/assoc! skybox :material mat)
-    skybox))
-
 (defn texture [path & {:keys [u-scale v-scale]
                        :as opts}]
   (let [tex (Texture. path)]
     (m/cond-doto tex
       u-scale (j/assoc! :uScale u-scale)
       v-scale (j/assoc! :vScale v-scale))))
-
-(defn key-pressed? [key]
-  (j/get-in db [:input-map key] false))
-
-(defn apply-force [mesh force location]
-  (j/call-in mesh [:physicsBody :applyForce] force location))
-
-(defn apply-impulse [mesh impulse location]
-  (j/call-in mesh [:physicsBody :applyImpulse] impulse location))
-
-(defn get-linear-velocity-to-ref [mesh ref]
-  (j/call-in mesh [:physicsBody :getLinearVelocityToRef] ref))
-
-(defn set-linear-velocity [mesh dir]
-  (j/call-in mesh [:physicsBody :setLinearVelocity] dir))
-
-(defn get-object-center-world [mesh]
-  (j/call-in mesh [:physicsBody :getObjectCenterWorld]))
 
 (defn directional-light [name & {:keys [dir pos intensity]
                                  :or {dir (v3 0 -1 0)
@@ -443,15 +196,6 @@
 
 (defn add-shadow-caster [shadow-generator mesh]
   (j/call shadow-generator :addShadowCaster mesh))
-
-(defn raycast-result []
-  (PhysicsRaycastResult.))
-
-(defn raycast-to-ref [p1 p2 result]
-  (let [scene (j/get db :scene)
-        physics-engine (j/call scene :getPhysicsEngine)]
-    (j/call physics-engine :raycastToRef p1 p2 result)
-    result))
 
 (defn register-on-before-render [f]
   (j/call-in db [:scene :onBeforeRenderObservable :add] f))
@@ -497,9 +241,7 @@
 
 (defn show-debug []
   (let [p (j/call-in db [:scene :debugLayer :show] #js {:embedMode true})]
-    (.then p
-           (fn []
-             (j/assoc-in! (js/document.getElementById "embed-host") [:style :position] "absolute")))))
+    (.then p #(j/assoc-in! (js/document.getElementById "embed-host") [:style :position] "absolute"))))
 
 (defn hide-debug []
   (j/call-in db [:scene :debugLayer :hide]))
@@ -568,7 +310,7 @@
       color (j/assoc! :color color)
       font-weight (j/assoc! :fontWeight font-weight))))
 
-(defn scene-clear-color [color]
+(defn clear-scene-color [color]
   (j/assoc-in! db [:scene :clearColor] color))
 
 (defn highlight-layer [name & {:keys [blur-horizontal-size

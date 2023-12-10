@@ -7,7 +7,8 @@
     [cljs.core.async :as a]
     [immersa.scene.api.camera :as api.camera]
     [immersa.scene.api.constant :as api.const]
-    [immersa.scene.api.core :as api.core :refer [v3]]
+    [immersa.scene.api.core :as api.core :refer [v3]])
+  (:require-macros
     [immersa.scene.macros :as m]))
 
 (defn cubic-ease [mode]
@@ -63,7 +64,8 @@
       (f))
     p))
 
-(defn create-position-animation [start end duration]
+(defn create-position-animation [{:keys [start end duration]
+                                  :or {duration 1.0}}]
   (animation "position-animation"
              :target-prop "position"
              :duration duration
@@ -73,7 +75,8 @@
              :loop-mode api.const/animation-loop-cons
              :easing (cubic-ease api.const/easing-ease-in-out)))
 
-(defn create-rotation-animation [start end duration]
+(defn create-rotation-animation [{:keys [start end duration]
+                                  :or {duration 1.0}}]
   (animation "rotation-animation"
              :target-prop "rotation"
              :duration duration
@@ -83,7 +86,8 @@
              :loop-mode api.const/animation-loop-cons
              :easing (cubic-ease api.const/easing-ease-in-out)))
 
-(defn create-visibility-animation [start end duration]
+(defn create-visibility-animation [{:keys [start end duration]
+                                    :or {duration 1.0}}]
   (animation "visibility-animation"
              :target-prop "visibility"
              :duration duration
@@ -93,7 +97,8 @@
              :loop-mode api.const/animation-loop-cons
              :easing (cubic-ease api.const/easing-ease-in-out)))
 
-(defn create-alpha-animation [start end duration]
+(defn create-alpha-animation [{:keys [start end duration]
+                               :or {duration 1.0}}]
   (animation "alpha-animation"
              :target-prop "alpha"
              :duration duration

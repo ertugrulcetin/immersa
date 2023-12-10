@@ -3,7 +3,8 @@
     ["@babylonjs/core/Cameras/arcRotateCamera" :refer [ArcRotateCamera]]
     ["@babylonjs/core/Cameras/freeCamera" :refer [FreeCamera]]
     [applied-science.js-interop :as j]
-    [immersa.scene.api.core :as api.core :refer [db v3]]
+    [immersa.scene.api.core :as api.core :refer [db v3]])
+  (:require-macros
     [immersa.scene.macros :as m]))
 
 (defn active-camera []
