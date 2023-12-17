@@ -7,9 +7,6 @@
     ["@babylonjs/core/Engines/engine" :refer [Engine]]
     ["@babylonjs/core/Layers/glowLayer" :refer [GlowLayer]]
     ["@babylonjs/core/Layers/highlightLayer" :refer [HighlightLayer]]
-    ["@babylonjs/core/Lights/Shadows/shadowGenerator" :refer [ShadowGenerator]]
-    ["@babylonjs/core/Lights/directionalLight" :refer [DirectionalLight]]
-    ["@babylonjs/core/Lights/hemisphericLight" :refer [HemisphericLight]]
     ["@babylonjs/core/Loading/sceneLoader" :refer [SceneLoader]]
     ["@babylonjs/core/Materials/Textures/dynamicTexture" :refer [DynamicTexture]]
     ["@babylonjs/core/Materials/Textures/texture" :refer [Texture]]
@@ -18,23 +15,12 @@
     ["@babylonjs/core/Meshes/transformNode" :refer [TransformNode]]
     ["@babylonjs/core/Misc/tools" :refer [Tools]]
     ["@babylonjs/core/scene" :refer [Scene]]
-    ["@babylonjs/gui/2D" :refer [AdvancedDynamicTexture Control TextWrapping]]
-    ["@babylonjs/gui/2D/controls" :refer [Button Image Rectangle TextBlock]]
     ["@babylonjs/inspector"]
-    [applied-science.js-interop :as j]
-    [immersa.scene.font :as font])
+    [applied-science.js-interop :as j])
   (:require-macros
     [immersa.scene.macros :as m]))
 
 (defonce db #js {})
-
-(def gui-horizontal-align-left :HORIZONTAL_ALIGNMENT_LEFT)
-(def gui-horizontal-align-center :HORIZONTAL_ALIGNMENT_CENTER)
-(def gui-vertical-align-center :VERTICAL_ALIGNMENT_CENTER)
-
-(def color-white (j/call Color3 :White))
-(def color-black (j/call Color3 :Black))
-(def color-yellow (j/call Color3 :Yellow))
 
 (defn create-engine [canvas]
   (let [e (Engine. canvas true #js {:preserveDrawingBuffer true
@@ -172,53 +158,14 @@
       u-scale (j/assoc! :uScale u-scale)
       v-scale (j/assoc! :vScale v-scale))))
 
-(defn directional-light [name & {:keys [dir pos intensity]
-                                 :or {dir (v3 0 -1 0)
-                                      intensity 1}
-                                 :as opts}]
-  (let [light (DirectionalLight. name dir)]
-    (add-node-to-db name light opts)
-    (j/assoc! light :position pos
-              :intensity intensity)))
-
-(defn hemispheric-light [name & {:keys [dir pos]
-                                 :or {dir (v3 0 1 0)}
-                                 :as opts}]
-  (let [light (HemisphericLight. name dir)]
-    (add-node-to-db name light opts)
-    (j/assoc! light :position pos)))
-
-(defn shadow-generator [name & {:keys [map-size light]
-                                :or {map-size 1024}
-                                :as opts}]
-  ;; TODO there is no name so be careful on disposing
-  (add-node-to-db name (ShadowGenerator. map-size light) opts))
-
-(defn add-shadow-caster [shadow-generator mesh]
-  (j/call shadow-generator :addShadowCaster mesh))
-
 (defn register-on-before-render [f]
   (j/call-in db [:scene :onBeforeRenderObservable :add] f))
 
 (defn register-on-after-render [f]
   (j/call-in db [:scene :onAfterRenderObservable :add] f))
 
-(defn advanced-dynamic-texture []
-  (let [advanced-texture (j/call-in AdvancedDynamicTexture [:CreateFullscreenUI] "UI")]
-    (j/assoc! db :gui-advanced-texture advanced-texture)
-    advanced-texture))
-
 (defn get-advanced-texture []
   (j/get db :gui-advanced-texture))
-
-(defn gui-image [name url]
-  (Image. name url))
-
-(defn gui-button [name text]
-  (j/call Button :CreateSimpleButton name text))
-
-(defn add-control [container control]
-  (j/call container :addControl control))
 
 (defn import-mesh [file f]
   (j/call SceneLoader :ImportMesh "" "models/" file (j/get db :scene) f))
@@ -261,54 +208,6 @@
                                            :generateMipMaps generate-mipmaps?})]
     (m/cond-doto texture
       (some? alpha?) (j/assoc! :hasAlpha alpha?))))
-
-(defn gui-rectangle [name & {:keys [corner-radius
-                                    background
-                                    height]
-                             :as opts}]
-  (let [rect (Rectangle. name)]
-    (add-node-to-db name rect opts)
-    (m/cond-doto rect
-      height (j/assoc! :height height)
-      corner-radius (j/assoc! :cornerRadius corner-radius)
-      background (j/assoc! :background background))))
-
-(defn gui-create-for-mesh [mesh & {:keys [width height]}]
-  (j/call AdvancedDynamicTexture :CreateForMesh mesh width height))
-
-(defn gui-text-block [name & {:keys [text
-                                     alpha
-                                     font-family
-                                     font-size-in-pixels
-                                     text-wrapping
-                                     text-horizontal-alignment
-                                     text-vertical-alignment
-                                     padding-top
-                                     padding-bottom
-                                     padding-right
-                                     padding-left
-                                     font-size
-                                     line-spacing
-                                     color
-                                     font-weight]
-                              :as opts}]
-  (let [text-block (TextBlock. name text)]
-    (add-node-to-db name text-block (assoc opts :type :text))
-    (m/cond-doto text-block
-      font-size-in-pixels (j/assoc! :fontSizeInPixels font-size-in-pixels)
-      text-wrapping (j/assoc! :textWrapping (j/get TextWrapping text-wrapping))
-      text-horizontal-alignment (j/assoc! :textHorizontalAlignment (j/get Control text-horizontal-alignment))
-      text-vertical-alignment (j/assoc! :textVerticalAlignment (j/get Control text-vertical-alignment))
-      alpha (j/assoc! :alpha alpha)
-      font-family (j/assoc! :fontFamily font-family)
-      line-spacing (j/assoc! :lineSpacing line-spacing)
-      padding-top (j/assoc! :paddingTop padding-top)
-      padding-bottom (j/assoc! :paddingBottom padding-bottom)
-      padding-right (j/assoc! :paddingRight padding-right)
-      padding-left (j/assoc! :paddingLeft padding-left)
-      font-size (j/assoc! :fontSize font-size)
-      color (j/assoc! :color color)
-      font-weight (j/assoc! :fontWeight font-weight))))
 
 (defn clear-scene-color [color]
   (j/assoc-in! db [:scene :clearColor] color))

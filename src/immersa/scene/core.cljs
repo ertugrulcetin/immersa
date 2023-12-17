@@ -8,7 +8,10 @@
     [immersa.scene.api.animation :as api.animation]
     [immersa.scene.api.camera :as api.camera]
     [immersa.scene.api.component :as api.component]
+    [immersa.scene.api.constant :as api.const]
     [immersa.scene.api.core :as api.core :refer [v3 v4]]
+    [immersa.scene.api.gui :as api.gui]
+    [immersa.scene.api.light :as api.light]
     [immersa.scene.api.material :as api.material]
     [immersa.scene.api.mesh :as api.mesh]
     [re-frame.core :refer [dispatch]]))
@@ -82,8 +85,8 @@
                                         :line-spacing "10px"
                                         :alpha 0
                                         :color "white"
-                                        :text-horizontal-alignment api.core/gui-horizontal-align-center
-                                        :text-vertical-alignment api.core/gui-vertical-align-center}}}
+                                        :text-horizontal-alignment api.const/gui-horizontal-align-center
+                                        :text-vertical-alignment api.const/gui-vertical-align-center}}}
                 {:data {"immersa-text" {:type :text
                                         :alpha 1}
                         "immersa-text-2" {:type :text
@@ -93,8 +96,8 @@
                                           :line-spacing "10px"
                                           :alpha 0
                                           :color "white"
-                                          :text-horizontal-alignment api.core/gui-horizontal-align-center
-                                          :text-vertical-alignment api.core/gui-vertical-align-center
+                                          :text-horizontal-alignment api.const/gui-horizontal-align-center
+                                          :text-vertical-alignment api.const/gui-vertical-align-center
                                           :padding-top "70%"}}}
                 {:data {:camera {:focus "world-earth-sphere"
                                  :type :center}
@@ -144,8 +147,8 @@
                                           :line-spacing "10px"
                                           :alpha 1
                                           :color "white"
-                                          :text-horizontal-alignment api.core/gui-horizontal-align-center
-                                          :text-vertical-alignment api.core/gui-vertical-align-center}}}
+                                          :text-horizontal-alignment api.const/gui-horizontal-align-center
+                                          :text-vertical-alignment api.const/gui-vertical-align-center}}}
 
                 {:data {:camera {:position (v3 0 0 50)}
                         "immersa-text-3" {:alpha 0}}}]
@@ -221,9 +224,9 @@
                              (case type
                                :box (api.component/create-box-with-numbers name params)
                                :text3D (api.mesh/text name params)
-                               :text (api.core/add-control
+                               :text (api.gui/add-control
                                        (api.core/get-advanced-texture)
-                                       (api.core/gui-text-block name params))
+                                       (api.gui/text-block name params))
                                :billboard (api.component/billboard name params)
                                nil)))
                        animations (reduce
@@ -257,19 +260,19 @@
     (some-> (api.core/get-object-by-name "cloud") (j/update-in! [:rotation :y] #(- % (* 0.07 delta))))))
 
 (defn when-scene-ready [scene]
-  (api.core/clear-scene-color api.core/color-white)
+  (api.core/clear-scene-color api.const/color-white)
   (j/assoc-in! (api.core/get-object-by-name "sky-box") [:rotation :y] js/Math.PI)
-  (api.core/advanced-dynamic-texture)
+  (api.gui/advanced-dynamic-texture)
   (j/call scene :registerBeforeRender (fn [] (register-before-render))))
 
 (defn start-scene [canvas]
   (let [engine (api.core/create-engine canvas)
         scene (api.core/create-scene engine)
         camera (api.camera/create-free-camera "free-camera" :position (v3 0 0 -10))
-        light (api.core/hemispheric-light "light")
-        light2 (api.core/directional-light "light2"
-                                           :position (v3 20)
-                                           :dir (v3 -1 -2 0))
+        light (api.light/hemispheric-light "light")
+        light2 (api.light/directional-light "light2"
+                                            :position (v3 20)
+                                            :dir (v3 -1 -2 0))
         ground-material (api.material/grid-mat "grid-mat"
                                                :major-unit-frequency 5
                                                :minor-unit-visibility 0.45
@@ -289,11 +292,12 @@
     (j/call engine :runRenderLoop #(j/call scene :render))
     (j/call scene :executeWhenReady #(when-scene-ready scene))))
 
+(defn restart-engine []
+  (api.core/dispose-engine)
+  (start-scene (js/document.getElementById "renderCanvas")))
+
 (comment
   (api.camera/reset-camera)
   (api.component/earth :name "world"
                        :position (v3 0 -0.7 -8.5))
-  (do
-    (api.core/dispose-engine)
-    (start-scene (js/document.getElementById "renderCanvas")))
-  )
+  (restart-engine))

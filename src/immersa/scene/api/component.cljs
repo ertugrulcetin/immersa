@@ -2,8 +2,9 @@
   (:require
     ["@babylonjs/core/Materials/Textures/cubeTexture" :refer [CubeTexture]]
     [applied-science.js-interop :as j]
-    [immersa.scene.api.constant :as api.constant]
+    [immersa.scene.api.constant :as api.const]
     [immersa.scene.api.core :as api.core :refer [v3 v4]]
+    [immersa.scene.api.gui :as api.gui]
     [immersa.scene.api.material :as api.material]
     [immersa.scene.api.mesh :as api.mesh]))
 
@@ -53,26 +54,26 @@
                               :height height
                               :position position
                               :rotation rotation
-                              :billboard-mode api.constant/mesh-billboard-mode-all
+                              :billboard-mode api.const/mesh-billboard-mode-all
                               :visibility visibility
                               :scale scale
                               :type :billboard)
-        gui (api.core/gui-create-for-mesh plane :width (* resolution-scale 1024) :height (* resolution-scale 1024))
-        text (api.core/gui-text-block (str name "-text-block")
-                                      :text text
-                                      :font-size-in-pixels (* 60 resolution-scale)
-                                      :text-wrapping api.constant/gui-text-wrapping-word-wrap
-                                      :text-horizontal-alignment api.constant/gui-horizontal-align-left
-                                      :padding-left (* 50 resolution-scale)
-                                      :color color
-                                      :font-weight font-weight)
-        rect (api.core/gui-rectangle (str name "-rect")
-                                     :corner-radius rect-corner-radius
-                                     :height rect-height
-                                     :background rect-background)]
+        gui (api.gui/create-for-mesh plane :width (* resolution-scale 1024) :height (* resolution-scale 1024))
+        text (api.gui/text-block (str name "-text-block")
+                                 :text text
+                                 :font-size-in-pixels (* 60 resolution-scale)
+                                 :text-wrapping api.const/gui-text-wrapping-word-wrap
+                                 :text-horizontal-alignment api.const/gui-horizontal-align-left
+                                 :padding-left (* 50 resolution-scale)
+                                 :color color
+                                 :font-weight font-weight)
+        rect (api.gui/rectangle (str name "-rect")
+                                :corner-radius rect-corner-radius
+                                :height rect-height
+                                :background rect-background)]
     (api.core/add-prop-to-db name :children [plane gui text rect])
-    (api.core/add-control gui rect)
-    (api.core/add-control rect text)
+    (api.gui/add-control gui rect)
+    (api.gui/add-control rect text)
     plane))
 
 ;; TODO move to mesh, it is a tiled box
