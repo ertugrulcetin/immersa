@@ -3,10 +3,13 @@
     ["@babylonjs/core/Materials/Textures/cubeTexture" :refer [CubeTexture]]
     [applied-science.js-interop :as j]
     [immersa.scene.api.constant :as api.const]
-    [immersa.scene.api.core :as api.core :refer [v3 v4]]
+    [immersa.scene.api.core :as api.core :refer [v2 v3 v4]]
     [immersa.scene.api.gui :as api.gui]
     [immersa.scene.api.material :as api.material]
-    [immersa.scene.api.mesh :as api.mesh]))
+    [immersa.scene.api.mesh :as api.mesh])
+  (:require-macros
+    [immersa.scene.macros :as m]
+    [shadow.resource :as rc]))
 
 (defn create-sky-box []
   (let [skybox (api.mesh/box "sky-box"
@@ -118,3 +121,68 @@
     (api.core/add-prop-to-db name :type :earth)
     (j/call hl :addMesh clouds (api.core/color 0.3 0.74 0.94 0.82))
     tn))
+
+(defn wave [name & {:keys [width
+                           height
+                           resolution
+                           point-size
+                           time-scale
+                           noise-amp-1
+                           noise-freq-1
+                           spd-modifier-1
+                           noise-amp-2
+                           noise-freq-2
+                           spd-modifier-2]
+                    :or {width 50
+                         height 50
+                         resolution 100
+                         point-size 3.0
+                         time-scale 1.0
+                         noise-amp-1 0.2
+                         noise-freq-1 3.0
+                         spd-modifier-1 1.0
+                         noise-amp-2 0.3
+                         noise-freq-2 2.0
+                         spd-modifier-2 0.8}
+                    :as opts}]
+  (let [mat (api.material/shader-mat
+              (str name "-wave-shader")
+              :fragment (rc/inline "shader/wave/fragment.glsl")
+              :vertex (rc/inline "shader/wave/vertex.glsl")
+              :attrs ["position" "normal" "uv"]
+              :uniforms ["world" "worldView" "worldViewProjection" "view" "projection"
+                         "u_time" "u_pointsize" "u_noise_amp_1" "u_noise_freq_1"
+                         "u_spd_modifier_1" "u_noise_amp_2" "u_noise_freq_2"
+                         "u_spd_modifier_2"])
+        pcs (api.core/point-cloud-system
+              (str "-wave-pcs")
+              :point-count (* width resolution)
+              :on-add-point (fn [particle i]
+                              (let [x (- (/ (* (mod i resolution) width) resolution) (/ width 2))
+                                    z (- (/ (* (Math/floor (/ i resolution)) height) resolution) (/ height 2))]
+                                (j/assoc! particle :position (v3 x 0 z))))
+              :on-build-done (fn [mesh]
+                               (m/assoc! mesh
+                                         :material mat
+                                         :material.pointsCloud true
+                                         :position (v3 0 -5 35)
+                                         :rotation (v3 (/ js/Math.PI 70) 0 0)
+                                         :visibility 0.5)))
+        start-time (js/Date.now)
+        engine (api.core/get-engine)
+        temp-v2 (v2)
+        _ (api.core/register-before-render-fn
+            (str name "-wave-before-render")
+            (fn []
+              (j/call mat :setFloat "u_pointsize" point-size)
+              (j/call mat :setFloat "u_noise_amp_1" noise-amp-1)
+              (j/call mat :setFloat "u_noise_freq_1" noise-freq-1)
+              (j/call mat :setFloat "u_spd_modifier_1" spd-modifier-1)
+              (j/call mat :setFloat "u_noise_amp_2" noise-amp-2)
+              (j/call mat :setFloat "u_noise_freq_2" noise-freq-2)
+              (j/call mat :setFloat "u_spd_modifier_2" spd-modifier-2)
+              (j/call mat :setFloat "u_time" (* (/ (- (js/Date.now) start-time) 1000) time-scale))
+              (j/call mat :setVector2 "u_resolution" (api.core/set-v2 temp-v2
+                                                                      (j/call engine :getRenderWidth)
+                                                                      (j/call engine :getRenderHeight)))))]
+    (api.core/add-node-to-db name pcs (assoc opts :type :pcs))))

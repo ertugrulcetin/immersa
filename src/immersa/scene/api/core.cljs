@@ -70,6 +70,9 @@
 (defn clone [obj]
   (j/call obj :clone))
 
+(defn set-v2 [v x y]
+  (j/call v :set x y))
+
 (defn set-v3 [v x y z]
   (j/call v :set x y z))
 
@@ -290,6 +293,9 @@
 
 (defn register-before-render-fn [name f]
   (j/assoc-in! db [:before-render-fns name] f))
+
+(defn remove-before-render-fn [name]
+  (js-delete (j/get db :before-render-fns) name))
 
 (defn get-before-render-fns []
   (some-> (j/get db :before-render-fns) (js/Object.values)))
