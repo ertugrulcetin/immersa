@@ -17,7 +17,7 @@
     ["@babylonjs/core/Misc/tools" :refer [Tools]]
     ["@babylonjs/core/Particles/pointsCloudSystem" :refer [PointsCloudSystem]]
     ["@babylonjs/core/scene" :refer [Scene]]
-    ["@babylonjs/inspector"]
+    ;["@babylonjs/inspector"]
     [applied-science.js-interop :as j])
   (:require-macros
     [immersa.scene.macros :as m]))
