@@ -95,12 +95,12 @@
 
 (defn earth [name & {:keys [position visibility] :as opts}]
   (let [mat (api.material/standard-mat (str name "-mat")
-                                       :diffuse-texture (api.core/texture "img/texture/earth/diffuse2.png")
+                                       :diffuse-texture (api.core/texture "img/texture/earth/diffuse2-min.png")
                                        :emissive-texture (api.core/texture "img/texture/earth/emmisive.jpeg")
                                        :specular-texture (api.core/texture "img/texture/earth/specular.jpeg")
                                        :bump-texture (api.core/texture "img/texture/earth/bump.jpeg"))
         mat-clouds (api.material/standard-mat (str name "-clouds")
-                                              :opacity-texture (api.core/texture "img/texture/earth/clouds2.jpg")
+                                              :opacity-texture (api.core/texture "img/texture/earth/clouds2-min.jpg")
                                               :get-alpha-from-rgb? true)
         tn (api.core/mesh name :position position)
         sp (api.mesh/sphere (str name "-earth-sphere")
