@@ -135,7 +135,7 @@
                                           :alpha 0}}}
 
                 {:data {:skybox {:path "img/skybox/sunny/sunny"
-                                 :speed-factor 0.5}
+                                 :speed-factor 1}
                         "box" {:type :box
                                :position (v3 0 2 0)
                                :rotation (v3 1.2 2.3 4.1)
@@ -293,9 +293,10 @@
                                                          :to max-fps})))
                                     {}
                                     (group-by first animations)))
+                dissolve-anim (run-skybox-dissolve-animation objects-data)
                 channels (mapv #(api.animation/begin-direct-animation %) animations-data)]
-            (some-> (run-skybox-dissolve-animation objects-data) a/<!)
             (doseq [c channels]
               (a/<! c))
+            (some-> dissolve-anim a/<!)
             (recur next-index))
           (recur index))))))

@@ -2,7 +2,6 @@
   (:require
     ["@babylonjs/core/Materials/Textures/cubeTexture" :refer [CubeTexture]]
     [applied-science.js-interop :as j]
-    [cljs.core.async :as a]
     [immersa.scene.api.constant :as api.const]
     [immersa.scene.api.core :as api.core :refer [v2 v3 v4]]
     [immersa.scene.api.gui :as api.gui]

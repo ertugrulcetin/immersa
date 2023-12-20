@@ -15,11 +15,14 @@
     ["@babylonjs/core/Maths/math.color" :refer [Color3]]
     ["@babylonjs/core/Meshes/mesh" :refer [Mesh]]
     ["@babylonjs/core/Meshes/transformNode" :refer [TransformNode]]
+    ["@babylonjs/core/Misc/assetsManager" :refer [AssetsManager]]
     ["@babylonjs/core/Misc/tools" :refer [Tools]]
     ["@babylonjs/core/Particles/pointsCloudSystem" :refer [PointsCloudSystem]]
     ["@babylonjs/core/scene" :refer [Scene]]
     ["@babylonjs/inspector"]
-    [applied-science.js-interop :as j])
+    [applied-science.js-interop :as j]
+    [cljs.core.async :as a]
+    [immersa.scene.api.assets :refer [assets]])
   (:require-macros
     [immersa.scene.macros :as m]))
 
@@ -165,10 +168,15 @@
                                              (clj->js (update params :trigger #(j/get ActionManager (name %)))))
                                            callback)))
 
+(defn- check-if-not-exists-in-assets [type path]
+  (when-not (get-in assets [type path])
+    (throw (ex-info (str "Path not found in Assets Manager, path: " path " - Type: " type) {}))))
+
 (defn texture [path & {:keys [u-scale
                               v-scale
                               on-load
                               on-error]}]
+  (check-if-not-exists-in-assets :textures path)
   (let [tex (Texture. path)]
     (m/cond-doto tex
       u-scale (j/assoc! :uScale u-scale)
@@ -316,8 +324,30 @@
                               on-load
                               on-error]
                        :or {root-url ""}}]
+  (check-if-not-exists-in-assets :cube-textures root-url)
   (let [cb (CubeTexture. root-url nil extensions no-mipmaps? (clj->js files))]
     (m/cond-doto cb
       coordinates-mode (j/assoc! :coordinatesMode (j/get Texture coordinates-mode))
       on-load (j/call-in [:onLoadObservable :add] on-load)
       on-error (j/assoc! :onError on-error))))
+
+(defn create-assets-manager []
+  (let [am (AssetsManager.)]
+    (j/assoc! db :assets-manager am)
+    (j/assoc! am :autoHideLoadingUI true)))
+
+(defn add-texture-task [name url]
+  (j/call-in db [:assets-manager :addTextureTask] name url))
+
+(defn add-cube-texture-task [name url]
+  (j/call-in db [:assets-manager :addCubeTextureTask] name url))
+
+(defn load-async []
+  (let [p (a/promise-chan)]
+    (doseq [[type assets] assets]
+      (doseq [[index path] (map-indexed vector assets)]
+        (case type
+          :textures (add-texture-task (str "texture-" index) path)
+          :cube-textures (add-cube-texture-task (str "cube-texture-" index) path))))
+    (j/call (j/call-in db [:assets-manager :loadAsync]) :then #(a/put! p true))
+    p))

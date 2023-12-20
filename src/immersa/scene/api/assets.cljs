@@ -1,0 +1,13 @@
+(ns immersa.scene.api.assets)
+
+(def assets
+  {:cube-textures #{"img/skybox/sunny/sunny"
+                    "img/skybox/space/space"
+                    "img/skybox/black/black"}
+   :textures #{"img/texture/noise/ac.jpg"
+               "img/texture/numbers.jpg"
+               "img/texture/earth/diffuse2-min.png"
+               "img/texture/earth/emmisive.jpeg"
+               "img/texture/earth/specular.jpeg"
+               "img/texture/earth/bump.jpeg"
+               "img/texture/earth/clouds2-min.jpg"}})

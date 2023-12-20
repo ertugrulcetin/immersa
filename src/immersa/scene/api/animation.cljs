@@ -44,8 +44,7 @@
                                         on-animation-end
                                         delay]
                                  :or {loop? false
-                                      speed-ratio 1.0}
-                                 :as opts}]
+                                      speed-ratio 1.0}}]
   (let [p (a/promise-chan)
         on-animation-end (fn []
                            (when on-animation-end
@@ -166,7 +165,5 @@
     (j/call mat :setTexture "skybox1" (api.core/cube-texture :root-url current-skybox-path))
     (j/call mat :setTexture "skybox2" (api.core/cube-texture :root-url skybox-path))
     (j/call mat :setFloat "dissolve" 0)
-    (println current-skybox-path)
-    (println skybox-path)
     (api.core/register-before-render-fn dissolve-fn-name dissolve-fn)
     p))
