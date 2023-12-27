@@ -26,3 +26,8 @@
   ::animate-progress-bar
   (fn [[progress-bar progress]]
     (j/call progress-bar :animate progress)))
+
+(reg-event-db
+  ::set-show-arrow-keys-text?
+  (fn [db [_ show-arrow-keys-text?]]
+    (assoc db :show-arrow-keys-text? show-arrow-keys-text?)))

@@ -331,10 +331,11 @@
       on-load (j/call-in [:onLoadObservable :add] on-load)
       on-error (j/assoc! :onError on-error))))
 
-(defn create-assets-manager []
+(defn create-assets-manager [& {:keys [on-finish]}]
   (let [am (AssetsManager.)]
     (j/assoc! db :assets-manager am)
-    (j/assoc! am :autoHideLoadingUI true)))
+    (j/assoc! am :autoHideLoadingUI true)
+    (j/assoc! am :onFinish on-finish)))
 
 (defn add-texture-task [name url]
   (j/call-in db [:assets-manager :addTextureTask] name url))

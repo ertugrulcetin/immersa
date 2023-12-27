@@ -27,3 +27,7 @@
   (fn [db]
     {:current-slide-index (:current-slide-index db "-")
      :slide-count (:slide-count db "-")}))
+
+(reg-sub
+  ::show-arrow-keys-text?
+  :show-arrow-keys-text?)

@@ -35,6 +35,19 @@
 (defn create-for-mesh [mesh & {:keys [width height]}]
   (j/call AdvancedDynamicTexture :CreateForMesh mesh width height))
 
+;; TODO fix resolution
+;; function adjustTextSize(textBlock, baseScreenResolution) {
+;;    let currentResolution = window.innerWidth; // or window.innerHeight based on your preference
+;;    let scaleFactor = currentResolution / baseScreenResolution;
+;;    textBlock.fontSizeInPixels = originalFontSize * scaleFactor;
+;; }
+;;
+;; // Usage
+;; const textBlock = new BABYLON.GUI.TextBlock();
+;; textBlock.text = "Your Text Here";
+;; let originalFontSize = 24; // Define your base font size
+;; textBlock.fontSizeInPixels = originalFontSize;
+;; adjustTextSize(textBlock, 1920); // Assuming 1920 is the base screen width you designed for
 (defn text-block [name & {:keys [text
                                  alpha
                                  font-family

@@ -3,6 +3,7 @@
     [applied-science.js-interop :as j]
     [cljs.core.async :as a]
     [immersa.common.utils :as common.utils]
+    [immersa.events :as events]
     [immersa.scene.api.camera :as api.camera]
     [immersa.scene.api.component :as api.component]
     [immersa.scene.api.constant :as api.const]
@@ -11,7 +12,8 @@
     [immersa.scene.api.light :as api.light]
     [immersa.scene.api.material :as api.material]
     [immersa.scene.api.mesh :as api.mesh]
-    [immersa.scene.slide :as slide])
+    [immersa.scene.slide :as slide]
+    [re-frame.core :refer [dispatch]])
   (:require-macros
     [shadow.resource :as rc]))
 
@@ -37,7 +39,7 @@
   (a/go
     (let [engine (api.core/create-engine canvas)
           scene (api.core/create-scene engine)
-          _ (api.core/create-assets-manager)
+          _ (api.core/create-assets-manager :on-finish #(dispatch [::events/set-show-arrow-keys-text? false]))
           _ (a/<! (api.core/load-async))
           camera (api.camera/create-free-camera "free-camera" :position (v3 0 0 -10))
           light (api.light/hemispheric-light "light")

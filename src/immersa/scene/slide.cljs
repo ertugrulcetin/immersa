@@ -217,7 +217,10 @@
 
 (defn start-slide-show []
   (api.component/wave "sine")
-  (let [command-ch (a/chan (a/dropping-buffer 1))]
+  (let [command-ch (a/chan (a/dropping-buffer 1))
+        slide-controls (js/document.getElementById "slide-controls")
+        prev-button (j/get-in slide-controls [:children 0])
+        next-button (j/get-in slide-controls [:children 2])]
     (a/put! command-ch :next)
     (api.core/dispose-all (concat (api.core/get-objects-by-type "box")
                                   (api.core/get-objects-by-type "billboard")
@@ -227,7 +230,14 @@
     (api.camera/reset-camera)
     (api.camera/detach-control (api.camera/active-camera))
     (common.utils/remove-element-listeners)
-
+    (common.utils/register-event-listener prev-button "click"
+                                          (fn [e]
+                                            (when-not (j/get e :repeat)
+                                              (a/put! command-ch :prev))))
+    (common.utils/register-event-listener next-button "click"
+                                          (fn [e]
+                                            (when-not (j/get e :repeat)
+                                              (a/put! command-ch :next))))
     (common.utils/register-event-listener js/window "keydown"
                                           (fn [e]
                                             (when-not (j/get e :repeat)

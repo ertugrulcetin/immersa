@@ -7,7 +7,14 @@
     ["@babylonjs/core/Maths/math" :refer [Vector3]]
     ["@babylonjs/core/Meshes/meshBuilder" :refer [MeshBuilder]]
     ["@babylonjs/core/scene" :refer [Scene]]
-    ["@phosphor-icons/react" :refer [CaretLeft CaretRight DotsThreeVertical ChatCenteredText SmileySticker Command]]
+    ["@phosphor-icons/react" :refer [CaretLeft
+                                     CaretRight
+                                     DotsThreeVertical
+                                     ChatCenteredText
+                                     SmileySticker
+                                     Command
+                                     ArrowFatRight
+                                     ArrowFatLeft]]
     ["progressbar.js" :as ProgressBar]
     [immersa.events :as events]
     [immersa.scene.core :as scene.core]
@@ -22,6 +29,8 @@
 (def icon-chat (r/adapt-react-class ChatCenteredText))
 (def icon-smiley (r/adapt-react-class SmileySticker))
 (def icon-control (r/adapt-react-class Command))
+(def icon-arrow-left (r/adapt-react-class ArrowFatLeft))
+(def icon-arrow-right (r/adapt-react-class ArrowFatRight))
 
 (defn- canvas []
   (r/create-class
@@ -38,6 +47,16 @@
       [:div
        {:id "canvas-container"
         :class (styles/canvas-container dimensions)}
+       (when @(subscribe [::subs/show-arrow-keys-text?])
+         [:div (styles/arrow-keys-text)
+          [:h1 "Use arrow keys to navigate"]
+          [:div
+           [icon-arrow-left {:size 32
+                             :color "white"
+                             :weight "bold"}]
+           [icon-arrow-right {:size 32
+                              :color "white"
+                              :weight "bold"}]]])
        [canvas]])))
 
 (defn- progress-bar-line []

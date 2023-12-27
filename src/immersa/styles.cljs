@@ -84,7 +84,13 @@
    :gap "10px"})
 
 (defclass current-slide-indicator []
-  {:font-weight "bold"
+  {:-webkit-touch-callout :none
+   :-webkit-user-select :none
+   :-khtml-user-select :none
+   :-moz-user-select :none
+   :-ms-user-select :none
+   :user-select :none
+   :font-weight "bold"
    :color "white"
    :padding-bottom "2px"})
 
@@ -92,3 +98,16 @@
   {:display :flex
    :flex-direction :row
    :gap "10px"})
+
+(defattrs arrow-keys-text []
+  {:display :flex
+   :flex-direction :column
+   :align-items :center
+   :justify-content :center
+   :color :white
+   :position :absolute
+   :font-family "Open Sans, sans-serif"
+   :top "65%"
+   :left "50%"
+   :transform "translate(-50%, -50%)"
+   :z-index 5})

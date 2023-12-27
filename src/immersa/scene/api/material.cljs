@@ -1,5 +1,6 @@
 (ns immersa.scene.api.material
   (:require
+    ["@babylonjs/core/Materials/Node/nodeMaterial" :refer [NodeMaterial]]
     ["@babylonjs/core/Materials/Textures/texture" :refer [Texture]]
     ["@babylonjs/core/Materials/effect" :refer [Effect]]
     ["@babylonjs/core/Materials/shaderMaterial" :refer [ShaderMaterial]]
@@ -72,3 +73,9 @@
                             (clj->js {:attributes attrs
                                       :uniforms uniforms}))]
     (api.core/add-node-to-db name sm opts)))
+
+(defn parse-from-json [json-str]
+  (j/call NodeMaterial :Parse (js/JSON.parse json-str)))
+
+(defn get-block-by-name [mat name]
+  (j/call mat :getBlockByName name))
