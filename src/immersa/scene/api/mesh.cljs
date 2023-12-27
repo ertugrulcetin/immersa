@@ -4,6 +4,7 @@
     ["@babylonjs/core/Meshes/meshBuilder" :refer [MeshBuilder]]
     ["earcut" :as earcut]
     [applied-science.js-interop :as j]
+    [immersa.scene.api.constant :as api.const]
     [immersa.scene.api.core :as api.core]
     [immersa.scene.font :as font])
   (:require-macros
@@ -38,6 +39,7 @@
 
 (defn sphere [name & {:keys [diameter
                              segments
+                             side-orientation
                              updatable?
                              arc
                              slice
@@ -45,25 +47,32 @@
                              position
                              rotation
                              scale
-                             mat]
+                             skybox?
+                             mat
+                             infinite-distance?]
                       :or {segments 32
                            diameter 1
                            arc 1
                            slice 1
-                           updatable? false}
+                           updatable? false
+                           side-orientation api.const/mesh-default-side}
                       :as opts}]
   (let [s (j/call MeshBuilder :CreateSphere name #js {:diameter diameter
                                                       :segments segments
                                                       :arc arc
                                                       :slice slice
-                                                      :updatable updatable?})]
-    (api.core/add-node-to-db name s opts)
+                                                      :updatable updatable?
+                                                      :sideOrientation side-orientation})]
+    (api.core/add-node-to-db name s (assoc opts :type (if skybox?
+                                                        :skybox
+                                                        :sphere)))
     (m/cond-doto s
       mat (j/assoc! :material mat)
       position (j/assoc! :position position)
       rotation (j/assoc! :rotation rotation)
       scale (api.core/scaling scale)
-      visibility (j/assoc! :visibility visibility))))
+      visibility (j/assoc! :visibility visibility)
+      (some? infinite-distance?) (j/assoc! :infiniteDistance infinite-distance?))))
 
 (defn capsule [name & {:keys [height radius visibility]
                        :as opts}]

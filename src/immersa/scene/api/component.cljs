@@ -34,11 +34,66 @@
     (j/call mat :setTexture "noiseTexture" (api.core/texture noise))
     (j/call mat :setFloat "dissolve" 0)
     (j/assoc! mat
-              :cullBackFaces false
+              :backFaceCulling false
               :skybox-path skybox1
               :default-skybox-path skybox1)
     (j/assoc! skybox :material mat)
     skybox))
+
+(defn create-sky-sphere []
+  (let [sky-sphere (api.mesh/sphere "sky-sphere"
+                                    :diameter 1000.0
+                                    :side-orientation api.const/mesh-double-side
+                                    :skybox? true
+                                    :infinite-distance? false)
+        mat (api.material/shader-mat "sky-sphere-mat"
+                                     :vertex (rc/inline "shader/gradient/vertex.glsl")
+                                     :fragment (rc/inline "shader/gradient/fragment.glsl")
+                                     :attrs ["position" "uv" "v_uv"]
+                                     :uniforms ["worldViewProjection"
+                                                "u_mixColor"
+                                                "u_mixColor1"
+                                                "u_mixScale"
+                                                "u_Time"
+                                                "u_mixSpeed"
+                                                "u_mixColor2"
+                                                "u_mixScale1"
+                                                "u_Time1"
+                                                "u_mixSpeed1"
+                                                "u_mixOffset"
+                                                "u_visibility"])
+        elapsed-time (atom 0)]
+    (doto mat
+      (j/call :setVector3 "u_mixColor" (v3 0.0 0.0 0.0))
+      (j/call :setVector3 "u_mixColor1" (v3 0.92 0.18 1.0))
+      (j/call :setVector3 "u_mixColor2" (v3 0.04 0.04 0.99))
+      (j/call :setVector2 "u_mixScale" (v2 2.25 2.75))
+      (j/call :setVector2 "u_mixScale1" (v2 2.79 2.55))
+      (j/call :setFloat "u_mixSpeed" 0.2)
+      (j/call :setFloat "u_mixSpeed1" 0.2)
+      (j/call :setFloat "u_Time" 0.0)
+      (j/call :setFloat "u_Time1" 0.0)
+      (j/call :setFloat "u_mixOffset" 1.0)
+      (j/call :setFloat "u_visibility" 0.0))
+    (api.core/register-before-render-fn "sky-sphere-before-render"
+                                        (fn []
+                                          (let [delta (api.core/get-delta-time)
+                                                elapsed-time (swap! elapsed-time + delta)]
+                                            (j/call mat :setFloat "u_Time" elapsed-time)
+                                            (j/call mat :setFloat "u_Time1" elapsed-time))))
+    (j/assoc! mat :backFaceCulling false)
+    (j/assoc! sky-sphere
+              :material mat
+              :visibility 0)))
+
+(comment
+  (create-sky-sphere)
+  (api.core/dispose "sky-sphere")
+
+
+  (j/call (api.core/get-object-by-name "sky-sphere-mat") :setFloat "u_visibility" 1)
+  (j/assoc! (api.core/get-object-by-name "sky-box") :visibility 0)
+  )
 
 (defn billboard [name & {:keys [text
                                 position

@@ -1,7 +1,9 @@
 (ns immersa.scene.api.constant
   (:require
+    ["@babylonjs/core/Materials/material" :refer [Material]]
     ["@babylonjs/core/Maths/math" :refer [Vector2 Vector3 Vector4]]
     ["@babylonjs/core/Maths/math.color" :refer [Color3]]
+    ["@babylonjs/core/Meshes/mesh" :refer [Mesh]]
     [applied-science.js-interop :as j]))
 
 (def v3-up (j/call Vector3 :Up))
@@ -32,3 +34,9 @@
 (def color-yellow (j/call Color3 :Yellow))
 
 (def coordinates-mode-skybox :SKYBOX_MODE)
+
+(def mesh-default-side (j/get Mesh :DEFAULTSIDE))
+(def mesh-double-side (j/get Mesh :DOUBLESIDE))
+
+(def mat-alpha-blend (j/get Material :MATERIAL_ALPHABLEND))
+(def mat-alpha-test-and-blend (j/get Material :ATERIAL_ALPHATESTANDBLEND))

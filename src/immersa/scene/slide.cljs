@@ -134,8 +134,9 @@
                         "immersa-text-2" {:type :text
                                           :alpha 0}}}
 
-                {:data {:skybox {:path "img/skybox/sunny/sunny"
-                                 :speed-factor 1}
+                {:data {:skybox {:gradient? true}
+                        #_{:path "img/skybox/sunny/sunny"
+                           :speed-factor 1}
                         "box" {:type :box
                                :position (v3 0 2 0)
                                :rotation (v3 1.2 2.3 4.1)
@@ -248,23 +249,23 @@
                                                     (= (.-keyCode e) 38)) (a/put! command-ch :prev)))))
     (go-loop [index -1]
       (let [command (a/<! command-ch)
-            next-index (case command
-                         :next (inc index)
-                         :prev (dec index))
+            current-index (case command
+                            :next (inc index)
+                            :prev (dec index))
             slides (get-slides)]
-        (if (and (>= next-index 0) (< next-index (count slides)))
-          (let [_ (notify-ui next-index (count slides))
-                slide (slides next-index)
+        (if (and (>= current-index 0) (< current-index (count slides)))
+          (let [_ (notify-ui current-index (count slides))
+                slide (slides current-index)
                 objects-data (:data slide)
                 object-names-from-slide-info (set (conj (keys (:data slide)) :camera))
                 _ (when (object-names-from-slide-info :camera)
                     (api.camera/update-active-camera))
                 object-names-from-objects (-> slide :objects keys)
                 objects-to-create (filter #(not (api.core/get-object-by-name %)) object-names-from-slide-info)
-                object-names-to-dispose (when (> next-index 0)
+                object-names-to-dispose (when (> current-index 0)
                                           (let [prev-slide (slides (if (= command :next)
-                                                                     (dec next-index)
-                                                                     (inc next-index)))
+                                                                     (dec current-index)
+                                                                     (inc current-index)))
                                                 prev-slide-object-names (-> prev-slide :data keys set)
                                                 current-slide-object-names (-> slide :data keys set)]
                                             (set/difference prev-slide-object-names current-slide-object-names #{:camera :skybox})))
@@ -303,10 +304,23 @@
                                                          :to max-fps})))
                                     {}
                                     (group-by first animations)))
-                dissolve-anim (run-skybox-dissolve-animation objects-data)
+                prev-and-gradient? (and (= :prev command)
+                                        (-> (:data (slides (inc current-index))) :skybox :gradient?))
+                skybox-dissolve-anim (when-not prev-and-gradient?
+                                       (run-skybox-dissolve-animation objects-data))
                 channels (mapv #(api.animation/begin-direct-animation %) animations-data)]
+            (some-> skybox-dissolve-anim a/<!)
+            (cond
+              (-> objects-data :skybox :gradient?)
+              (a/<! (api.animation/create-sky-sphere-dissolve-anim))
+
+              prev-and-gradient?
+              (do
+                (a/<! (api.animation/create-reverse-sky-sphere-dissolve-anim))
+                (some-> (run-skybox-dissolve-animation objects-data) a/<!)))
+
             (doseq [c channels]
               (a/<! c))
-            (some-> dissolve-anim a/<!)
-            (recur next-index))
+
+            (recur current-index))
           (recur index))))))

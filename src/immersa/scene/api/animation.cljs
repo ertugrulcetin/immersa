@@ -7,7 +7,8 @@
     [cljs.core.async :as a]
     [immersa.scene.api.camera :as api.camera]
     [immersa.scene.api.constant :as api.const]
-    [immersa.scene.api.core :as api.core :refer [v3]])
+    [immersa.scene.api.core :as api.core :refer [v3]]
+    [immersa.scene.api.material :as api.material])
   (:require-macros
     [immersa.scene.macros :as m]))
 
@@ -165,5 +166,43 @@
     (j/call mat :setTexture "skybox1" (api.core/cube-texture :root-url current-skybox-path))
     (j/call mat :setTexture "skybox2" (api.core/cube-texture :root-url skybox-path))
     (j/call mat :setFloat "dissolve" 0)
+    (api.core/register-before-render-fn dissolve-fn-name dissolve-fn)
+    p))
+
+(defn create-sky-sphere-dissolve-anim []
+  (let [p (a/promise-chan)
+        dissolve (atom 0)
+        dissolve-fn-name "dissolve-sky-sphere"
+        sphere (api.core/get-object-by-name "sky-sphere")
+        mat (api.core/get-object-by-name "sky-sphere-mat")
+        speed-factor 1
+        dissolve-fn (fn []
+                      (let [dissolve (swap! dissolve + (* (api.core/get-delta-time) speed-factor))]
+                        (if (<= dissolve 1.0)
+                          (j/call mat :setFloat "u_visibility" dissolve)
+                          (do
+                            (j/assoc! (api.core/get-object-by-name "sky-box") :visibility 0)
+                            (api.core/remove-before-render-fn dissolve-fn-name)
+                            (a/put! p true)))))]
+    (j/assoc! sphere :visibility 1)
+    (api.core/register-before-render-fn dissolve-fn-name dissolve-fn)
+    p))
+
+(defn create-reverse-sky-sphere-dissolve-anim []
+  (let [p (a/promise-chan)
+        dissolve (atom 1)
+        dissolve-fn-name "reverse-dissolve-sky-sphere"
+        sphere (api.core/get-object-by-name "sky-sphere")
+        mat (api.core/get-object-by-name "sky-sphere-mat")
+        speed-factor 1
+        dissolve-fn (fn []
+                      (let [dissolve (swap! dissolve - (* (api.core/get-delta-time) speed-factor))]
+                        (if (>= dissolve 0.0)
+                          (j/call mat :setFloat "u_visibility" dissolve)
+                          (do
+                            (j/assoc! (api.core/get-object-by-name "sky-box") :visibility 1)
+                            (j/assoc! sphere :visibility 0)
+                            (api.core/remove-before-render-fn dissolve-fn-name)
+                            (a/put! p true)))))]
     (api.core/register-before-render-fn dissolve-fn-name dissolve-fn)
     p))

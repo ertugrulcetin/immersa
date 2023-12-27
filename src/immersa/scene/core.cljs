@@ -13,9 +13,7 @@
     [immersa.scene.api.material :as api.material]
     [immersa.scene.api.mesh :as api.mesh]
     [immersa.scene.slide :as slide]
-    [re-frame.core :refer [dispatch]])
-  (:require-macros
-    [shadow.resource :as rc]))
+    [re-frame.core :refer [dispatch]]))
 
 (defn register-before-render []
   (let [delta (api.core/get-delta-time)]
@@ -58,7 +56,8 @@
                                          :width 50
                                          :height 50
                                          :mat ground-material)
-          sky-box (api.component/create-sky-box)]
+          _ (api.component/create-sky-box)
+          _ (api.component/create-sky-sphere)]
       ;; TODO add debounce here
       (common.utils/register-event-listener js/window "resize" #(j/call engine :resize))
       (j/assoc! light :intensity 0.7)
@@ -78,4 +77,7 @@
 
   (api.core/show-debug)
   (api.camera/reset-camera)
+
+  (restart-engine)
+
   (restart-engine :start-slide-show? false))

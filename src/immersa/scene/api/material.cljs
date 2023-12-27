@@ -77,5 +77,8 @@
 (defn parse-from-json [json-str]
   (j/call NodeMaterial :Parse (js/JSON.parse json-str)))
 
+(defn parse-from-snippet [id on-loaded]
+  (j/call (j/call NodeMaterial :ParseFromSnippetAsync id) :then on-loaded))
+
 (defn get-block-by-name [mat name]
   (j/call mat :getBlockByName name))
