@@ -135,6 +135,11 @@
                                           :alpha 0}}}
 
                 {:data {:skybox {:gradient? true}
+                        "text-dots" {:type :pcs-text
+                                     :text "     Welcome to \n\n\n\n\n\n\nImmersive Journey"
+                                     :point-size 5
+                                     :position (v3 -4.5 0 0)
+                                     :color api.const/color-white}
                         #_{:path "img/skybox/sunny/sunny"
                            :speed-factor 1}
                         "box" {:type :box
@@ -308,7 +313,13 @@
                                         (-> (:data (slides (inc current-index))) :skybox :gradient?))
                 skybox-dissolve-anim (when-not prev-and-gradient?
                                        (run-skybox-dissolve-animation objects-data))
-                channels (mapv #(api.animation/begin-direct-animation %) animations-data)]
+                channels (mapv #(api.animation/begin-direct-animation %) animations-data)
+                direct-animations (keep
+                                    (fn [object-name]
+                                      (let [object-slide-info (get-in slide [:data object-name])]
+                                        (when (#{:pcs-text} (:type object-slide-info))
+                                          (api.animation/pcs-text-anim object-name object-slide-info))))
+                                    object-names-from-slide-info)]
             (some-> skybox-dissolve-anim a/<!)
             (cond
               (-> objects-data :skybox :gradient?)
@@ -320,6 +331,9 @@
                 (some-> (run-skybox-dissolve-animation objects-data) a/<!)))
 
             (doseq [c channels]
+              (a/<! c))
+
+            (doseq [c direct-animations]
               (a/<! c))
 
             (recur current-index))

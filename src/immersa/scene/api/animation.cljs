@@ -206,3 +206,87 @@
                             (a/put! p true)))))]
     (api.core/register-before-render-fn dissolve-fn-name dissolve-fn)
     p))
+
+(defn pcs-text-anim [name & {:keys [text
+                                    duration
+                                    position
+                                    font-size
+                                    point-size
+                                    sample-factor
+                                    simplify-threshold
+                                    down-scale
+                                    fps
+                                    color
+                                    rand-range
+                                    font
+                                    delay
+                                    type]
+                             :or {point-size 1
+                                  font-size 120
+                                  down-scale 100
+                                  sample-factor 0.25
+                                  simplify-threshold 0
+                                  rand-range [-10 10]
+                                  fps 30
+                                  duration 2.0
+                                  font :big-caslon}}]
+  (let [p (a/promise-chan)
+        font (api.core/get-p5-font font)
+        points (j/call font :textToPoints text 0 0 font-size #js {:sampleFactor sample-factor
+                                                                  :simplifyThreshold simplify-threshold})
+        pcs (api.core/pcs name :point-size point-size)]
+    (doseq [p points]
+      (api.core/add-points pcs 1 (fn [particle]
+                                   (j/assoc! particle
+                                             :position (v3 (/ (j/get p :x) down-scale)
+                                                           (/ (- (j/get p :y)) down-scale)
+                                                           0)
+                                             :color (or color
+                                                        (api.core/color (js/Math.random)
+                                                                        (js/Math.random)
+                                                                        (js/Math.random)))))))
+    (api.core/build-mesh-async
+      pcs
+      (fn [mesh]
+        (some->> position (j/assoc! mesh :position))
+        (let [end-positions (j/call mesh :getPositionData)
+              end-positions-len (j/get end-positions :length)
+              points-count (/ end-positions-len 3)
+              [rand1 rand2] rand-range
+              init-positions (into-array
+                               (map
+                                 (fn [_]
+                                   (api.core/rand-range rand1 rand2))
+                                 (range end-positions-len)))
+              new-positions (js/Array. end-positions-len)
+              interpolate-factor #js {:value 0}
+              anim (animation (str name "-pcs-morph-animation")
+                              :target-prop "value"
+                              :from 0
+                              :to 1
+                              :duration duration
+                              :fps fps
+                              :data-type api.const/animation-type-float
+                              :loop-mode api.const/animation-loop-cons
+                              :easing (cubic-ease api.const/easing-ease-in-out))]
+          (api.core/register-before-render-fn
+            (str name "-pcs-morph-before-render")
+            (fn []
+              (let [inter (j/get interpolate-factor :value)]
+                (doseq [p (range 0 points-count)]
+                  (doseq [axis (range 0 3)]
+                    (let [index (+ (* 3 p) axis)
+                          start-value (j/get init-positions index)
+                          end-value (j/get end-positions index)]
+                      (j/assoc! new-positions index (api.core/lerp start-value end-value inter))))))
+              (api.core/update-vertices-data mesh new-positions)))
+          (begin-direct-animation
+            :delay delay
+            :target interpolate-factor
+            :animations anim
+            :from 0
+            :to (* fps duration)
+            :on-animation-end (fn []
+                                (a/put! p true)
+                                (api.core/remove-before-render-fn (str name "-pcs-morph-before-render")))))))
+    p))

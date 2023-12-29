@@ -2,7 +2,6 @@
   (:require
     ["@babylonjs/core/Materials/Textures/cubeTexture" :refer [CubeTexture]]
     [applied-science.js-interop :as j]
-    [immersa.scene.api.animation :as api.animation]
     [immersa.scene.api.constant :as api.const]
     [immersa.scene.api.constant :as api.const]
     [immersa.scene.api.core :as api.core :refer [v2 v3 v4]]
@@ -87,15 +86,6 @@
     (j/assoc! sky-sphere
               :material mat
               :visibility 0)))
-
-(comment
-  (create-sky-sphere)
-  (api.core/dispose "sky-sphere")
-
-
-  (j/call (api.core/get-object-by-name "sky-sphere-mat") :setFloat "u_visibility" 1)
-  (j/assoc! (api.core/get-object-by-name "sky-box") :visibility 0)
-  )
 
 (defn billboard [name & {:keys [text
                                 position
@@ -252,68 +242,3 @@
                                                                       (j/call engine :getRenderWidth)
                                                                       (j/call engine :getRenderHeight)))))]
     (api.core/add-node-to-db name pcs (assoc opts :type :pcs))))
-
-(defn create-pcs-text [])
-
-(comment
-  (let [font (api.core/get-p5-font :big-caslon)
-        points (j/call font :textToPoints "     Welcome to the \n\n\n\n\n\n\nImmersive Experience"
-                       0 0 120 #js {:sampleFactor 0.25
-                                    :simplifyThreshold 0})
-        pcs (api.core/pcs "pcs" :point-size 5)
-        down-scale 100]
-    (doseq [p points]
-      (api.core/add-points
-        pcs
-        1
-        (fn [particle]
-          (j/assoc! particle
-                    :position (v3 (/ (j/get p :x) down-scale)
-                                  (/ (- (j/get p :y)) down-scale)
-                                  0)
-                    :color (api.core/color (js/Math.random) (js/Math.random) (js/Math.random))))))
-    (api.core/build-mesh-async
-      pcs
-      (fn [mesh]
-        (j/assoc-in! mesh [:position :x] -5)
-        (let [end-positions (j/call mesh :getPositionData)
-              end-positions-len (j/get end-positions :length)
-              points-count (/ end-positions-len 3)
-              init-positions (into-array
-                               (map
-                                 (fn [_]
-                                   (api.core/rand-range -10 10))
-                                 (range end-positions-len)))
-              new-positions (js/Array. end-positions-len)
-              interpolate-factor #js {:value 0}
-              anim (api.animation/animation "pcs-morph"
-                                            :target-prop "value"
-                                            :from 0
-                                            :to 1
-                                            :duration 2.0
-                                            :fps 60
-                                            :data-type api.const/animation-type-float
-                                            :loop-mode api.const/animation-loop-cons
-                                            :easing (api.animation/cubic-ease api.const/easing-ease-in-out))]
-          (api.animation/begin-direct-animation
-            :target interpolate-factor
-            :animations anim
-            :from 0
-            :to (* 60 2.0)
-            :on-animation-end (fn [] (api.core/remove-before-render-fn "pcs-morph")))
-          (api.core/register-before-render-fn
-            "pcs-morph"
-            (fn []
-              (let [inter (j/get interpolate-factor :value)]
-                (doseq [p (range 0 points-count)]
-                  (doseq [axis (range 0 3)]
-                    (let [index (+ (* 3 p) axis)
-                          start-value (j/get init-positions index)
-                          end-value (j/get end-positions index)]
-                      (j/assoc! new-positions index (api.core/lerp start-value end-value inter))))))
-              (api.core/update-vertices-data mesh new-positions)
-              ))
-          )
-        ))
-    )
-  )

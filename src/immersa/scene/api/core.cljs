@@ -361,7 +361,7 @@
                    :or {point-size 1}
                    :as opts}]
   (let [pcs (PointsCloudSystem. name point-size)]
-    (add-node-to-db name pcs opts)))
+    (add-node-to-db name pcs (assoc opts :type :pcs))))
 
 (defn add-points [pcs n f]
   (j/call pcs :addPoints n f))
