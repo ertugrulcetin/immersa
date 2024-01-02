@@ -201,7 +201,6 @@
                    ;(Math/abs (Math/sin (/ elapsed 5)))
                    )
               z (+ (j/get origin :z) (* r (Math/sin elapsed)))]
-          ;(println y)
           (j/assoc! position :x x)
           (j/assoc! position :y y)
           (j/assoc! position :z z)
