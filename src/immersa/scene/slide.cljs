@@ -20,14 +20,22 @@
         start-pos (j/get object :position)
         end-pos (:position object-slide-info)]
     (cond
+      (and start-pos end-pos (vector? end-pos))
+      [object-name (api.animation/create-multiple-position-animation {:start start-pos
+                                                                      :end end-pos
+                                                                      :duration (:duration object-slide-info)
+                                                                      :delay (:delay object-slide-info)})]
+
       (and start-pos end-pos (not (api.core/equals? start-pos end-pos)))
       [object-name (api.animation/create-position-animation {:start start-pos
                                                              :end end-pos
+                                                             :duration (:duration object-slide-info)
                                                              :delay (:delay object-slide-info)})]
 
       (and (= object-name :camera) (not (api.core/equals? start-pos (j/get object :init-position))))
       [object-name (api.animation/create-position-animation {:start start-pos
                                                              :end (api.core/clone (j/get object :init-position))
+                                                             :duration (:duration object-slide-info)
                                                              :delay (:delay object-slide-info)})])))
 
 (defn- get-rotation-anim [object-slide-info object-name]
@@ -61,6 +69,17 @@
                                                           :end end-alpha
                                                           :delay (:delay object-slide-info)})])))
 
+(defn get-target-anim [object-slide-info object-name]
+  (when (and object-slide-info (= object-name :camera))
+    (let [camera (api.camera/active-camera)
+          start (j/call camera :getTarget)
+          target (:target object-slide-info)]
+      (when (and start target (not (api.core/equals? start target)))
+        [object-name (api.animation/create-camera-target-anim {:camera camera
+                                                               :target target
+                                                               :duration (:duration object-slide-info)
+                                                               :delay (:delay object-slide-info)})]))))
+
 (defn- get-animations-from-slide-info [acc object-slide-info object-name]
   (reduce
     (fn [acc anim-type]
@@ -69,7 +88,8 @@
                                               :rotation (get-rotation-anim object-slide-info object-name)
                                               :visibility (get-visibility-anim object-slide-info object-name)
                                               :alpha (get-alpha-anim object-slide-info object-name)
-                                              :focus (api.animation/create-focus-camera-anim object-slide-info))]
+                                              :focus (api.animation/create-focus-camera-anim object-slide-info)
+                                              :target (get-target-anim object-slide-info object-name))]
         (cond-> acc
           (and (not= anim-type :focus) anim-vec)
           (conj anim-vec)
@@ -77,7 +97,7 @@
           (and (= anim-type :focus) anim-vec)
           (conj [object-name (first anim)] [object-name (second anim)]))))
     acc
-    [:position :rotation :visibility :alpha :focus]))
+    [:position :rotation :visibility :alpha :focus :target]))
 
 (defn- notify-ui [index slides-count]
   (dispatch [::events/update-slide-info index slides-count]))
@@ -133,24 +153,32 @@
                                   :visibility 1}
                         "image" {:type :image
                                  :path "img/texture/gg.png"
-                                 :radius 0.2
                                  :visibility 0}
                         "world" {:type :earth
                                  :position (v3 0 2.5 -7.5)
                                  :visibility 1}}}
 
-                {:data {:skybox {:gradient? true
+                {:data {:camera {:position (v3 0 2 -1)
+                                 :duration 4
+                                 :delay 100}
+                        :skybox {:gradient? true
                                  :speed-factor 1.0}
                         "text-dots" {:type :pcs-text
                                      :text "     Welcome to \n\n\n\n\n\n\nImmersive Journey"
                                      :visibility 1
                                      :point-size 5
-                                     :position (v3 -4.5 0 0)
+                                     :position (v3 -4.5 1 9)
                                      :color api.const/color-white}
                         "image" {:visibility 1
+                                 :position (v3 0 3 9)
                                  :delay 1000}
                         "particle-cycle" {:type :particle
-                                          :target-stop-duration 2}
+                                          :duration 3
+                                          :position [(v3 -2 0.5 -6)
+                                                     (v3 -5 0.5 0)
+                                                     (v3 5 0.5 5)
+                                                     (v3 0 0 8)]
+                                          :target-stop-duration 2.2}
                         #_{:path "img/skybox/sunny/sunny"
                            :speed-factor 1}
                         "box" {:type :box
@@ -158,8 +186,9 @@
                                :rotation (v3 1.2 2.3 4.1)
                                :visibility 0}}}
 
-                {:data {:camera {:focus "box"
-                                 :type :left}
+                {:data {:camera {:focus "image"
+                                 :type :right}
+                        "image" {:visibility 1}
                         "billboard-1" {:type :billboard
                                        :position (v3 3 2.3 0)
                                        :text "❖ 3D Immersive Experience\n\n❖ Web-Based Accessibility\n\n❖ AI-Powered Features"
@@ -185,17 +214,18 @@
                                       :width 3
                                       :height 3
                                       :font-size 30
-                                      :visibility 1}
-                        "image" {:visibility 0}}}
+                                      :visibility 1}}}
 
                 {:data {:camera {:position (v3 0 0 50)}
                         "enjoy-text" {:visibility 0}}}]
         slides-vec (vec (map-indexed #(assoc %2 :index %1) slides))
         props-to-copy [:type :position :rotation :visibility]
         clone-if-exists (fn [data]
-                          (cond-> data
-                            (:position data) (assoc :position (api.core/clone (:position data)))
-                            (:rotation data) (assoc :rotation (api.core/clone (:rotation data)))))]
+                          (let [position (:position data)]
+                            (cond-> data
+                              (vector? position) (assoc :position (mapv api.core/clone (:position data)))
+                              (and position (not (vector? position))) (assoc :position (api.core/clone (:position data)))
+                              (:rotation data) (assoc :rotation (api.core/clone (:rotation data))))))]
     (reduce
       (fn [slides-vec slide]
         (let [prev-slide-data (get-in slides-vec [(dec (:index slide)) :data])
@@ -451,7 +481,7 @@
                                 (api.core/get-advanced-texture)
                                 (api.gui/text-block name params))
                         :image (api.component/image name params)
-                        :particle (api.particle/circle-move name params)
+                        :particle (api.particle/sparkles name params)
                         :billboard (api.component/billboard name params)
                         nil)))
                 animations (reduce
@@ -465,6 +495,7 @@
                                     (fn [acc name animations]
                                       (let [animations (mapv second animations)
                                             delay (first (keep (j/get :delay) animations))
+                                            duration (first (keep (j/get :duration) animations))
                                             max-fps (apply max (map (j/get :framePerSecond) animations))
                                             target (api.core/get-object-by-name name)]
                                         (if target
@@ -472,7 +503,7 @@
                                                            :animations animations
                                                            :delay delay
                                                            :from 0
-                                                           :to max-fps})
+                                                           :to (* max-fps duration)})
                                           acc)))
                                     {}
                                     (group-by first animations)))

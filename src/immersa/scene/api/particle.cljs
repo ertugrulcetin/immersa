@@ -123,9 +123,13 @@
 (defn reset [ps]
   (j/call ps :reset))
 
-(defn circle-move [name & {:keys [position
-                                  target-stop-duration]
-                           :or {position (v3 0 0 0)}}]
+(defn sparkles [name & {:keys [position
+                               radius
+                               target-stop-duration
+                               speed-factor]
+                        :or {position (v3 0 0 0)
+                             radius 1
+                             speed-factor 4}}]
   (let [emitter-position (v3 0 0 0)
         before-render-fn (str name "-circle-move-before-render")
         ps (create-particle-system name
@@ -153,16 +157,14 @@
     (api.core/register-before-render-fn
       before-render-fn
       (fn []
-        (let [speed-factor 4
-              elapsed (* speed-factor (api.core/get-elapsed-time))
+        (let [elapsed (* speed-factor (api.core/get-elapsed-time))
               position (j/get ps :position)
-              r 1
-              x (+ (j/get position :x) (* r (Math/cos elapsed)))
+              x (+ (j/get position :x) #_(* radius (Math/cos elapsed)))
               y (+ (j/get position :y)
-                   (Math/sin (/ elapsed 5))
+                   #_(Math/sin (/ elapsed 5))
                    ;; (Math/abs (Math/sin (/ elapsed 5)))
                    )
-              z (+ (j/get position :z) (* r (Math/sin elapsed)))]
+              z (+ (j/get position :z) #_(* radius (Math/sin elapsed)))]
           (j/assoc! emitter-position :x x)
           (j/assoc! emitter-position :y y)
           (j/assoc! emitter-position :z z))))

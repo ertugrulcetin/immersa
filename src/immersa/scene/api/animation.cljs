@@ -32,6 +32,7 @@
                                     {:frame (* duration fps) :value to}]))
         anim (Animation. name target-prop fps (j/get Animation data-type) (j/get Animation loop-mode))]
     (m/cond-doto anim
+      duration (j/assoc! :duration duration)
       delay (j/assoc! :delay delay)
       easing (j/call :setEasingFunction easing)
       keys (j/call :setKeys (clj->js keys)))))
@@ -67,17 +68,40 @@
       (f))
     p))
 
-(defn create-position-animation [{:keys [start end duration delay]
-                                  :or {duration 1.0}}]
-  (animation "position-animation"                           ;
-             :target-prop "position"
-             :duration duration
-             :delay delay                                   ;
-             :from start
-             :to end
-             :data-type api.const/animation-type-v3
-             :loop-mode api.const/animation-loop-cons
-             :easing (cubic-ease api.const/easing-ease-in-out)))
+(defn create-position-animation [{:keys [start end duration delay]}]
+  (let [duration (or duration 1.0)]
+    (animation "position-animation"                         ;
+               :target-prop "position"
+               :duration duration
+               :delay delay                                 ;
+               :from start
+               :to end
+               :data-type api.const/animation-type-v3
+               :loop-mode api.const/animation-loop-cons
+               :easing (cubic-ease api.const/easing-ease-in-out))))
+
+(defn create-multiple-position-animation [{:keys [start end duration delay fps]
+                                           :or {duration 1.0
+                                                fps 30}}]
+  (let [from {:frame 0 :value start}
+        n-positions (count end)
+        keys (vec
+               (cons
+                 from
+                 (map
+                   (fn [frame value]
+                     {:frame frame :value value})
+                   (rest (take (inc n-positions) (iterate (partial + (/ (* fps duration) n-positions)) 0)))
+                   end)))]
+    (animation "multiple-position-animation"
+               :target-prop "position"
+               :fps fps
+               :duration duration
+               :delay delay
+               :keys keys
+               :data-type api.const/animation-type-v3
+               :loop-mode api.const/animation-loop-cons
+               :easing (cubic-ease api.const/easing-ease-in-out))))
 
 (defn create-rotation-animation [{:keys [start end duration delay]
                                   :or {duration 1.0}}]
@@ -115,6 +139,18 @@
              :loop-mode api.const/animation-loop-cons
              :easing (cubic-ease api.const/easing-ease-in-out)))
 
+(defn create-camera-target-anim [{:keys [camera target duration delay]
+                                  :or {duration 1.0}}]
+  (animation "camera-target-anim"
+             :delay delay
+             :target-prop "target"
+             :duration duration
+             :from (j/call camera :getTarget)
+             :to target
+             :data-type api.const/animation-type-v3
+             :loop-mode api.const/animation-loop-cons
+             :easing (cubic-ease api.const/easing-ease-in-out)))
+
 (defn create-focus-camera-anim [object-slide-info]
   (when-let [object-name (:focus object-slide-info)]
     (let [object (api.core/get-object-by-name object-name)
@@ -131,7 +167,6 @@
           easing-function (cubic-ease api.const/easing-ease-in-out)
           position-animation (animation "camera-position-anim"
                                         :delay (:delay object-slide-info)
-                                        :fps 60
                                         :target-prop "position"
                                         :from (j/get camera :position)
                                         :to final-position
@@ -140,7 +175,6 @@
                                         :easing easing-function)
           target-animation (animation "camera-target-anim"
                                       :delay (:delay object-slide-info)
-                                      :fps 60
                                       :target-prop "target"
                                       :from (j/call camera :getTarget)
                                       :to (case focus-type

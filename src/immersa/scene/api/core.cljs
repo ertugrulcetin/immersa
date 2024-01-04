@@ -81,6 +81,9 @@
   ([x y z w]
    (Vector4. x y z w)))
 
+(defn v3? [v]
+  (instance? Vector3 v))
+
 (defn clone [obj]
   (j/call obj :clone))
 
