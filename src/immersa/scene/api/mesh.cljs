@@ -6,6 +6,7 @@
     [applied-science.js-interop :as j]
     [immersa.scene.api.constant :as api.const]
     [immersa.scene.api.core :as api.core :refer [v3]]
+    [immersa.scene.api.material :as api.material]
     [immersa.scene.font :as font])
   (:require-macros
     [immersa.scene.macros :as m]))
@@ -177,10 +178,12 @@
                            depth
                            visibility
                            position
+                           emissive-color
                            mat]
                     :or {size 1
                          resolution 8
-                         depth 1.0}
+                         depth 1.0
+                         mat (api.material/standard-mat (str name "-mat"))}
                     :as opts}]
   (let [text (j/call MeshBuilder :CreateText name
                      text
@@ -192,6 +195,8 @@
                      nil
                      earcut)]
     (api.core/add-node-to-db name text (assoc opts :type :text3D))
+    (cond-> mat
+      emissive-color (j/assoc! :emissiveColor emissive-color))
     (cond-> text
       mat (j/assoc! :material mat)
       visibility (j/assoc! :visibility visibility)

@@ -98,19 +98,33 @@
                                 color
                                 scale
                                 resolution-scale
+                                font-size
                                 font-weight
+                                font-family
+                                rect-width
                                 rect-height
                                 rect-corner-radius
-                                rect-background]
+                                rect-background
+                                padding-left
+                                horizontal-alignment
+                                thickness]
                          :or {width 1.2
                               height 1
                               scale 1
                               resolution-scale 5
+                              font-size 100
+                              font-family "Bellefair,serif"
                               color "white"
-                              rect-height "2500px"
-                              rect-corner-radius 500
-                              rect-background "rgba(128, 128, 128, 0.4)"}}]
-  (let [plane (api.mesh/plane name
+                              rect-height 1
+                              rect-width 3
+                              rect-corner-radius 100
+                              thickness 0
+                              horizontal-alignment api.const/gui-horizontal-align-center
+                              ;; rect-background "rgba(128, 128, 128, 0.4)"
+                              }}]
+  (let [rect-height (/ 1 resolution-scale)
+        rect-width (/ 3 resolution-scale)
+        plane (api.mesh/plane name
                               :width width
                               :height height
                               :position position
@@ -122,15 +136,18 @@
         gui (api.gui/create-for-mesh plane :width (* resolution-scale 1024) :height (* resolution-scale 1024))
         text (api.gui/text-block (str name "-text-block")
                                  :text text
-                                 :font-size-in-pixels (* 60 resolution-scale)
+                                 :font-size (* font-size resolution-scale)
+                                 :font-family font-family
                                  :text-wrapping api.const/gui-text-wrapping-word-wrap
-                                 :text-horizontal-alignment api.const/gui-horizontal-align-left
-                                 :padding-left (* 50 resolution-scale)
+                                 :text-horizontal-alignment horizontal-alignment
+                                 :padding-left (some-> padding-left (* resolution-scale))
                                  :color color
                                  :font-weight font-weight)
         rect (api.gui/rectangle (str name "-rect")
-                                :corner-radius rect-corner-radius
+                                :corner-radius (* resolution-scale rect-corner-radius)
+                                :width rect-width
                                 :height rect-height
+                                :thickness thickness
                                 :background rect-background)]
     (api.core/add-prop-to-db name :children [plane gui text rect])
     (api.gui/add-control gui rect)
@@ -214,7 +231,8 @@
                          "u_spd_modifier_1" "u_noise_amp_2" "u_noise_freq_2"
                          "u_spd_modifier_2"])
         pcs (api.core/point-cloud-system
-              (str name "-wave-pcs")
+              name
+              :type :wave
               :point-count (* width resolution)
               :on-add-point (fn [particle i]
                               (let [x (- (/ (* (mod i resolution) width) resolution) (/ width 2))
@@ -244,7 +262,7 @@
               (j/call mat :setVector2 "u_resolution" (api.core/set-v2 temp-v2
                                                                       (j/call engine :getRenderWidth)
                                                                       (j/call engine :getRenderHeight)))))]
-    (api.core/add-node-to-db name pcs (assoc opts :type :pcs))))
+    pcs))
 
 (defn image [name & {:keys [path
                             position

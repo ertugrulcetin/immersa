@@ -83,69 +83,58 @@
   (dispatch [::events/update-slide-info index slides-count]))
 
 (defn get-slides []
-  (let [slides [{:data {"immersa-text" {:type :text
+  (let [slides [{:data {"wave" {:type :wave}
+                        "immersa-text" {:type :billboard
+                                        :position (v3)
                                         :text "IMMERSA"
-                                        :font-size 72
-                                        :font-family "Bellefair,serif"
-                                        :line-spacing "10px"
-                                        :alpha 0
-                                        :color "white"
-                                        :text-horizontal-alignment api.const/gui-horizontal-align-center
-                                        :text-vertical-alignment api.const/gui-vertical-align-center}
+                                        :scale 4
+                                        :visibility 0}
                         "world" {:type :earth
                                  :position (v3 0 -0.7 -9.5)
                                  :visibility 0}}}
-                {:data {"immersa-text" {:type :text
-                                        :alpha 1}
+                {:data {"wave" {:type :wave}
+                        "immersa-text" {:type :billboard
+                                        :visibility 1}
                         "world" {:type :earth
-                                 :position (v3 0 -0.7 -8.5)}
+                                 :position (v3 0 -0.7 -8.5)
+                                 :visibility 1}
                         "world-cloud-sphere" {:visibility 1}
                         "world-earth-sphere" {:visibility 1}
-                        "immersa-text-2" {:type :text
+                        "immersa-text-2" {:type :billboard
+                                          :position (v3 0 -0.8 -7.5)
                                           :text "A 3D Presentation Tool for the Web"
-                                          :font-size 72
-                                          :font-family "Bellefair,serif"
-                                          :line-spacing "10px"
-                                          :alpha 0
-                                          :color "white"
-                                          :text-horizontal-alignment api.const/gui-horizontal-align-center
-                                          :text-vertical-alignment api.const/gui-vertical-align-center
-                                          :padding-top "75%"}}}
-                {:data {"immersa-text-dim" {:type :text
-                                            :text "We added a new dimension to your presentations"
-                                            :font-size 72
-                                            :font-family "Bellefair,serif"
-                                            :line-spacing "10px"
-                                            :alpha 0
-                                            :color "white"
-                                            :text-horizontal-alignment api.const/gui-horizontal-align-center
-                                            :text-vertical-alignment api.const/gui-vertical-align-top
-                                            :padding-top "10%"}
-                        "immersa-text-2" {:type :text
-                                          :alpha 1}
+                                          :scale 1
+                                          :width 3
+                                          :height 3
+                                          :font-size 35
+                                          :visibility 0}}}
+                {:data {"wave" {:type :wave}
+                        "immersa-text-2" {:type :billboard
+                                          :text "A 3D Presentation Tool for the Web"
+                                          :visibility 1}
                         "world" {:type :earth
-                                 :position (v3 0 0 -7.5)}}}
+                                 :position (v3 0 0 -7.5)
+                                 :visibility 1}
+                        "text-3" {:type :text3D
+                                  :text "A new dimension to your presentations"
+                                  :depth 0.001
+                                  :emissive-color api.const/color-white
+                                  :size 0.5
+                                  :position (v3 0 0 5)
+                                  :visibility 0}}}
                 {:data {:camera {:position (v3 0 2 -10)}
                         :skybox {:path "img/skybox/space/space"
                                  :speed-factor 0.5}
                         "text-3" {:type :text3D
-                                  :text "Hello, world!"
-                                  :depth 0.5
+                                  :position (v3 0 0 0)
                                   :visibility 1}
                         "image" {:type :image
                                  :path "img/texture/gg.png"
                                  :radius 0.2
                                  :visibility 0}
                         "world" {:type :earth
-                                 :position (v3 0 2 -7.5)}
-                        "immersa-text-dim" {:type :text
-                                            :alpha 1}
-                        "box" {:type :box
-                               :position (v3 2 0 0)
-                               :rotation (v3 0 2.4 0)
-                               :visibility 0.5}
-                        "immersa-text-2" {:type :text
-                                          :alpha 0}}}
+                                 :position (v3 0 2.5 -7.5)
+                                 :visibility 1}}}
 
                 {:data {:skybox {:gradient? true
                                  :speed-factor 1.0}
@@ -164,7 +153,7 @@
                         "box" {:type :box
                                :position (v3 0 2 0)
                                :rotation (v3 1.2 2.3 4.1)
-                               :visibility 1}}}
+                               :visibility 0}}}
 
                 {:data {:camera {:focus "box"
                                  :type :left}
@@ -187,19 +176,17 @@
                 {:data {:camera {:position (v3 0 0 -10)
                                  :rotation (v3 0 0 0)}}}
 
-                {:data {"immersa-text-3" {:type :text
-                                          :text "✦ Enjoy the Immersive Experience ✦"
-                                          :font-size 72
-                                          :font-family "Bellefair,serif"
-                                          :line-spacing "10px"
-                                          :alpha 1
-                                          :color "white"
-                                          :text-horizontal-alignment api.const/gui-horizontal-align-center
-                                          :text-vertical-alignment api.const/gui-vertical-align-center}
+                {:data {"enjoy-text" {:type :billboard
+                                      :text "✦ Enjoy the Immersive Experience ✦"
+                                      :scale 5
+                                      :width 3
+                                      :height 3
+                                      :font-size 30
+                                      :visibility 1}
                         "image" {:visibility 0}}}
 
                 {:data {:camera {:position (v3 0 0 50)}
-                        "immersa-text-3" {:alpha 0}}}]
+                        "enjoy-text" {:visibility 0}}}]
         slides-vec (vec (map-indexed #(assoc %2 :index %1) slides))
         props-to-copy [:type :position :rotation :visibility]
         clone-if-exists (fn [data]
@@ -307,7 +294,7 @@
         pcs (j/get mesh :pcs)
         visibility (j/get mesh :visibility)
         duration 0.5
-        to (* 30 1.0)]
+        to (* 30 duration)]
     (api.animation/begin-direct-animation
       :target mesh
       :animations (api.animation/create-visibility-animation {:start visibility
@@ -317,6 +304,22 @@
       :on-animation-end (fn []
                           (api.core/dispose mesh)
                           (api.core/dispose pcs)))))
+
+(defmethod disable-component :wave [name]
+  (let [pcs (api.core/get-object-by-name name)
+        mesh (j/get pcs :mesh)
+        visibility (j/get mesh :visibility)
+        duration 0.5
+        to (* 30 duration)]
+    (api.animation/begin-direct-animation
+      :target mesh
+      :animations (api.animation/create-visibility-animation {:start visibility
+                                                              :end 0
+                                                              :duration duration})
+      :to to
+      :on-animation-end (fn []
+                          (api.core/dispose mesh)
+                          (api.core/dispose name)))))
 
 (defmethod disable-component :particle [name]
   (let [ps (api.core/get-object-by-name name)]
@@ -351,11 +354,14 @@
 (defmethod enable-component :text3D [name]
   (enable-mesh-component name))
 
+(defmethod enable-component :wave [name]
+  (when-not (api.core/get-object-by-name name)
+    (api.component/wave name)))
+
 (defmethod enable-component :default [name]
   (println "enable-component Default: " name))
 
 (defn start-slide-show []
-  (api.component/wave "sine")
   (let [command-ch (a/chan (a/dropping-buffer 1))
         slide-controls (js/document.getElementById "slide-controls")
         prev-button (j/get-in slide-controls [:children 0])
@@ -400,13 +406,14 @@
                     (api.camera/update-active-camera))
                 object-names-from-objects (-> slide :objects keys)
                 objects-to-create (filter #(not (api.core/get-object-by-name %)) object-names-from-slide-info)
-                object-names-to-dispose (when (> current-index 0)
-                                          (let [prev-slide (slides (if (= command :next)
-                                                                     (dec current-index)
-                                                                     (inc current-index)))
-                                                prev-slide-object-names (-> prev-slide :data keys set)
-                                                current-slide-object-names (-> slide :data keys set)]
-                                            (set/difference prev-slide-object-names current-slide-object-names #{:camera :skybox})))
+                current-slide-object-names (-> slide :data keys set)
+                [prev-slide-object-names object-names-to-dispose] (when (> current-index 0)
+                                                                    (let [prev-slide (slides (if (= command :next)
+                                                                                               (dec current-index)
+                                                                                               (inc current-index)))
+                                                                          prev-slide-object-names (-> prev-slide :data keys set)]
+                                                                      [prev-slide-object-names
+                                                                       (set/difference prev-slide-object-names current-slide-object-names #{:camera :skybox})]))
 
                 _ (doseq [name object-names-to-dispose]
                     (disable-component name))
@@ -415,6 +422,7 @@
                           type (:type params)
                           params (dissoc params :type)]
                       (case type
+                        :wave (api.component/wave name)
                         :box (api.component/create-box-with-numbers name params)
                         :earth (api.component/earth name params)
                         :text3D (api.mesh/text name params)
@@ -451,7 +459,9 @@
                                         (-> (:data (slides (inc current-index))) :skybox :gradient?))
                 skybox-dissolve-anim (when-not prev-and-gradient?
                                        (run-skybox-dissolve-animation objects-data))
-                _ (doseq [name (map first animations)]
+                _ (doseq [name (set/difference current-slide-object-names
+                                               object-names-to-dispose
+                                               (set prev-slide-object-names))]
                     (enable-component name))
                 channels (mapv #(api.animation/begin-direct-animation %) animations-data)
                 pcs-animations (keep

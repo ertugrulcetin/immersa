@@ -23,11 +23,15 @@
 
 (defn rectangle [name & {:keys [corner-radius
                                 background
-                                height]
+                                width
+                                height
+                                thickness]
                          :as opts}]
   (let [rect (Rectangle. name)]
     (api.core/add-node-to-db name rect opts)
     (m/cond-doto rect
+      thickness (j/assoc! :thickness thickness)
+      width (j/assoc! :width width)
       height (j/assoc! :height height)
       corner-radius (j/assoc! :cornerRadius corner-radius)
       background (j/assoc! :background background))))
