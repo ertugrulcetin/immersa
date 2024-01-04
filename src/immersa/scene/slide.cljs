@@ -260,7 +260,7 @@
         earth-sphere-visibility (j/get earth-sphere :visibility)
         cloud-sphere-visibility (j/get cloud-sphere :visibility)
         duration 0.5
-        to (* 30 1.0)]
+        to (* 30 duration)]
     (j/call hl :removeMesh cloud-sphere)
     (api.animation/begin-direct-animation
       :target earth-sphere
@@ -329,18 +329,33 @@
 (defmethod disable-component :default [name]
   (println "dispose-component Default: " name))
 
-(defmulti enable-component (comp keyword api.core/get-object-type-by-name))
+(defmulti enable-component (fn [name _]
+                             (-> name api.core/get-object-type-by-name keyword)))
 
 (defn- enable-mesh-component [name]
   (api.core/set-enabled (api.core/get-object-by-name name) true))
 
-(defmethod enable-component :earth [name]
+(defmethod enable-component :earth [name slide-info]
   (let [hl (j/get-in api.core/db [:nodes name :hl])
         earth-sphere (api.core/get-object-by-name (str name "-earth-sphere"))
-        cloud-sphere (api.core/get-object-by-name (str name "-cloud-sphere"))]
+        cloud-sphere (api.core/get-object-by-name (str name "-cloud-sphere"))
+        duration 0.5
+        to (* 30 duration)]
     (api.core/set-enabled earth-sphere true)
     (api.core/set-enabled cloud-sphere true)
-    (j/call hl :addMesh cloud-sphere (api.core/color 0.3 0.74 0.94))))
+    (j/call hl :addMesh cloud-sphere (api.core/color 0.3 0.74 0.94))
+    (api.animation/begin-direct-animation
+      :target earth-sphere
+      :animations (api.animation/create-visibility-animation {:start (j/get earth-sphere :visibility)
+                                                              :end (:visibility slide-info)
+                                                              :duration duration})
+      :to to)
+    (api.animation/begin-direct-animation
+      :target cloud-sphere
+      :animations (api.animation/create-visibility-animation {:start (j/get cloud-sphere :visibility)
+                                                              :end (:visibility slide-info)
+                                                              :duration duration})
+      :to to)))
 
 (defmethod enable-component :box [name]
   (enable-mesh-component name))
@@ -462,7 +477,7 @@
                 _ (doseq [name (set/difference current-slide-object-names
                                                object-names-to-dispose
                                                (set prev-slide-object-names))]
-                    (enable-component name))
+                    (enable-component name (get-in slide [:data name])))
                 channels (mapv #(api.animation/begin-direct-animation %) animations-data)
                 pcs-animations (keep
                                  (fn [object-name]
