@@ -180,7 +180,8 @@
                            position
                            rotation
                            emissive-color
-                           mat]
+                           mat
+                           hl-color]
                     :or {size 1
                          resolution 8
                          depth 1.0
@@ -195,6 +196,10 @@
                           :sideOrientation api.const/mesh-double-side}
                      nil
                      earcut)]
+    (when hl-color
+      (let [hl (api.core/highlight-layer (str name "-hl"))
+            [r g b] hl-color]
+        (j/call hl :addMesh text (api.core/color r g b))))
     (api.core/add-node-to-db name text (assoc opts :type :text3D))
     (cond-> mat
       emissive-color (j/assoc! :emissiveColor emissive-color))
@@ -203,3 +208,45 @@
       visibility (j/assoc! :visibility visibility)
       position (j/assoc! :position position)
       rotation (j/assoc! :rotation rotation))))
+
+(defn glb->mesh [name & {:keys [path
+                                position
+                                rotation
+                                scale]}]
+  (let [m (api.core/clone (j/get-in api.core/db [:models path]))]
+    (m/cond-doto m
+      position (j/assoc! :position position)
+      rotation (j/assoc! :rotation rotation)
+      scale (api.core/scaling scale))
+    (api.core/add-node-to-db name m {:type :glb})
+    (api.core/set-enabled m true)))
+
+(comment
+
+  (glb->mesh "a" {:type :glb
+                  :path "model/plane.glb"
+                  :position (v3 1 1 1)
+                  :rotation (v3 -0.25 Math/PI -0.4)
+                  })
+
+  (api.core/dispose "text-dots" "t2" "t" "2d-slide-text-2")
+  (text "t"
+        {:type :text3D
+         :text "From 2D clarity to..."
+         :depth 0.001
+         :emissive-color api.const/color-white
+         :size 0.215
+         :position (v3 0 2.65 5)
+         :visibility 1})
+
+  (text "t2"
+        {:type :text3D
+         :text "3D Immersion with Immersa"
+         :depth 0.1
+         ;:emissive-color api.const/color-white
+         :size 0.2
+         :position (v3 0 2.65 5)
+         :hl-color [1 1 1]
+         ;:rotation (v3 (/ js/Math.PI 2) 0 0)
+         :visibility 1})
+  )

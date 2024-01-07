@@ -332,5 +332,19 @@
             :to (* fps duration)
             :on-animation-end (fn []
                                 (a/put! p true)
+                                (api.core/update-vertices-data mesh end-positions)
                                 (api.core/remove-before-render-fn (str name "-pcs-morph-before-render")))))))
     p))
+
+(comment
+  (api.core/dispose (api.core/get-object-by-name "text-dots"))
+  (pcs-text-anim "text-dots"
+                 {:type :pcs-text
+                  :text "      Welcome to the\n\n\n\n\n\n\n\nFuture of Presentation"
+                  :visibility 1
+                  :duration 0.0
+                  :point-size 5
+                  :rand-range [-10 20]
+                  :position (v3 -5.5 1 9)
+                  :color api.const/color-white})
+  )

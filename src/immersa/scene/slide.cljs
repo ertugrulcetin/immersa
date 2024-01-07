@@ -32,7 +32,14 @@
                                                              :duration (:duration object-slide-info)
                                                              :delay (:delay object-slide-info)})]
 
-      (and (= object-name :camera) (not (api.core/equals? start-pos (j/get object :init-position))))
+      ;; TODO handle here
+      (and (= object-name :camera) start-pos end-pos (not (api.core/equals? start-pos end-pos)))
+      [object-name (api.animation/create-position-animation {:start start-pos
+                                                             :end end-pos
+                                                             :duration (:duration object-slide-info)
+                                                             :delay (:delay object-slide-info)})]
+
+      (and (= object-name :camera) (not end-pos) (not (api.core/equals? start-pos (j/get object :init-position))))
       [object-name (api.animation/create-position-animation {:start start-pos
                                                              :end (api.core/clone (j/get object :init-position))
                                                              :duration (:duration object-slide-info)
@@ -159,43 +166,75 @@
                                  :visibility 1}}}
 
                 {:data {:camera {:position (v3 0 2 -1)
-                                 :duration 4
+                                 :duration 3
                                  :delay 100}
                         :skybox {:path "img/skybox/space/space"}
                         #_#_:skybox {:gradient? true
-                                 :speed-factor 1.0}
+                                     :speed-factor 1.0}
                         "text-dots" {:type :pcs-text
-                                     :text "     Welcome to \n\n\n\n\n\n\nImmersive Journey"
+                                     :text "      Welcome to the\n\n\n\n\n\n\n\nFuture of Presentation"
                                      :visibility 1
+                                     :duration 1.5
                                      :point-size 5
-                                     :position (v3 -4.5 1 9)
+                                     :rand-range [-10 20]
+                                     :position (v3 -5.5 1 9)
                                      :color api.const/color-white}
-                        "image" {:visibility 1
-                                 :position (v3 0 3 9)
-                                 :delay 1000}
                         "particle-cycle" {:type :particle
-                                          :duration 3
+                                          :duration 2
                                           :position [(v3 -2 0.5 -6)
                                                      (v3 -5 0.5 0)
                                                      (v3 5 0.5 5)
                                                      (v3 0 0 8)]
-                                          :target-stop-duration 2.2}
-                        #_{:path "img/skybox/sunny/sunny"
-                           :speed-factor 1}
+                                          :target-stop-duration 1.5}
+                        "2d-slide-text-1" {:type :text3D
+                                           :text "From 2D clarity to..."
+                                           :depth 0.001
+                                           :emissive-color api.const/color-white
+                                           :size 0.215
+                                           :position (v3 0 2.65 5)
+                                           :visibility 0}
+                        "2d-slide-text-2" {:type :text3D
+                                           :text "3D IMMERSION"
+                                           :depth 0.1
+                                           :size 0.35
+                                           :position (v3 0 1.53 9.1)
+                                           :hl-color [1 1 1]
+                                           :visibility 0}
+                        "2d-slide" {:type :image
+                                    :path "img/texture/2d-slide.png"
+                                    :scale 3.7
+                                    :position (v3 0 1 9)
+                                    :rotation (v3)
+                                    :visibility 0}
                         "box" {:type :box
                                :position (v3 0 2 0)
                                :rotation (v3 1.2 2.3 4.1)
                                :visibility 0}}}
 
-                {:data {:camera {:focus "image"
-                                 :type :right}
-                        "image" {:visibility 1}
-                        "billboard-1" {:type :billboard
-                                       :position (v3 3 2.3 0)
-                                       :text "❖ 3D Immersive Experience\n\n❖ Web-Based Accessibility\n\n❖ AI-Powered Features"
-                                       :scale 2
-                                       :font-weight "bold"
-                                       :visibility 1}}}
+                {:data {:camera {:position (v3 0 2 -1)}
+                        :skybox {:path "img/skybox/space/space"}
+                        "2d-slide" {:visibility 1}
+                        "2d-slide-text-1" {:visibility 1}
+                        "2d-slide-text-2" {:visibility 0}
+                        "plane" {:type :glb
+                                 :path "model/plane.glb"
+                                 :position (v3 0 -1 50)
+                                 :rotation (v3 0 Math/PI 0)}}}
+
+                {:data {:camera {:position (v3 0 2 -1)}
+                        :skybox {:path "img/skybox/space/space"}
+                        ;; "2d-slide-text-1" {}
+                        "2d-slide-text-2" {:position (v3 0 1.75 5)
+                                           :visibility 1}
+                        "2d-slide" {:visibility 0
+                                    :rotation (v3 (/ js/Math.PI 2) 0 0)}
+                        "plane" {:type :glb
+                                 :position (v3 0 5 -2)
+                                 :rotation (v3 -0.25 Math/PI 0)
+                                 :duration 2}}}
+
+                {:data {:camera {:position (v3 0 2 -1)}
+                        :skybox {:path "img/skybox/space/space"}}}
 
                 {:data {:camera {:focus "box"
                                  :type :right}
@@ -323,6 +362,9 @@
 (defmethod disable-component :text3D [name]
   (disable-mesh-component-via-visibility name))
 
+(defmethod disable-component :glb [name]
+  (api.core/set-enabled (api.core/get-object-by-name name) false))
+
 (defmethod disable-component :pcs-text [name]
   (let [mesh (api.core/get-object-by-name name)
         pcs (j/get mesh :pcs)
@@ -403,6 +445,9 @@
 (defmethod enable-component :text3D [name _]
   (enable-mesh-component name))
 
+(defmethod enable-component :glb [name _]
+  (enable-mesh-component name))
+
 (defmethod enable-component :wave [name _]
   (when-not (api.core/get-object-by-name name)
     (api.component/wave name)))
@@ -449,6 +494,7 @@
                             :next (inc index)
                             :prev (dec index))
             slides (get-slides)]
+        ;; (cljs.pprint/pprint slides)
         (if (and (>= current-index 0) (< current-index (count slides)))
           (let [_ (notify-ui current-index (count slides))
                 slide (slides current-index)
@@ -474,6 +520,7 @@
                           type (:type params)
                           params (dissoc params :type)]
                       (case type
+                        :glb (api.mesh/glb->mesh name params)
                         :wave (api.component/wave name)
                         :box (api.component/create-box-with-numbers name params)
                         :earth (api.component/earth name params)

@@ -26,6 +26,7 @@
     ["p5" :as p5]
     [applied-science.js-interop :as j]
     [cljs.core.async :as a]
+    [clojure.string :as str]
     [immersa.scene.api.assets :refer [assets]])
   (:require-macros
     [immersa.scene.macros :as m]))
@@ -360,13 +361,21 @@
 (defn add-cube-texture-task [name url]
   (j/call-in db [:assets-manager :addCubeTextureTask] name url))
 
+(defn add-mesh-task [name meshes-names url]
+  (let [task (j/call-in db [:assets-manager :addMeshTask] name meshes-names url)]
+    (j/assoc! task :onSuccess (fn [task]
+                                (let [mesh (j/get-in task [:loadedMeshes 0])]
+                                  (set-enabled mesh false)
+                                  (j/assoc-in! db [:models url] mesh))))))
+
 (defn load-async []
   (let [p (a/promise-chan)]
     (doseq [[type assets] assets]
       (doseq [[index path] (map-indexed vector assets)]
         (case type
           :textures (add-texture-task (str "texture-" index) path)
-          :cube-textures (add-cube-texture-task (str "cube-texture-" index) path))))
+          :cube-textures (add-cube-texture-task (str "cube-texture-" index) path)
+          :models (add-mesh-task (str "mesh-" index) "" path))))
     (j/call (j/call-in db [:assets-manager :loadAsync]) :then #(a/put! p true))
     p))
 

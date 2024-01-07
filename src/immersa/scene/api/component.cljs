@@ -270,16 +270,19 @@
                             visibility
                             scale
                             radius
-                            billboard-mode]}]
+                            billboard-mode
+                            transparent?]
+                     :or {transparent? false}}]
   (let [texture (api.core/texture path)
         {:keys [width height]} (j/lookup (j/call texture :getSize))
         width (/ width height)
         height 1
-        mat (api.material/standard-mat (str name "-image-mat")
-                                       :diffuse-texture texture
-                                       :opacity-texture texture
-                                       :emissive-color api.const/color-white
-                                       :has-alpha? true)
+        mat (api.material/standard-mat
+              (str name "-image-mat")
+              (cond-> {:diffuse-texture texture
+                       :emissive-color api.const/color-white}
+                transparent? (assoc :opacity-texture texture
+                                    :has-alpha? transparent?)))
         opts {:width width
               :height height
               :radius radius
