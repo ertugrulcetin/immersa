@@ -248,19 +248,47 @@
                         "plane" {:type :glb
                                  :path "model/plane.glb"
                                  :position (v3 0 -1 50)
-                                 :rotation (v3 0 Math/PI 0)}}}
+                                 :rotation (v3 0 Math/PI 0)}
+
+                        "3d-slide-text-1" {:type :text3D
+                                           :text "$2.3B\n(TOM)"
+                                           :depth 0.1
+                                           :size 0.25
+                                           :position (v3 -1.5 1.5 5)
+                                           :hl-color [0.99 0.8 1]
+                                           :visibility 0}
+                        "3d-slide-text-2" {:type :text3D
+                                           :text "$242.9M\n  (SAM)"
+                                           :depth 0.1
+                                           :size 0.25
+                                           :position (v3 0 1.5 5)
+                                           :hl-color [0.9 0.8 0.4]
+                                           :visibility 0}
+                        "3d-slide-text-3" {:type :text3D
+                                           :text "$15M\n(SOM)"
+                                           :depth 0.1
+                                           :size 0.25
+                                           :position (v3 1.5 1.5 5)
+                                           :hl-color [0.9 0.88 0.88]
+                                           :visibility 0}}}
 
                 {:data {:camera {:position (v3 0 2 -1)
-                                 :rotation [(v3 (/ Math/PI -8) 0 0)
+                                 :rotation [(v3 (/ Math/PI -7) 0 0)
                                             (v3)]
                                  :duration 3.5
                                  :delay 1250}
                         :skybox {:path "img/skybox/space/space"}
                         ;; "2d-slide-text-1" {}
-                        "2d-slide-text-2" {:position (v3 0 1.75 5)
+                        "2d-slide-text-2" {:position (v3 0 2.75 5)
                                            :visibility 1}
                         "2d-slide" {:visibility 0
                                     :rotation (v3 (/ js/Math.PI 2) 0 0)}
+                        "3d-slide-text-1" {:visibility 1
+                                           :delay 3000}
+                        "3d-slide-text-2" {:visibility 1
+                                           :delay 3000}
+                        "3d-slide-text-3" {:visibility 1
+                                           :delay 3000}
                         "plane" {:type :glb
                                  :position (v3 0 5 -10)
                                  :rotation (v3 -0.25 Math/PI 0.15)

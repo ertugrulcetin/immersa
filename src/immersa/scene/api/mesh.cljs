@@ -229,14 +229,32 @@
                   :rotation (v3 -0.25 Math/PI -0.4)
                   })
 
-  (api.core/dispose "text-dots" "t2" "t" "2d-slide-text-2")
+  (api.core/dispose "text-dots" "t2" "t" "2d-slide-text-2" "2d-slide")
   (text "t"
         {:type :text3D
-         :text "From 2D clarity to..."
-         :depth 0.001
-         :emissive-color api.const/color-white
-         :size 0.215
-         :position (v3 0 2.65 5)
+         :text "$2.3B\n(TOM)"
+         :depth 0.1
+         :size 0.25
+         :position (v3 -1.5 1.75 5)
+         :hl-color [0.99 0.8 1]
+         :visibility 1})
+
+  (text "t-2"
+        {:type :text3D
+         :text "$242.9M\n  (SAM)"
+         :depth 0.1
+         :size 0.25
+         :position (v3 0 1.75 5)
+         :hl-color [0.9 0.8 0.4]
+         :visibility 1})
+
+  (text "t-3"
+        {:type :text3D
+         :text "$15M\n(SOM)"
+         :depth 0.1
+         :size 0.25
+         :position (v3 1.5 1.75 5)
+         :hl-color [0.9 0.88 0.88]
          :visibility 1})
 
   (text "t2"
