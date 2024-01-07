@@ -115,6 +115,29 @@
              :loop-mode api.const/animation-loop-cons
              :easing (cubic-ease api.const/easing-ease-in-out)))
 
+(defn create-multiple-rotation-animation [{:keys [start end duration delay fps]
+                                           :or {duration 1.0
+                                                fps 30}}]
+  (let [from {:frame 0 :value start}
+        n-positions (count end)
+        keys (vec
+               (cons
+                 from
+                 (map
+                   (fn [frame value]
+                     {:frame frame :value value})
+                   (rest (take (inc n-positions) (iterate (partial + (/ (* fps duration) n-positions)) 0)))
+                   end)))]
+    (animation "multiple-rotation-animation"
+               :target-prop "rotation"
+               :fps fps
+               :duration duration
+               :delay delay
+               :keys keys
+               :data-type api.const/animation-type-v3
+               :loop-mode api.const/animation-loop-cons
+               :easing (cubic-ease api.const/easing-ease-in-out))))
+
 (defn create-visibility-animation [{:keys [start end duration delay]
                                     :or {duration 1.0}}]
   (animation "visibility-animation"
@@ -150,6 +173,30 @@
              :data-type api.const/animation-type-v3
              :loop-mode api.const/animation-loop-cons
              :easing (cubic-ease api.const/easing-ease-in-out)))
+
+(defn create-multiple-target-animation [{:keys [camera target duration delay fps]
+                                         :or {duration 1.0
+                                              fps 30}}]
+  (let [from {:frame 0 :value (j/call camera :getTarget)}
+        n-positions (count target)
+        keys (vec
+               (cons
+                 from
+                 (map
+                   (fn [frame value]
+                     {:frame frame :value value})
+                   (rest (take (inc n-positions) (iterate (partial + (/ (* fps duration) n-positions)) 0)))
+                   target)))]
+    (cljs.pprint/pprint keys)
+    (animation "multiple-camera-target-anim"
+               :target-prop "target"
+               :fps fps
+               :duration duration
+               :delay delay
+               :keys keys
+               :data-type api.const/animation-type-v3
+               :loop-mode api.const/animation-loop-cons
+               :easing (cubic-ease api.const/easing-ease-in-out))))
 
 (defn create-focus-camera-anim [object-slide-info]
   (when-let [object-name (:focus object-slide-info)]

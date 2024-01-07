@@ -50,15 +50,37 @@
         start-rotation (j/get object :rotation)
         end-rotation (:rotation object-slide-info)]
     (cond
-      (and start-rotation end-rotation (not (api.core/equals? start-rotation end-rotation)))
+      (and (not= object-name :camera)
+           start-rotation
+           end-rotation
+           (not (vector? end-rotation))
+           (not (api.core/equals? start-rotation end-rotation)))
       [object-name (api.animation/create-rotation-animation {:start start-rotation
                                                              :end end-rotation
+                                                             :duration (:duration object-slide-info)
                                                              :delay (:delay object-slide-info)})]
 
-      (and (= object-name :camera) (not (api.core/equals? start-rotation (j/get object :init-rotation))))
+      (and (not= object-name :camera)
+           start-rotation
+           end-rotation
+           (vector? end-rotation)
+           (not (api.core/equals? start-rotation end-rotation)))
+      [object-name (api.animation/create-multiple-rotation-animation {:start start-rotation
+                                                                      :end end-rotation
+                                                                      :duration (:duration object-slide-info)
+                                                                      :delay (:delay object-slide-info)})]
+
+      (and (= object-name :camera) (not end-rotation) (not (api.core/equals? start-rotation (j/get object :init-rotation))))
       [object-name (api.animation/create-rotation-animation {:start start-rotation
                                                              :end (api.core/clone (j/get object :init-rotation))
-                                                             :delay (:delay object-slide-info)})])))
+                                                             :duration (:duration object-slide-info)
+                                                             :delay (:delay object-slide-info)})]
+
+      (and (= object-name :camera) (vector? end-rotation))
+      [object-name (api.animation/create-multiple-rotation-animation {:start start-rotation
+                                                                      :end end-rotation
+                                                                      :duration (:duration object-slide-info)
+                                                                      :delay (:delay object-slide-info)})])))
 
 (defn- get-visibility-anim [object-slide-info object-name]
   (let [end-visibility (:visibility object-slide-info)
@@ -81,11 +103,18 @@
     (let [camera (api.camera/active-camera)
           start (j/call camera :getTarget)
           target (:target object-slide-info)]
-      (when (and start target (not (api.core/equals? start target)))
+      (cond
+        (and start target (not (vector? target)) (not (api.core/equals? start target)))
         [object-name (api.animation/create-camera-target-anim {:camera camera
                                                                :target target
                                                                :duration (:duration object-slide-info)
-                                                               :delay (:delay object-slide-info)})]))))
+                                                               :delay (:delay object-slide-info)})]
+
+        (and start target (vector? target))
+        [object-name (api.animation/create-multiple-target-animation {:camera camera
+                                                                      :target target
+                                                                      :duration (:duration object-slide-info)
+                                                                      :delay (:delay object-slide-info)})]))))
 
 (defn- get-animations-from-slide-info [acc object-slide-info object-name]
   (reduce
@@ -221,7 +250,11 @@
                                  :position (v3 0 -1 50)
                                  :rotation (v3 0 Math/PI 0)}}}
 
-                {:data {:camera {:position (v3 0 2 -1)}
+                {:data {:camera {:position (v3 0 2 -1)
+                                 :rotation [(v3 (/ Math/PI -8) 0 0)
+                                            (v3)]
+                                 :duration 3.5
+                                 :delay 1250}
                         :skybox {:path "img/skybox/space/space"}
                         ;; "2d-slide-text-1" {}
                         "2d-slide-text-2" {:position (v3 0 1.75 5)
@@ -229,9 +262,10 @@
                         "2d-slide" {:visibility 0
                                     :rotation (v3 (/ js/Math.PI 2) 0 0)}
                         "plane" {:type :glb
-                                 :position (v3 0 5 -2)
-                                 :rotation (v3 -0.25 Math/PI 0)
-                                 :duration 2}}}
+                                 :position (v3 0 5 -10)
+                                 :rotation (v3 -0.25 Math/PI 0.15)
+                                 :delay 750
+                                 :duration 4}}}
 
                 {:data {:camera {:position (v3 0 2 -1)}
                         :skybox {:path "img/skybox/space/space"}}}
@@ -261,11 +295,20 @@
         slides-vec (vec (map-indexed #(assoc %2 :index %1) slides))
         props-to-copy [:type :position :rotation :visibility]
         clone-if-exists (fn [data]
-                          (let [position (:position data)]
+                          (let [position (:position data)
+                                rotation (:rotation data)]
                             (cond-> data
-                              (vector? position) (assoc :position (mapv api.core/clone (:position data)))
-                              (and position (not (vector? position))) (assoc :position (api.core/clone (:position data)))
-                              (:rotation data) (assoc :rotation (api.core/clone (:rotation data))))))]
+                              (vector? position)
+                              (assoc :position (mapv api.core/clone (:position data)))
+
+                              (and position (not (vector? position)))
+                              (assoc :position (api.core/clone (:position data)))
+
+                              (vector? rotation)
+                              (assoc :rotation (mapv api.core/clone (:rotation data)))
+
+                              (and rotation (not (vector? rotation)))
+                              (assoc :rotation (api.core/clone (:rotation data))))))]
     (reduce
       (fn [slides-vec slide]
         (let [prev-slide-data (get-in slides-vec [(dec (:index slide)) :data])
