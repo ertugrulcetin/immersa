@@ -1,6 +1,5 @@
 (ns immersa.scene.core
   (:require
-    ["/immersa/vendor/pixels"]
     [applied-science.js-interop :as j]
     [cljs.core.async :as a]
     [goog.functions :as functions]
