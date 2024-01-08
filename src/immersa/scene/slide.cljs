@@ -183,8 +183,8 @@
                 {:data {:camera {:position (v3 0 2 -1)
                                  :duration 3
                                  :delay 100}
-                        ;:skybox {:path "img/skybox/space/space"}
-                        :skybox {:gradient? true
+                        :skybox {:path "img/skybox/space/space"}
+                        #_#_:skybox {:gradient? true
                                      :speed-factor 1.0}
                         "text-dots" {:type :pcs-text
                                      :text "      Welcome to the\n\n\n\n\n\n\n\nFuture of Presentation"
