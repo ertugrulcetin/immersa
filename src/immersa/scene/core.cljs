@@ -2,10 +2,10 @@
   (:require
     [applied-science.js-interop :as j]
     [cljs.core.async :as a]
+    [cljs.core.async :as a :refer [go-loop <!]]
     [goog.functions :as functions]
     [immersa.common.utils :as common.utils]
     [immersa.events :as events]
-    [cljs.core.async :as a :refer [go-loop <!]]
     [immersa.scene.api.camera :as api.camera]
     [immersa.scene.api.component :as api.component]
     [immersa.scene.api.constant :as api.const]
@@ -109,7 +109,7 @@
                   (a/put! p true)))))]
     p))
 
-;;TODO check OffscreenCanvas support
+;; TODO check OffscreenCanvas support
 (defn- start-background-lighting [engine]
   (when (j/get js/window :Worker)
     (let [worker (js/Worker. "js/worker/worker.js")
@@ -118,19 +118,20 @@
       (a/put! color-ch #js[0 0 0])
       (j/assoc! worker :onmessage #(a/put! color-ch (j/get % :data)))
       (go-loop []
-               (let [{:keys [pixels width height]} (<! (read-pixels engine))
-                     color (<! color-ch)
-                     new-color (api.core/color (j/get color 0) (j/get color 1) (j/get color 2))
-                     _ (<! (lerp-colors @prev-color new-color))]
-                 (reset! prev-color new-color)
-                 (j/call worker :postMessage #js[pixels width height])
-                 (<! (a/timeout 500))
-                 (recur))))))
+        (let [{:keys [pixels width height]} (<! (read-pixels engine))
+              color (<! color-ch)
+              new-color (api.core/color (j/get color 0) (j/get color 1) (j/get color 2))
+              _ (when-not (api.core/equals? @prev-color new-color)
+                  (<! (lerp-colors @prev-color new-color)))]
+          (reset! prev-color new-color)
+          (j/call worker :postMessage #js[pixels width height])
+          (<! (a/timeout 500))
+          (recur))))))
 
 (defn when-scene-ready [engine scene start-slide-show?]
-  ;(api.core/clear-scene-color api.const/color-white)
+  ;; (api.core/clear-scene-color api.const/color-white)
   ;; (api.core/clear-scene-color (api.core/color-rgb 239 239 239))
-  ;(api.core/clear-scene-color api.const/color-black)
+  ;; (api.core/clear-scene-color api.const/color-black)
   (j/assoc-in! (api.core/get-object-by-name "sky-box") [:rotation :y] js/Math.PI)
   (api.gui/advanced-dynamic-texture)
   (j/call scene :registerBeforeRender (fn [] (register-before-render)))

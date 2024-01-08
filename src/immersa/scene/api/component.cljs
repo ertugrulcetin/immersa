@@ -164,9 +164,9 @@
         texture (api.core/texture "img/texture/numbers.jpg")
         mat (api.material/standard-mat "mat" :diffuse-texture texture)]
     (api.mesh/box name (assoc params
-                         :face-uv face-uv
-                         :wrap? true
-                         :mat mat))))
+                              :face-uv face-uv
+                              :wrap? true
+                              :mat mat))))
 
 (defn earth [name & {:keys [position visibility] :as opts}]
   (let [mat (api.material/standard-mat (str name "-mat")
@@ -281,8 +281,8 @@
               (str name "-image-mat")
               (cond-> {:diffuse-texture texture
                        :emissive-color api.const/color-white}
-                      transparent? (assoc :opacity-texture texture
-                                          :has-alpha? transparent?)))
+                transparent? (assoc :opacity-texture texture
+                                    :has-alpha? transparent?)))
         opts {:width width
               :height height
               :radius radius
