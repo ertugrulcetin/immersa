@@ -3,7 +3,8 @@
 (def assets
   {:cube-textures #{"img/skybox/sunny/sunny"
                     "img/skybox/space/space"
-                    "img/skybox/black/black"}
+                    "img/skybox/black/black"
+                    "img/skybox/background/background"}
    :textures #{"img/texture/noise/ac.jpg"
                "img/texture/numbers.jpg"
                "img/texture/pp.jpeg"

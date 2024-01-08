@@ -202,7 +202,7 @@
                                                      (v3 0 0 8)]
                                           :target-stop-duration 1.5}
                         "2d-slide-text-1" {:type :text3D
-                                           :text "From 2D clarity to..."
+                                           :text "From 2D Clarity to..."
                                            :depth 0.001
                                            :emissive-color api.const/color-white
                                            :size 0.215
@@ -253,7 +253,7 @@
                                            :hl-blur 0.5
                                            :visibility 0}
                         "3d-slide-text-3" {:type :text3D
-                                           :text "$1.78B\n(SOM)"
+                                           :text "$1.78B\n (SOM)"
                                            :depth 0.1
                                            :size 0.25
                                            :position (v3 1.5 1.5 5)
@@ -532,7 +532,6 @@
                                   (api.core/get-objects-by-type "wave")))
     (api.camera/reset-camera)
     (api.camera/detach-control (api.camera/active-camera))
-    (common.utils/remove-element-listeners)
     (common.utils/register-event-listener prev-button "click"
                                           (fn [e]
                                             (when-not (j/get e :repeat)

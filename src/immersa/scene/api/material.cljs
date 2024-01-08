@@ -1,5 +1,6 @@
 (ns immersa.scene.api.material
   (:require
+    ["@babylonjs/core/Materials/Background/backgroundMaterial" :refer [BackgroundMaterial]]
     ["@babylonjs/core/Materials/Node/nodeMaterial" :refer [NodeMaterial]]
     ["@babylonjs/core/Materials/Textures/texture" :refer [Texture]]
     ["@babylonjs/core/Materials/effect" :refer [Effect]]
@@ -75,6 +76,25 @@
                             (clj->js {:attributes attrs
                                       :uniforms uniforms}))]
     (api.core/add-node-to-db name sm opts)))
+
+(defn background-mat [name & {:keys [reflection-texture
+                                     primary-color]
+                              :as opts}]
+  (let [bm (BackgroundMaterial. name)]
+    (cond-> bm
+      reflection-texture (j/assoc! :reflectionTexture reflection-texture)
+      true (j/assoc-in! [:reflectionTexture :coordinatesMode] (j/get Texture :SKYBOX_MODE))
+      true (j/assoc-in! [:reflectionTexture :gammaSpace] false)
+      true (j/assoc! :enableNoise true)
+      true (j/assoc! :useRGBColor false)
+      primary-color (j/assoc! :primaryColor primary-color))
+    (api.core/add-node-to-db name bm opts)))
+
+(comment
+  (let [mat (background-mat "background-mat"
+                            :reflection-texture (api.core/cube-texture :root-url "img/skybox/background/background")
+                            :primary-color (api.core/color 1 0 0))]
+    (j/assoc! (api.core/get-object-by-name "sky-box") :material mat)))
 
 (defn parse-from-json [json-str]
   (j/call NodeMaterial :Parse (js/JSON.parse json-str)))

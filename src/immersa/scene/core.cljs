@@ -2,6 +2,7 @@
   (:require
     [applied-science.js-interop :as j]
     [cljs.core.async :as a]
+    [goog.functions :as functions]
     [immersa.common.utils :as common.utils]
     [immersa.events :as events]
     [immersa.scene.api.camera :as api.camera]
@@ -120,8 +121,8 @@
                                          :mat ground-material)
           _ (api.component/create-sky-box)
           _ (api.component/create-sky-sphere)]
-      ;; TODO add debounce here
-      (common.utils/register-event-listener js/window "resize" #(j/call engine :resize))
+      (common.utils/remove-element-listeners)
+      (common.utils/register-event-listener js/window "resize" (functions/debounce #(j/call engine :resize) 250))
       (j/assoc! light :intensity 0.7)
       (j/call free-camera :setTarget (v3))
       (j/call free-camera :attachControl canvas false)
@@ -134,6 +135,9 @@
   (start-scene (js/document.getElementById "renderCanvas") :start-slide-show? start-slide-show?))
 
 (comment
+  (common.utils/register-event-listener js/window "resize" #(do
+                                                              (println "resized!")
+                                                              ))
 
   (j/call (api.camera/active-camera) :attachControl (api.core/canvas) true)
 

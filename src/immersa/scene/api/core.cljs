@@ -366,7 +366,12 @@
     (j/assoc! task :onSuccess (fn [task]
                                 (let [mesh (j/get-in task [:loadedMeshes 0])]
                                   (set-enabled mesh false)
-                                  (j/assoc-in! db [:models url] mesh))))))
+                                  (j/assoc-in! db [:models url] mesh)))
+              :onError (fn [task]
+                         (let [meshes (j/get task :loadedMeshes)]
+                           (when (and meshes (> (j/get meshes :length) 0))
+                             (js/console.warn "Failed meshes: " meshes)
+                             (j/call meshes :forEach dispose)))))))
 
 (defn load-async []
   (let [p (a/promise-chan)]

@@ -218,20 +218,24 @@
                                 rotation
                                 scale]}]
   (let [m (api.core/clone (j/get-in api.core/db [:models path]))]
+    (api.core/add-node-to-db name m {:type :glb})
     (m/cond-doto m
       position (j/assoc! :position position)
       rotation (j/assoc! :rotation rotation)
       scale (api.core/scaling scale))
-    (api.core/add-node-to-db name m {:type :glb})
-    (api.core/set-enabled m true)))
+    (api.core/set-enabled m true)
+    m))
 
 (comment
 
-  (glb->mesh "a" {:type :glb
-                  :path "model/plane.glb"
-                  :position (v3 1 1 1)
-                  :rotation (v3 -0.25 Math/PI -0.4)
-                  })
+  (let [m (glb->mesh "a" {:type :glb
+                        :path "model/plane.glb"
+                        :position (v3 1 1 1)
+                        :rotation (v3 -0.25 Math/PI -0.4)
+                        })
+        mat (api.material/standard-mat "mat")]
+    (j/assoc! m :material m)
+    )
 
   (api.core/dispose "text-dots" "t2" "t" "2d-slide-text-2" "2d-slide"
                     "3d-slide-text-1")
