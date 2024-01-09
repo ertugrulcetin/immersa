@@ -21,6 +21,7 @@
                           position
                           skybox?
                           infinite-distance?
+                          alpha-index
                           mat]
                    :as opts}]
   (let [b (j/call MeshBuilder :CreateBox name #js {:size size
@@ -33,6 +34,7 @@
                                                         :skybox
                                                         :box)))
     (cond-> b
+      alpha-index (j/assoc! :alphaIndex alpha-index)
       mat (j/assoc! :material mat)
       position (j/assoc! :position position)
       visibility (j/assoc! :visibility visibility)
@@ -216,9 +218,15 @@
 (defn glb->mesh [name & {:keys [path
                                 position
                                 rotation
-                                scale]}]
+                                scale
+                                update-materials]}]
   (let [m (api.core/clone (j/get-in api.core/db [:models path]))]
     (api.core/add-node-to-db name m {:type :glb})
+    ;; TODO this apply to all meshes in the glb,it is not per mesh! fix it
+    (doseq [[name {:keys [albedo-color]}] update-materials]
+      (let [mat (api.core/get-mat-by-name name)]
+        (m/cond-doto mat
+          albedo-color (j/assoc! :albedoColor albedo-color))))
     (m/cond-doto m
       position (j/assoc! :position position)
       rotation (j/assoc! :rotation rotation)
@@ -227,15 +235,20 @@
     m))
 
 (comment
-
+  (api.core/get-mat-by-name "paint")
   (let [m (glb->mesh "a" {:type :glb
-                        :path "model/plane.glb"
-                        :position (v3 1 1 1)
-                        :rotation (v3 -0.25 Math/PI -0.4)
-                        })
+                          :path "model/plane.glb"
+                          :position (v3 1 1 1)
+                          :rotation (v3 -0.25 Math/PI -0.4)
+                          })
         mat (api.material/standard-mat "mat")]
-    (j/assoc! m :material m)
-    )
+    (j/assoc! m :material m))
+
+  (glb->mesh "porche" {:type :glb
+                       :path "model/porche_911.glb"
+                       :position (v3 -1.25 1 5)
+                       :rotation (v3 0 (/ Math/PI 8) 0)
+                       :update-materials {"paint" {:albedo-color api.const/color-black}}})
 
   (api.core/dispose "text-dots" "t2" "t" "2d-slide-text-2" "2d-slide"
                     "3d-slide-text-1")

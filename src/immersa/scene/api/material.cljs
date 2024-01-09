@@ -1,5 +1,6 @@
 (ns immersa.scene.api.material
   (:require
+    ["@babylonjs/core/Helpers/environmentHelper" :refer [EnvironmentHelper]]
     ["@babylonjs/core/Materials/Background/backgroundMaterial" :refer [BackgroundMaterial]]
     ["@babylonjs/core/Materials/Node/nodeMaterial" :refer [NodeMaterial]]
     ["@babylonjs/core/Materials/Textures/texture" :refer [Texture]]
@@ -96,14 +97,49 @@
               :primaryColor primary-color)
     (api.core/add-node-to-db name bm opts)))
 
+(defn create-environment-helper []
+  (let [engine (api.core/get-engine)
+        srgb-conversions (j/get engine :useExactSrgbConversions)
+        color-fn (fn [color]
+                   (j/call (j/call color :toLinearSpace srgb-conversions) :scale 3))
+        options #js {:createGround true
+                     :groundSize 15
+                     :groundTexture "img/texture/ground/backgroundGround.png"
+                     :groundColor (color-fn (api.core/color 0.2 0.2 0.3))
+                     :groundOpacity 0.9
+                     :enableGroundShadow true
+                     :groundShadowLevel 0.5
+                     :enableGroundMirror false
+                     :groundMirrorSizeRatio 0.3
+                     :groundMirrorBlurKernel 64
+                     :groundMirrorAmount 1
+                     :groundMirrorFresnelWeight 1
+                     :groundMirrorFallOffDistance 0
+                     :groundMirrorTextureType 0
+                     :groundYBias 0.00001
+                     :createSkybox true
+                     :skyboxSize 1000
+                     :skyboxTexture "img/texture/skybox/backgroundSkybox.dds"
+                     :skyboxColor (color-fn (api.core/color-rgb 91 91 111))
+                     :backgroundYRotation 0
+                     :sizeAuto true
+                     :rootPosition (api.core/v3)
+                     :setupImageProcessing true
+                     :environmentTexture "img/texture/environment/environmentSpecular.env"
+                     :cameraExposure 0.8
+                     :cameraContrast 1.2
+                     :toneMappingEnabled true}
+        eh (EnvironmentHelper. options (api.core/get-scene))]
+    (j/assoc! api.core/db :environment-helper eh)
+    eh))
+
 (comment
 
+  (let [mat (j/get-in api.core/db [:environment-helper :skyboxMaterial])]
+    (j/assoc! mat :backFaceCulling false)
+    ;(j/assoc! (api.core/get-object-by-name "sky-box") :material mat)
 
-  (let [mat (background-mat "background-mat"
-                            :reflection-texture (api.core/cube-texture :root-url "img/skybox/background/background")
-                            :primary-color api.cons/color-gray
-                            :shadow-level 0.4)]
-    (j/assoc! (api.core/get-object-by-name "sky-box") :material mat)))
+    ))
 
 (defn parse-from-json [json-str]
   (j/call NodeMaterial :Parse (js/JSON.parse json-str)))

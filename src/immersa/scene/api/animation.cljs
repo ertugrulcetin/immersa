@@ -181,7 +181,6 @@
                      {:frame frame :value value})
                    (rest (take (inc n-positions) (iterate (partial + (/ (* fps duration) n-positions)) 0)))
                    target)))]
-    (cljs.pprint/pprint keys)
     (animation "multiple-camera-target-anim"
                :target-prop "target"
                :fps fps
@@ -226,6 +225,52 @@
                                       :loop-mode api.const/animation-loop-cons
                                       :easing easing-function)]
       [:camera [position-animation target-animation]])))
+
+(defn create-skybox->background-dissolve-anim [& {:keys [speed-factor]
+                                                  :or {speed-factor 1}}]
+  (let [p (a/promise-chan)
+        dissolve (atom 0)
+        dissolve-fn-name "dissolve-skybox->background"
+        mat (api.core/get-object-by-name "skybox-shader")
+        _ (j/assoc! mat :alpha 0)
+        dissolve-fn (fn []
+                      (let [dissolve (swap! dissolve + (* (api.core/get-delta-time) speed-factor))]
+                        (if (<= dissolve 1.5)
+                          (do
+                            (j/call mat :setFloat "dissolve" dissolve)
+                            (j/call mat :setFloat "transparency" dissolve))
+                          (do
+                            (api.core/remove-before-render-fn dissolve-fn-name)
+                            (a/put! p true)))))]
+    (j/call mat :setFloat "dissolve" 0)
+    (api.core/register-before-render-fn dissolve-fn-name dissolve-fn)
+    p))
+
+(defn create-background->skybox-dissolve-anim [& {:keys [objects-data
+                                                         speed-factor]
+                                                  :or {speed-factor 1}}]
+  (let [p (a/promise-chan)
+        dissolve (atom 1)
+        dissolve-fn-name "background->skybox-dissolve"
+        mat (api.core/get-object-by-name "skybox-shader")
+        skybox-1 (-> objects-data :skybox :path)
+        skybox-2 (j/get mat :skybox-path)
+        dissolve-fn (fn []
+                      (let [dissolve (swap! dissolve - (* (api.core/get-delta-time) speed-factor))]
+                        (if (>= dissolve 0.0)
+                          (do
+                            (j/call mat :setFloat "dissolve" dissolve)
+                            (j/call mat :setFloat "transparency" dissolve))
+                          (do
+                            (j/call mat :setFloat "dissolve" 0)
+                            (j/assoc! mat :alpha 1)
+                            (j/assoc! mat :skybox-path skybox-1)
+                            (api.core/remove-before-render-fn dissolve-fn-name)
+                            (a/put! p true)))))]
+    (j/call mat :setTexture "skybox1" (api.core/cube-texture :root-url skybox-2))
+    (j/call mat :setTexture "skybox2" (api.core/cube-texture :root-url skybox-1))
+    (api.core/register-before-render-fn dissolve-fn-name dissolve-fn)
+    p))
 
 (defn create-skybox-dissolve-anim [& {:keys [skybox-path
                                              speed-factor]

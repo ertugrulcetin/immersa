@@ -421,3 +421,6 @@
 
 (defn color-lerp [start end amount]
   (j/call Color3 :Lerp start end amount))
+
+(defn get-mat-by-name [name]
+  (j/call-in db [:scene :getMaterialByName] name))

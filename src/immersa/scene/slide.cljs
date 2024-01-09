@@ -282,30 +282,106 @@
                                  :position (v3 0 5 -10)
                                  :rotation (v3 -0.25 Math/PI 0.15)
                                  :delay 750
-                                 :duration 4}}}
+                                 :duration 4}
+                        "porche" {:type :glb
+                                  :path "model/porche_911.glb"
+                                  :position (v3 -15 1 5)
+                                  :rotation (v3 0 (/ Math/PI 8) 0)
+                                  :update-materials {"paint" {:albedo-color api.const/color-black}}}
+                        "3d-lib-header" {:type :text3D
+                                         :text "Extensive 3D Library"
+                                         :depth 0.001
+                                         :emissive-color api.const/color-white
+                                         :size 0.7
+                                         :position (v3 15 4 9)
+                                         :visibility 1}
+                        "3d-lib-text-2" {:type :text3D
+                                         :text "Over 100 pre-built 3D models at your fingertips"
+                                         :depth 0.001
+                                         :emissive-color api.const/color-white
+                                         :size 0.3
+                                         :position (v3 19 3 9)
+                                         :visibility 1}
+                        "3d-lib-text-3" {:type :text3D
+                                         :text "ready to elevate your presentations"
+                                         :depth 0.001
+                                         :emissive-color api.const/color-white
+                                         :size 0.3
+                                         :position (v3 19 2.5 9)
+                                         :visibility 1}}}
 
                 {:data {:camera {:position (v3 0 2 -1)
-                                 :rotation (v3)}
-                        :skybox {:path "img/skybox/space/space"}}}
+                                 :rotation (v3 0 0 0)}
+                        :skybox {:background? true
+                                 :speed-factor 1.0}
+                        "porche" {:type :glb
+                                  :position (v3 -1.25 1 5)}
 
-                {:data {:camera {:focus "box"
-                                 :type :right}
-                        "billboard-2" {:type :billboard
-                                       :position (v3 -3 2.3 0)
-                                       :text "❖ Ready-Made Templates\n\n❖ High-Performance Render\n\n❖ User-Friendly UI/UX"
-                                       :scale 2
-                                       :font-weight "bold"
-                                       :visibility 1}}}
+                        "3d-lib-header" {:position (v3 0 4 9)
+                                         :duration 1.5
+                                         :visibility 1}
+                        "3d-lib-text-2" {:position (v3 0 3 9)
+                                         :duration 1.5
+                                         :delay 250
+                                         :visibility 1}
+                        "3d-lib-text-3" {:position (v3 0 2.5 9)
+                                         :duration 1.5
+                                         :delay 350
+                                         :visibility 1}
+                        "3d-lib-header-2" {:type :text3D
+                                           :text "Personalized Imports"
+                                           :depth 0.001
+                                           :emissive-color api.const/color-white
+                                           :size 0.55
+                                           :position (v3 15 4 9)
+                                           :visibility 1}
+                        "3d-lib-text-4" {:type :text3D
+                                         :text "Seamlessly integrate your own models"
+                                         :depth 0.001
+                                         :emissive-color api.const/color-white
+                                         :size 0.25
+                                         :position (v3 19 3 9)
+                                         :visibility 1}
+                        "3d-lib-text-5" {:type :text3D
+                                         :text "making each presentation uniquely yours"
+                                         :depth 0.001
+                                         :emissive-color api.const/color-white
+                                         :size 0.25
+                                         :position (v3 19 2.5 9)
+                                         :visibility 1}}}
+
+                {:data {:camera {:position (v3 0 1 -1)}
+                        "porche" {:type :glb
+                                  :path "model/porche_911.glb"
+                                  :position (v3 -0.7 1 3)
+                                  :rotation (v3 0 Math/PI 0)}
+                        "3d-lib-header-2" {:type :text3D
+                                           :position (v3 0 4 9)
+                                           :duration 1.5
+                                           :visibility 1}
+                        "3d-lib-text-4" {:position (v3 0 3 9)
+                                         :duration 1.5
+                                         :delay 250
+                                         :visibility 1}
+                        "3d-lib-text-5" {:position (v3 3.5 2.5 9)
+                                         :duration 1.5
+                                         :delay 350
+                                         :visibility 1}}}
 
                 {:data {:camera {:position (v3 0 0 -10)
-                                 :rotation (v3 0 0 0)}}}
-
-                {:data {"enjoy-text" {:type :billboard
+                                 :rotation (v3 0 0 0)}
+                        "porche" {:type :glb
+                                  :path "model/porche_911.glb"
+                                  :position (v3 -0.7 1 500)}
+                        "enjoy-text" {:type :billboard
                                       :text "✦ Enjoy the Immersive Experience ✦"
                                       :scale 5
                                       :width 3
                                       :height 3
                                       :font-size 30
+                                      :visibility 0}}}
+
+                {:data {"enjoy-text" {:type :billboard
                                       :visibility 1}}}
 
                 {:data {:camera {:position (v3 0 0 50)}
@@ -615,9 +691,10 @@
                                           acc)))
                                     {}
                                     (group-by first animations)))
+                background? (-> objects-data :skybox :background?)
                 prev-and-gradient? (and (= :prev command)
                                         (-> (:data (slides (inc current-index))) :skybox :gradient?))
-                skybox-dissolve-anim (when-not prev-and-gradient?
+                skybox-dissolve-anim (when (and (not prev-and-gradient?) (not background?))
                                        (run-skybox-dissolve-animation objects-data))
                 _ (doseq [name (set/difference current-slide-object-names
                                                object-names-to-dispose
@@ -630,6 +707,14 @@
                                      (when (and (#{:pcs-text} (:type object-slide-info)))
                                        (api.animation/pcs-text-anim object-name object-slide-info))))
                                  object-names-from-slide-info)]
+            (when (and (not (= :prev command))
+                       background?)
+              (a/<! (api.animation/create-skybox->background-dissolve-anim :speed-factor 0.5)))
+
+            (when (and (= :prev command)
+                       (-> (:data (slides (inc current-index))) :skybox :background?))
+              (a/<! (api.animation/create-background->skybox-dissolve-anim :objects-data objects-data)))
+
             (some-> skybox-dissolve-anim a/<!)
             (cond
               (-> objects-data :skybox :gradient?)

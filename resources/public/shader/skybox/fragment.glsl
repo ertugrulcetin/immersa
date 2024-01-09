@@ -1,5 +1,6 @@
 precision highp float;
 
+uniform float transparency;
 uniform float dissolve;
 uniform samplerCube skybox1;
 uniform samplerCube skybox2;
@@ -19,5 +20,5 @@ void main(void) {
     // Use the noise value to create a threshold for the dissolve effect
     float visibility = smoothstep(dissolve - 0.1, dissolve + 0.1, noiseValue);
 
-    gl_FragColor = vec4(mix(fromSky, toSky, visibility), 1.0);
+    gl_FragColor = vec4(mix(fromSky, toSky, visibility), clamp(1.0 - transparency, 0.0, 1.0));
 }

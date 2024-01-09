@@ -25,23 +25,41 @@
   (let [skybox (api.mesh/box "sky-box"
                              :size 1000.0
                              :skybox? true
-                             :infinite-distance? false)
+                             :infinite-distance? false
+                             :alpha-index 0)
         mat (api.material/shader-mat
               "skybox-shader"
               :vertex (rc/inline "shader/skybox/vertex.glsl")
               :fragment (rc/inline "shader/skybox/fragment.glsl")
               :attrs ["position"]
-              :uniforms ["worldViewProjection" "dissolve" "skybox1" "skybox2" "noiseTexture"])]
+              :uniforms ["worldViewProjection" "dissolve" "skybox1" "skybox2" "noiseTexture" "transparency"])]
     (j/call mat :setTexture "skybox1" (api.core/cube-texture :root-url skybox1))
     (j/call mat :setTexture "skybox2" (api.core/cube-texture :root-url skybox2))
     (j/call mat :setTexture "noiseTexture" (api.core/texture noise))
     (j/call mat :setFloat "dissolve" 0)
+    (j/call mat :setFloat "transparency" 0)
     (j/assoc! mat
               :backFaceCulling false
               :skybox-path skybox1
               :default-skybox-path skybox1)
     (j/assoc! skybox :material mat)
+    #_(j/assoc! skybox :material (j/get-in api.core/db [:environment-helper :skyboxMaterial]))
     skybox))
+
+(comment
+  (create-sky-box)
+  (j/call (api.core/get-object-by-name "skybox-shader") :setFloat "transparency" 0.2)
+  (j/call (api.core/get-object-by-name "skybox-shader") :getFloat "transparency")
+  (j/assoc! (api.core/get-object-by-name "skybox-shader") :alpha 0)
+
+  (j/get (api.core/get-object-by-name "skybox-shader") :skybox-path)
+
+  (j/get (api.core/get-object-by-name "skybox-shader") :alpha)
+  (j/assoc! (api.core/get-object-by-name "skybox-shader") :alpha 0)
+  (api.core/dispose (api.core/get-object-by-name "skybox-shader"))
+
+  (j/assoc! (j/get-in api.core/db [:environment-helper :skybox]) :visibility 1)
+  )
 
 (defn create-sky-sphere []
   (let [sky-sphere (api.mesh/sphere "sky-sphere"

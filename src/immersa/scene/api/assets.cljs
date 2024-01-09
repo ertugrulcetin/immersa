@@ -4,7 +4,9 @@
   {:cube-textures #{"img/skybox/sunny/sunny"
                     "img/skybox/space/space"
                     "img/skybox/black/black"
-                    "img/skybox/background/background"}
+                    "img/skybox/background/background"
+                    "img/texture/environment/environmentSpecular.env"
+                    "img/texture/skybox/backgroundSkybox.dds"}
    :textures #{"img/texture/noise/ac.jpg"
                "img/texture/numbers.jpg"
                "img/texture/pp.jpeg"
@@ -19,5 +21,7 @@
                "img/texture/earth/emmisive.jpeg"
                "img/texture/earth/specular.jpeg"
                "img/texture/earth/bump.jpeg"
-               "img/texture/earth/clouds2-min.jpg"}
-   :models #{"model/plane.glb"}})
+               "img/texture/earth/clouds2-min.jpg"
+               "img/texture/ground/backgroundGround.png"}
+   :models #{"model/plane.glb"
+             "model/porche_911.glb"}})

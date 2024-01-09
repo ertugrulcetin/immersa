@@ -137,7 +137,7 @@
           (recur))))))
 
 (defn when-scene-ready [engine scene start-slide-show?]
-  ;; (api.core/clear-scene-color api.const/color-white)
+  (api.core/clear-scene-color api.const/color-white)
   ;; (api.core/clear-scene-color (api.core/color-rgb 239 239 239))
   ;; (api.core/clear-scene-color api.const/color-black)
   (j/assoc-in! (api.core/get-object-by-name "sky-box") [:rotation :y] js/Math.PI)
@@ -178,7 +178,8 @@
                                          :height 50
                                          :mat ground-material)
           _ (api.component/create-sky-box)
-          _ (api.component/create-sky-sphere)]
+          _ (api.component/create-sky-sphere)
+          _ (api.material/create-environment-helper)]
       (common.utils/remove-element-listeners)
       (common.utils/register-event-listener js/window "resize" (functions/debounce #(j/call engine :resize) 250))
       (j/assoc! light :intensity 0.7)
