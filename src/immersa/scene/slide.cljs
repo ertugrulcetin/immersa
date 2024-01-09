@@ -65,8 +65,8 @@
                          (api.core/clone (j/get object :init-rotation)))]
       (when end-rotation
         [object-name (api.animation/create-rotation-animation (assoc object-slide-info
-                                                                :start start-rotation
-                                                                :end end-rotation))]))))
+                                                                     :start start-rotation
+                                                                     :end end-rotation))]))))
 
 (defn- get-visibility-anim [object-slide-info object-name]
   (let [end-visibility (:visibility object-slide-info)
@@ -113,11 +113,11 @@
                                               :focus (api.animation/create-focus-camera-anim object-slide-info)
                                               :target (get-target-anim object-slide-info object-name))]
         (cond-> acc
-                (and (not= anim-type :focus) anim-vec)
-                (conj anim-vec)
+          (and (not= anim-type :focus) anim-vec)
+          (conj anim-vec)
 
-                (and (= anim-type :focus) anim-vec)
-                (conj [object-name (first anim)] [object-name (second anim)]))))
+          (and (= anim-type :focus) anim-vec)
+          (conj [object-name (first anim)] [object-name (second anim)]))))
     acc
     [:position :rotation :visibility :alpha :focus :target]))
 
@@ -184,8 +184,8 @@
                                  :duration 3
                                  :delay 100}
                         :skybox {:path "img/skybox/space/space"}
-                        ;:skybox {:gradient? true
-                        ;         :speed-factor 1.0}
+                        ;; :skybox {:gradient? true
+                        ;;         :speed-factor 1.0}
                         "text-dots" {:type :pcs-text
                                      :text "      Welcome to the\n\n\n\n\n\n\n\nFuture of Presentation"
                                      :visibility 1
@@ -316,30 +316,30 @@
                           (let [position (:position data)
                                 rotation (:rotation data)]
                             (cond-> data
-                                    (vector? position)
-                                    (assoc :position (mapv api.core/clone (:position data)))
+                              (vector? position)
+                              (assoc :position (mapv api.core/clone (:position data)))
 
-                                    (and position (not (vector? position)))
-                                    (assoc :position (api.core/clone (:position data)))
+                              (and position (not (vector? position)))
+                              (assoc :position (api.core/clone (:position data)))
 
-                                    (vector? rotation)
-                                    (assoc :rotation (mapv api.core/clone (:rotation data)))
+                              (vector? rotation)
+                              (assoc :rotation (mapv api.core/clone (:rotation data)))
 
-                                    (and rotation (not (vector? rotation)))
-                                    (assoc :rotation (api.core/clone (:rotation data))))))]
+                              (and rotation (not (vector? rotation)))
+                              (assoc :rotation (api.core/clone (:rotation data))))))]
     (reduce
       (fn [slides-vec slide]
         (let [prev-slide-data (get-in slides-vec [(dec (:index slide)) :data])
               slide-data (:data slide)]
           (conj slides-vec
                 (assoc slide :data
-                             (reduce-kv
-                               (fn [acc name objet-slide-data]
-                                 (if-let [prev-slide-data (get prev-slide-data name)]
-                                   (assoc acc name (merge (clone-if-exists (select-keys prev-slide-data props-to-copy)) objet-slide-data))
-                                   (assoc acc name objet-slide-data)))
-                               {}
-                               slide-data)))))
+                       (reduce-kv
+                         (fn [acc name objet-slide-data]
+                           (if-let [prev-slide-data (get prev-slide-data name)]
+                             (assoc acc name (merge (clone-if-exists (select-keys prev-slide-data props-to-copy)) objet-slide-data))
+                             (assoc acc name objet-slide-data)))
+                         {}
+                         slide-data)))))
       [(first slides-vec)]
       (rest slides-vec))))
 
@@ -549,102 +549,102 @@
                                                 (or (= (.-keyCode e) 37)
                                                     (= (.-keyCode e) 38)) (a/put! command-ch :prev)))))
     (go-loop [index -1]
-             (let [command (a/<! command-ch)
-                   current-index (case command
-                                   :next (inc index)
-                                   :prev (dec index))
-                   slides (get-slides)]
-               ;; (cljs.pprint/pprint slides)
-               (if (and (>= current-index 0) (< current-index (count slides)))
-                 (let [_ (notify-ui current-index (count slides))
-                       slide (slides current-index)
-                       objects-data (:data slide)
-                       object-names-from-slide-info (set (conj (keys (:data slide)) :camera))
-                       _ (when (object-names-from-slide-info :camera)
-                           (api.camera/update-active-camera))
-                       object-names-from-objects (-> slide :objects keys)
-                       objects-to-create (filter #(not (api.core/get-object-by-name %)) object-names-from-slide-info)
-                       current-slide-object-names (-> slide :data keys set)
-                       [prev-slide-object-names object-names-to-dispose] (when (> current-index 0)
-                                                                           (let [prev-slide (slides (if (= command :next)
-                                                                                                      (dec current-index)
-                                                                                                      (inc current-index)))
-                                                                                 prev-slide-object-names (-> prev-slide :data keys set)]
-                                                                             [prev-slide-object-names
-                                                                              (set/difference prev-slide-object-names current-slide-object-names #{:camera :skybox})]))
+      (let [command (a/<! command-ch)
+            current-index (case command
+                            :next (inc index)
+                            :prev (dec index))
+            slides (get-slides)]
+        ;; (cljs.pprint/pprint slides)
+        (if (and (>= current-index 0) (< current-index (count slides)))
+          (let [_ (notify-ui current-index (count slides))
+                slide (slides current-index)
+                objects-data (:data slide)
+                object-names-from-slide-info (set (conj (keys (:data slide)) :camera))
+                _ (when (object-names-from-slide-info :camera)
+                    (api.camera/update-active-camera))
+                object-names-from-objects (-> slide :objects keys)
+                objects-to-create (filter #(not (api.core/get-object-by-name %)) object-names-from-slide-info)
+                current-slide-object-names (-> slide :data keys set)
+                [prev-slide-object-names object-names-to-dispose] (when (> current-index 0)
+                                                                    (let [prev-slide (slides (if (= command :next)
+                                                                                               (dec current-index)
+                                                                                               (inc current-index)))
+                                                                          prev-slide-object-names (-> prev-slide :data keys set)]
+                                                                      [prev-slide-object-names
+                                                                       (set/difference prev-slide-object-names current-slide-object-names #{:camera :skybox})]))
 
-                       _ (doseq [name object-names-to-dispose]
-                           (disable-component name))
-                       _ (doseq [name objects-to-create]
-                           (let [params (get objects-data name)
-                                 type (:type params)
-                                 params (dissoc params :type)]
-                             (case type
-                               :glb (api.mesh/glb->mesh name params)
-                               :wave (api.component/wave name)
-                               :box (api.component/create-box-with-numbers name params)
-                               :earth (api.component/earth name params)
-                               :text3D (api.mesh/text name params)
-                               :text (api.gui/add-control
-                                       (api.core/get-advanced-texture)
-                                       (api.gui/text-block name params))
-                               :image (api.component/image name params)
-                               :particle (api.particle/sparkles name params)
-                               :billboard (api.component/billboard name params)
-                               nil)))
-                       animations (reduce
-                                    (fn [acc object-name]
-                                      (let [object-slide-info (get-in slide [:data object-name])]
-                                        (get-animations-from-slide-info acc object-slide-info object-name)))
-                                    []
-                                    object-names-from-slide-info)
-                       animations-data (vals
-                                         (reduce-kv
-                                           (fn [acc name animations]
-                                             (let [animations (mapv second animations)
-                                                   delay (first (keep (j/get :delay) animations))
-                                                   duration (first (keep (j/get :duration) animations))
-                                                   max-fps (apply max (map (j/get :framePerSecond) animations))
-                                                   target (api.core/get-object-by-name name)]
-                                               (if target
-                                                 (assoc acc name {:target (api.core/get-object-by-name name)
-                                                                  :animations animations
-                                                                  :delay delay
-                                                                  :from 0
-                                                                  :to (* max-fps duration)})
-                                                 acc)))
-                                           {}
-                                           (group-by first animations)))
-                       prev-and-gradient? (and (= :prev command)
-                                               (-> (:data (slides (inc current-index))) :skybox :gradient?))
-                       skybox-dissolve-anim (when-not prev-and-gradient?
-                                              (run-skybox-dissolve-animation objects-data))
-                       _ (doseq [name (set/difference current-slide-object-names
-                                                      object-names-to-dispose
-                                                      (set prev-slide-object-names))]
-                           (enable-component name (get-in slide [:data name])))
-                       channels (mapv #(api.animation/begin-direct-animation %) animations-data)
-                       pcs-animations (keep
-                                        (fn [object-name]
-                                          (let [object-slide-info (get-in slide [:data object-name])]
-                                            (when (and (#{:pcs-text} (:type object-slide-info)))
-                                              (api.animation/pcs-text-anim object-name object-slide-info))))
-                                        object-names-from-slide-info)]
-                   (some-> skybox-dissolve-anim a/<!)
-                   (cond
-                     (-> objects-data :skybox :gradient?)
-                     (a/<! (api.animation/create-sky-sphere-dissolve-anim))
+                _ (doseq [name object-names-to-dispose]
+                    (disable-component name))
+                _ (doseq [name objects-to-create]
+                    (let [params (get objects-data name)
+                          type (:type params)
+                          params (dissoc params :type)]
+                      (case type
+                        :glb (api.mesh/glb->mesh name params)
+                        :wave (api.component/wave name)
+                        :box (api.component/create-box-with-numbers name params)
+                        :earth (api.component/earth name params)
+                        :text3D (api.mesh/text name params)
+                        :text (api.gui/add-control
+                                (api.core/get-advanced-texture)
+                                (api.gui/text-block name params))
+                        :image (api.component/image name params)
+                        :particle (api.particle/sparkles name params)
+                        :billboard (api.component/billboard name params)
+                        nil)))
+                animations (reduce
+                             (fn [acc object-name]
+                               (let [object-slide-info (get-in slide [:data object-name])]
+                                 (get-animations-from-slide-info acc object-slide-info object-name)))
+                             []
+                             object-names-from-slide-info)
+                animations-data (vals
+                                  (reduce-kv
+                                    (fn [acc name animations]
+                                      (let [animations (mapv second animations)
+                                            delay (first (keep (j/get :delay) animations))
+                                            duration (first (keep (j/get :duration) animations))
+                                            max-fps (apply max (map (j/get :framePerSecond) animations))
+                                            target (api.core/get-object-by-name name)]
+                                        (if target
+                                          (assoc acc name {:target (api.core/get-object-by-name name)
+                                                           :animations animations
+                                                           :delay delay
+                                                           :from 0
+                                                           :to (* max-fps duration)})
+                                          acc)))
+                                    {}
+                                    (group-by first animations)))
+                prev-and-gradient? (and (= :prev command)
+                                        (-> (:data (slides (inc current-index))) :skybox :gradient?))
+                skybox-dissolve-anim (when-not prev-and-gradient?
+                                       (run-skybox-dissolve-animation objects-data))
+                _ (doseq [name (set/difference current-slide-object-names
+                                               object-names-to-dispose
+                                               (set prev-slide-object-names))]
+                    (enable-component name (get-in slide [:data name])))
+                channels (mapv #(api.animation/begin-direct-animation %) animations-data)
+                pcs-animations (keep
+                                 (fn [object-name]
+                                   (let [object-slide-info (get-in slide [:data object-name])]
+                                     (when (and (#{:pcs-text} (:type object-slide-info)))
+                                       (api.animation/pcs-text-anim object-name object-slide-info))))
+                                 object-names-from-slide-info)]
+            (some-> skybox-dissolve-anim a/<!)
+            (cond
+              (-> objects-data :skybox :gradient?)
+              (a/<! (api.animation/create-sky-sphere-dissolve-anim))
 
-                     prev-and-gradient?
-                     (do
-                       (a/<! (api.animation/create-reverse-sky-sphere-dissolve-anim))
-                       (some-> (run-skybox-dissolve-animation objects-data) a/<!)))
+              prev-and-gradient?
+              (do
+                (a/<! (api.animation/create-reverse-sky-sphere-dissolve-anim))
+                (some-> (run-skybox-dissolve-animation objects-data) a/<!)))
 
-                   (doseq [c channels]
-                     (a/<! c))
+            (doseq [c channels]
+              (a/<! c))
 
-                   (doseq [c pcs-animations]
-                     (a/<! c))
+            (doseq [c pcs-animations]
+              (a/<! c))
 
-                   (recur current-index))
-                 (recur index))))))
+            (recur current-index))
+          (recur index))))))

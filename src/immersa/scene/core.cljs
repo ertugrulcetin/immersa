@@ -3,6 +3,7 @@
     [applied-science.js-interop :as j]
     [cljs.core.async :as a]
     [cljs.core.async :as a :refer [go-loop <!]]
+    [clojure.string :as str]
     [goog.functions :as functions]
     [immersa.common.utils :as common.utils]
     [immersa.events :as events]
@@ -109,9 +110,16 @@
                   (a/put! p true)))))]
     p))
 
+(defn- strong-machine? [engine]
+  (let [gl (j/get engine :getGlInfo)
+        renderer (j/get gl :renderer)]
+    (boolean
+      (when-not (str/blank? renderer)
+        (some #(str/includes? renderer %) ["Apple M1" "Apple M2" "Apple M3"])))))
+
 ;; TODO check OffscreenCanvas support
 (defn- start-background-lighting [engine]
-  (when (j/get js/window :Worker)
+  (when (and (j/get js/window :Worker) (strong-machine? engine))
     (let [worker (js/Worker. "js/worker/worker.js")
           color-ch (a/chan (a/dropping-buffer 1))
           prev-color (atom (api.core/color 0 0 0))]
@@ -139,7 +147,7 @@
     (register-scene-mouse-events scene))
   (when start-slide-show?
     (slide/start-slide-show)
-    #_(start-background-lighting engine)))
+    (start-background-lighting engine)))
 
 (defn start-scene [canvas & {:keys [start-slide-show?]
                              :or {start-slide-show? true}}]
