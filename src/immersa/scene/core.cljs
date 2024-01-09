@@ -139,7 +139,7 @@
     (register-scene-mouse-events scene))
   (when start-slide-show?
     (slide/start-slide-show)
-    (start-background-lighting engine)))
+    #_(start-background-lighting engine)))
 
 (defn start-scene [canvas & {:keys [start-slide-show?]
                              :or {start-slide-show? true}}]
