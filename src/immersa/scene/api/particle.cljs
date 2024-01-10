@@ -189,10 +189,8 @@
     ps))
 
 (defn clouds [name & {:keys [position
-                             scale
-                             update-speed]
+                             scale]
                       :or {position (v3 0 0 0)
-                           update-speed 0.025
                            scale 0.1}}]
   (let [cloud-mesh (api.mesh/sphere (str name "-mesh")
                                     :position position
@@ -226,7 +224,9 @@
                                              :max-angular-speed 0.1
                                              :min-emit-power 0.04
                                              :max-emit-power 0.06
-                                             :update-speed update-speed
+                                             :update-speed 0.01
+                                             :pre-warm-step-offset 10
+                                             :pre-warm-cycles 100
                                              :emitter cloud-mesh
                                              ;; :local? true
                                              :min-size (* 0.3 scale)
