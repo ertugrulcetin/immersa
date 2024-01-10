@@ -58,8 +58,7 @@
   (j/assoc! (api.core/get-object-by-name "skybox-shader") :alpha 0)
   (api.core/dispose (api.core/get-object-by-name "skybox-shader"))
 
-  (j/assoc! (j/get-in api.core/db [:environment-helper :skybox]) :visibility 1)
-  )
+  (j/assoc! (j/get-in api.core/db [:environment-helper :skybox]) :visibility 1))
 
 (defn create-sky-sphere []
   (let [sky-sphere (api.mesh/sphere "sky-sphere"
