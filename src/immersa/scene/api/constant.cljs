@@ -6,6 +6,7 @@
     ["@babylonjs/core/Maths/math" :refer [Vector2 Vector3 Vector4]]
     ["@babylonjs/core/Maths/math.color" :refer [Color3]]
     ["@babylonjs/core/Meshes/mesh" :refer [Mesh]]
+    ["@babylonjs/core/Particles/particleSystem" :refer [ParticleSystem]]
     [applied-science.js-interop :as j]))
 
 (def v3-up (j/call Vector3 :Up))
@@ -51,3 +52,5 @@
 
 (def keyboard-type-key-down (j/get KeyboardEventTypes :KEYDOWN))
 (def keyboard-type-key-up (j/get KeyboardEventTypes :KEYUP))
+
+(def particle-blend-mode-standard (j/get ParticleSystem :BLENDMODE_STANDARD))

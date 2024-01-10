@@ -195,6 +195,7 @@
                                      :position (v3 -5.5 1 9)
                                      :color api.const/color-white}
                         "particle-cycle" {:type :particle
+                                          :particle-type :sparkle
                                           :duration 2
                                           :position [(v3 -2 0.5 -6)
                                                      (v3 -5 0.5 0)
@@ -308,7 +309,12 @@
                                          :emissive-color api.const/color-white
                                          :size 0.3
                                          :position (v3 19 2.5 9)
-                                         :visibility 1}}}
+                                         :visibility 1}
+                        "cloud-particle" {:type :particle
+                                          :particle-type :cloud
+                                          :scale 0.9
+                                          :update-speed 0.01
+                                          :position (v3 10 2.1 2)}}}
 
                 {:data {:camera {:position (v3 0 2 -1)
                                  :rotation (v3 0 0 0)}
@@ -328,6 +334,8 @@
                                          :duration 1.5
                                          :delay 350
                                          :visibility 1}
+                        "cloud-particle" {:delay 600
+                                          :position (v3 0 2.1 2)}
                         "3d-lib-header-2" {:type :text3D
                                            :text "Personalized Imports"
                                            :depth 0.001
@@ -366,7 +374,8 @@
                         "3d-lib-text-5" {:position (v3 3.5 2.5 9)
                                          :duration 1.5
                                          :delay 350
-                                         :visibility 1}}}
+                                         :visibility 1}
+                        "cloud-particle" {:position (v3 1 1.3 2)}}}
 
                 {:data {:camera {:position (v3 0 0 -10)
                                  :rotation (v3 0 0 0)}
@@ -665,7 +674,9 @@
                                 (api.core/get-advanced-texture)
                                 (api.gui/text-block name params))
                         :image (api.component/image name params)
-                        :particle (api.particle/sparkles name params)
+                        :particle (case (:particle-type params)
+                                    :sparkle (api.particle/sparkles name params)
+                                    :cloud (api.particle/clouds name params))
                         :billboard (api.component/billboard name params)
                         nil)))
                 animations (reduce

@@ -135,7 +135,7 @@
                      :createSkybox true
                      :skyboxSize 1000
                      :skyboxTexture "img/texture/skybox/backgroundSkybox.dds"
-                     :skyboxColor (color-fn (api.core/color-rgb 91 91 111))
+                     :skyboxColor (color-fn (api.core/color-rgb 103))
                      :backgroundYRotation 0
                      :sizeAuto true
                      :rootPosition (api.core/v3)

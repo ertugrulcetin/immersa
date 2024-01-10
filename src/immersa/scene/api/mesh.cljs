@@ -53,7 +53,8 @@
                              scale
                              skybox?
                              mat
-                             infinite-distance?]
+                             infinite-distance?
+                             visible?]
                       :or {segments 32
                            diameter 1
                            arc 1
@@ -76,6 +77,7 @@
       rotation (j/assoc! :rotation rotation)
       scale (api.core/scaling scale)
       visibility (j/assoc! :visibility visibility)
+      (some? visible?) (j/assoc! :isVisible visible?)
       (some? infinite-distance?) (j/assoc! :infiniteDistance infinite-distance?))))
 
 (defn capsule [name & {:keys [height radius visibility]
@@ -244,7 +246,7 @@
   (api.core/dispose "2d-slide-text-2")
 
   (api.material/parse-from-snippet
-    "#IL1K1C#6"
+    "#IL1K1C#8"
     (fn [mat]
       (text "2d-slide-text-2" {:type :text3D
                                :text "3D IMMERSION"

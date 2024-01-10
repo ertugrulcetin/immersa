@@ -3,7 +3,9 @@
     ["@babylonjs/core/Particles/gpuParticleSystem" :refer [GPUParticleSystem]]
     ["@babylonjs/core/Particles/particleSystem" :refer [ParticleSystem]]
     [applied-science.js-interop :as j]
-    [immersa.scene.api.core :as api.core :refer [v3]])
+    [immersa.scene.api.constant :as api.const]
+    [immersa.scene.api.core :as api.core :refer [v3]]
+    [immersa.scene.api.mesh :as api.mesh])
   (:require-macros
     [immersa.scene.macros :as m]))
 
@@ -66,7 +68,15 @@
                                              noise-texture
                                              noise-strength
                                              texture-mask
-                                             limit-velocity-damping]
+                                             limit-velocity-damping
+                                             animation-sheet-enabled?
+                                             sprite-cell-height
+                                             sprite-cell-width
+                                             start-sprite-cell-id
+                                             end-sprite-cell-id
+                                             sprite-cell-change-speed
+                                             sprite-cell-loop?
+                                             sprite-random-start-cell?]
                                       :or {capacity 100}
                                       :as opts}]
   (let [particle-system (if gpu?
@@ -103,11 +113,19 @@
       pre-warm-cycles (j/assoc! :preWarmCycles pre-warm-cycles)
       min-initial-rotation (j/assoc! :minInitialRotation min-initial-rotation)
       max-initial-rotation (j/assoc! :maxInitialRotation max-initial-rotation)
+      sprite-cell-height (j/assoc! :spriteCellHeight sprite-cell-height)
+      sprite-cell-width (j/assoc! :spriteCellWidth sprite-cell-width)
+      start-sprite-cell-id (j/assoc! :startSpriteCellID start-sprite-cell-id)
+      end-sprite-cell-id (j/assoc! :endSpriteCellID end-sprite-cell-id)
+      sprite-cell-change-speed (j/assoc! :spriteCellChangeSpeed sprite-cell-change-speed)
+      (some? sprite-cell-loop?) (j/assoc! :spriteCellLoop sprite-cell-loop?)
+      (some? sprite-random-start-cell?) (j/assoc! :spriteRandomStartCell sprite-random-start-cell?)
       (some? local?) (j/assoc! :isLocal local?)
       target-stop-duration (j/assoc! :targetStopDuration (if update-speed
                                                            (/ target-stop-duration (/ 0.01 update-speed))
                                                            target-stop-duration))
-      dispose-on-stop? (j/assoc! :disposeOnStop dispose-on-stop?)
+      (some? animation-sheet-enabled?) (j/assoc! :isAnimationSheetEnabled animation-sheet-enabled?)
+      (some? dispose-on-stop?) (j/assoc! :disposeOnStop dispose-on-stop?)
       texture-mask (j/assoc! :textureMask texture-mask)
       limit-velocity-damping (j/assoc! :limitVelocityDamping limit-velocity-damping))))
 
@@ -170,7 +188,74 @@
           (j/assoc! emitter-position :z z))))
     ps))
 
+(defn clouds [name & {:keys [position
+                             scale
+                             update-speed]
+                      :or {position (v3 0 0 0)
+                           update-speed 0.025
+                           scale 0.1}}]
+  (let [cloud-mesh (api.mesh/sphere (str name "-mesh")
+                                    :position position
+                                    :diameter 0.1
+                                    :segments 16
+                                    :scale scale
+                                    :visible? false)
+        before-render-fn (str name "-clouds-before-render")
+        cloud-system (create-particle-system name
+                                             :position position
+                                             :capacity 750
+                                             :particle-texture (api.core/texture "img/texture/clouds.png")
+                                             :blend-mode api.const/particle-blend-mode-standard
+                                             :animation-sheet-enabled? true
+                                             :sprite-cell-height 512
+                                             :sprite-cell-width 512
+                                             :start-sprite-cell-id 3
+                                             :end-sprite-cell-id 15
+                                             :sprite-cell-change-speed 0
+                                             :sprite-cell-loop? false
+                                             :sprite-random-start-cell? true
+                                             :min-emit-box (v3 -1 0 0)
+                                             :max-emit-box (v3 1 0 0)
+                                             :min-life-time 1
+                                             :max-life-time 1
+                                             :emit-rate 500
+                                             :gravity (v3 0 -0.8 0)
+                                             :direction1 (v3 -2 8 2)
+                                             :direction2 (v3 2 8 -2)
+                                             :min-angular-speed 0
+                                             :max-angular-speed 0.1
+                                             :min-emit-power 0.04
+                                             :max-emit-power 0.06
+                                             :update-speed update-speed
+                                             :emitter cloud-mesh
+                                             ;; :local? true
+                                             :min-size (* 0.3 scale)
+                                             :max-size (* 0.3 scale)
+                                             :color-gradients [[0 (api.core/color 1 1 1 0)]
+                                                               [0.3 (api.core/color 1 1 1 0.7)]
+                                                               [1 (api.core/color 0.3 0.3 0.3 0)]])]
+    (api.core/register-before-render-fn
+      before-render-fn
+      (fn []
+        (let [position (j/get cloud-system :position)
+              x (j/get position :x)
+              y (j/get position :y)
+              z (j/get position :z)]
+          (j/assoc-in! cloud-mesh [:position :x] x)
+          (j/assoc-in! cloud-mesh [:position :y] y)
+          (j/assoc-in! cloud-mesh [:position :z] z))))
+    (j/call cloud-system :createCylinderEmitter 1 0.1)
+    cloud-system))
+
 (comment
+  (j/get (api.core/get-object-by-name "cloud-particle") :position)
+  (api.core/dispose "cloud-particle")
+  (start
+    (clouds "cloud-particle"
+           :scale 0.9
+           :update-speed 0.01
+           :position (v3 0 2.1 2)))
+
   (let [origin (v3 0 0 0)
         position (v3 0 0 0)
         p (create-particle-system "p"

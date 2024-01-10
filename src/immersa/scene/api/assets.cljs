@@ -22,7 +22,8 @@
                "img/texture/earth/specular.jpeg"
                "img/texture/earth/bump.jpeg"
                "img/texture/earth/clouds2-min.jpg"
-               "img/texture/ground/backgroundGround.png"}
+               "img/texture/ground/backgroundGround.png"
+               "img/texture/clouds.png"}
    :models #{;; "model/plane.glb"
              "model/plane_2.glb"
              "model/porche_911.glb"}})
