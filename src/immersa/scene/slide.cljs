@@ -210,10 +210,10 @@
                                            :visibility 0}
                         "2d-slide-text-2" {:type :text3D
                                            :text "3D IMMERSION"
+                                           :nme :purple-glass
                                            :depth 0.1
                                            :size 0.35
                                            :position (v3 0 1.53 9.1)
-                                           :hl-color [1 1 1]
                                            :visibility 0}
                         "2d-slide" {:type :image
                                     :path "img/texture/2d-slide.png"
@@ -232,7 +232,7 @@
                         "2d-slide-text-1" {:visibility 1}
                         "2d-slide-text-2" {:visibility 0}
                         "plane" {:type :glb
-                                 :path "model/plane.glb"
+                                 :path "model/plane_2.glb"
                                  :position (v3 0 -1 50)
                                  :rotation (v3 0 Math/PI 0)}
 

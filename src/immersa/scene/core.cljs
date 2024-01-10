@@ -179,7 +179,8 @@
                                          :mat ground-material)
           _ (api.component/create-sky-box)
           _ (api.component/create-sky-sphere)
-          _ (api.material/create-environment-helper)]
+          _ (api.material/create-environment-helper)
+          _ (api.material/init-nme-materials)]
       (common.utils/remove-element-listeners)
       (common.utils/register-event-listener js/window "resize" (functions/debounce #(j/call engine :resize) 250))
       (j/assoc! light :intensity 0.7)

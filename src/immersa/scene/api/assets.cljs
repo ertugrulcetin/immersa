@@ -23,5 +23,6 @@
                "img/texture/earth/bump.jpeg"
                "img/texture/earth/clouds2-min.jpg"
                "img/texture/ground/backgroundGround.png"}
-   :models #{"model/plane.glb"
+   :models #{;; "model/plane.glb"
+             "model/plane_2.glb"
              "model/porche_911.glb"}})

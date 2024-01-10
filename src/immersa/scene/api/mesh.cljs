@@ -9,7 +9,8 @@
     [immersa.scene.api.material :as api.material]
     [immersa.scene.font :as font])
   (:require-macros
-    [immersa.scene.macros :as m]))
+    [immersa.scene.macros :as m]
+    [shadow.resource :as rc]))
 
 (defn box [name & {:keys [size
                           width
@@ -183,8 +184,10 @@
                            rotation
                            emissive-color
                            mat
+                           billboard-mode
                            hl-color
-                           hl-blur]
+                           hl-blur
+                           nme]
                     :or {size 1
                          resolution 8
                          depth 1.0
@@ -199,7 +202,8 @@
                           :depth depth
                           :sideOrientation api.const/mesh-double-side}
                      nil
-                     earcut)]
+                     earcut)
+        mat (or (some-> nme api.material/get-nme-material) mat)]
     (when hl-color
       (let [hl (api.core/highlight-layer (str name "-hl")
                                          :blur-vertical-size hl-blur
@@ -207,9 +211,11 @@
             [r g b] hl-color]
         (j/call hl :addMesh text (api.core/color r g b))))
     (api.core/add-node-to-db name text (assoc opts :type :text3D))
-    (cond-> mat
-      emissive-color (j/assoc! :emissiveColor emissive-color))
+    (when-not nme
+      (cond-> mat
+        emissive-color (j/assoc! :emissiveColor emissive-color)))
     (cond-> text
+      billboard-mode (j/assoc! :billboardMode (j/get Mesh billboard-mode))
       mat (j/assoc! :material mat)
       visibility (j/assoc! :visibility visibility)
       position (j/assoc! :position position)
@@ -235,58 +241,17 @@
     m))
 
 (comment
-  (api.core/get-mat-by-name "paint")
-  (let [m (glb->mesh "a" {:type :glb
-                          :path "model/plane.glb"
-                          :position (v3 1 1 1)
-                          :rotation (v3 -0.25 Math/PI -0.4)
-                          })
-        mat (api.material/standard-mat "mat")]
-    (j/assoc! m :material m))
+  (api.core/dispose "2d-slide-text-2")
 
-  (glb->mesh "porche" {:type :glb
-                       :path "model/porche_911.glb"
-                       :position (v3 -1.25 1 5)
-                       :rotation (v3 0 (/ Math/PI 8) 0)
-                       :update-materials {"paint" {:albedo-color api.const/color-black}}})
-
-  (api.core/dispose "text-dots" "t2" "t" "2d-slide-text-2" "2d-slide"
-                    "3d-slide-text-1")
-  (text "t"
-        {:type :text3D
-         :text "$2.3B\n(TOM)"
-         :depth 0.1
-         :size 0.25
-         :position (v3 -1.5 1.75 5)
-         :hl-color [0.99 0.8 1]
-         :visibility 1})
-
-  (text "t-2"
-        {:type :text3D
-         :text "$242.9M\n  (SAM)"
-         :depth 0.1
-         :size 0.25
-         :position (v3 0 1.75 5)
-         :hl-color [0.9 0.8 0.4]
-         :visibility 1})
-
-  (text "t-3"
-        {:type :text3D
-         :text "$15M\n(SOM)"
-         :depth 0.1
-         :size 0.25
-         :position (v3 1.5 1.75 5)
-         :hl-color [0.9 0.88 0.88]
-         :visibility 1})
-
-  (text "t2"
-        {:type :text3D
-         :text "3D Immersion with Immersa"
-         :depth 0.1
-         ;:emissive-color api.const/color-white
-         :size 0.2
-         :position (v3 0 2.65 5)
-         :hl-color [1 1 1]
-         ;:rotation (v3 (/ js/Math.PI 2) 0 0)
-         :visibility 1})
+  (api.material/parse-from-snippet
+    "#IL1K1C#6"
+    (fn [mat]
+      (text "2d-slide-text-2" {:type :text3D
+                               :text "3D IMMERSION"
+                               :depth 0.1
+                               :size 0.35
+                               :billboard-mode api.const/mesh-billboard-mode-all
+                               :mat mat
+                               :position (v3 0 2.75 5)
+                               :visibility 1})))
   )

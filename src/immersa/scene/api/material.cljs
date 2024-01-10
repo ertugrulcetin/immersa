@@ -9,10 +9,25 @@
     ["@babylonjs/core/Materials/standardMaterial" :refer [StandardMaterial]]
     ["@babylonjs/materials/grid/gridMaterial" :refer [GridMaterial]]
     [applied-science.js-interop :as j]
-    [immersa.scene.api.constant :as api.cons]
     [immersa.scene.api.core :as api.core])
   (:require-macros
-    [immersa.scene.macros :as m]))
+    [immersa.scene.macros :as m]
+    [shadow.resource :as rc]))
+
+(defn parse-from-json [json-str]
+  (j/call NodeMaterial :Parse (js/JSON.parse json-str)))
+
+(defn parse-from-snippet [id on-loaded]
+  (j/call (j/call NodeMaterial :ParseFromSnippetAsync id) :then on-loaded))
+
+;; TODO move to addTask, currently it's bundled with the app.js!!!
+(def nme)
+
+(defn init-nme-materials []
+  (set! nme {:purple-glass (parse-from-json (rc/inline "shader/nme/purpleGlass.json"))}))
+
+(defn get-nme-material [name]
+  (api.core/clone (get nme name)))
 
 (defn standard-mat [name & {:keys [diffuse-texture
                                    has-alpha?
@@ -132,20 +147,6 @@
         eh (EnvironmentHelper. options (api.core/get-scene))]
     (j/assoc! api.core/db :environment-helper eh)
     eh))
-
-(comment
-
-  (let [mat (j/get-in api.core/db [:environment-helper :skyboxMaterial])]
-    (j/assoc! mat :backFaceCulling false)
-    ;(j/assoc! (api.core/get-object-by-name "sky-box") :material mat)
-
-    ))
-
-(defn parse-from-json [json-str]
-  (j/call NodeMaterial :Parse (js/JSON.parse json-str)))
-
-(defn parse-from-snippet [id on-loaded]
-  (j/call (j/call NodeMaterial :ParseFromSnippetAsync id) :then on-loaded))
 
 (defn get-block-by-name [mat name]
   (j/call mat :getBlockByName name))
