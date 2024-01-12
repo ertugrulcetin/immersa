@@ -16,6 +16,9 @@
 (defn detach-control [camera]
   (j/call camera :detachControl))
 
+(defn set-pos [pos]
+  (j/call-in (active-camera) [:position :copyFrom] pos))
+
 (defn reset-camera []
   (let [cam (active-camera)]
     (j/assoc! cam

@@ -1,12 +1,17 @@
 (ns immersa.scene.api.assets)
 
 (def assets
-  {:texts #{"shader/nme/purpleGlass.json"}
+  {:texts #{"shader/nme/purpleGlass.json"
+            "shader/nme/sphere_stone.json"
+            "shader/nme/sphere_world.json"
+            "shader/nme/translucent.json"
+            "shader/nme/nebula.json"}
    :cube-textures #{"img/skybox/sunny/sunny"
                     "img/skybox/space/space"
                     "img/skybox/black/black"
                     "img/skybox/background/background"
                     "img/texture/environment/environmentSpecular.env"
+                    "img/texture/environment/cube_specular.env"
                     "img/texture/skybox/backgroundSkybox.dds"}
    :textures #{"img/texture/noise/ac.jpg"
                "img/texture/numbers.jpg"
@@ -24,7 +29,12 @@
                "img/texture/earth/bump.jpeg"
                "img/texture/earth/clouds2-min.jpg"
                "img/texture/ground/backgroundGround.png"
-               "img/texture/clouds.png"}
-   :models #{;; "model/plane.glb"
-             "model/plane_2.glb"
+               "img/texture/copper-diffuse.png"
+               "img/texture/copper-normal.jpg"
+               "img/texture/clouds.png"
+               "img/texture/sphere_stone_1.png"
+               "img/texture/sphere_stone_2.png"
+               "img/texture/sphere_stone_3.png"
+               "img/texture/sphere_stone_4.png"}
+   :models #{"model/plane_2.glb"
              "model/porche_911.glb"}})

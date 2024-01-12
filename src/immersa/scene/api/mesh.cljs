@@ -3,6 +3,8 @@
     ["@babylonjs/core/Maths/math.path" :refer [Curve3]]
     ["@babylonjs/core/Meshes/mesh" :refer [Mesh]]
     ["@babylonjs/core/Meshes/meshBuilder" :refer [MeshBuilder]]
+    ["@babylonjs/core/Misc/greasedLineTools" :refer [GreasedLineTools]]
+    ["@babylonjs/core/Meshes/Builders/greasedLineBuilder" :refer [CreateGreasedLine]]
     ["earcut" :as earcut]
     [applied-science.js-interop :as j]
     [immersa.scene.api.constant :as api.const]
@@ -10,8 +12,7 @@
     [immersa.scene.api.material :as api.material]
     [immersa.scene.font :as font])
   (:require-macros
-    [immersa.scene.macros :as m]
-    [shadow.resource :as rc]))
+    [immersa.scene.macros :as m]))
 
 (defn box [name & {:keys [size
                           width
@@ -36,11 +37,11 @@
                                                         :skybox
                                                         :box)))
     (cond-> b
-      alpha-index (j/assoc! :alphaIndex alpha-index)
-      mat (j/assoc! :material mat)
-      position (j/assoc! :position position)
-      visibility (j/assoc! :visibility visibility)
-      (some? infinite-distance?) (j/assoc! :infiniteDistance infinite-distance?))))
+            alpha-index (j/assoc! :alphaIndex alpha-index)
+            mat (j/assoc! :material mat)
+            position (j/assoc! :position position)
+            visibility (j/assoc! :visibility visibility)
+            (some? infinite-distance?) (j/assoc! :infiniteDistance infinite-distance?))))
 
 (defn sphere [name & {:keys [diameter
                              segments
@@ -55,7 +56,8 @@
                              skybox?
                              mat
                              infinite-distance?
-                             visible?]
+                             visible?
+                             type]
                       :or {segments 32
                            diameter 1
                            arc 1
@@ -69,17 +71,17 @@
                                                       :slice slice
                                                       :updatable updatable?
                                                       :sideOrientation side-orientation})]
-    (api.core/add-node-to-db name s (assoc opts :type (if skybox?
-                                                        :skybox
-                                                        :sphere)))
+    (api.core/add-node-to-db name s (assoc opts :type (or type (if skybox?
+                                                                 :skybox
+                                                                 :sphere))))
     (m/cond-doto s
-      mat (j/assoc! :material mat)
-      position (j/assoc! :position position)
-      rotation (j/assoc! :rotation rotation)
-      scale (api.core/scaling scale)
-      visibility (j/assoc! :visibility visibility)
-      (some? visible?) (j/assoc! :isVisible visible?)
-      (some? infinite-distance?) (j/assoc! :infiniteDistance infinite-distance?))))
+                 mat (j/assoc! :material mat)
+                 position (j/assoc! :position position)
+                 rotation (j/assoc! :rotation rotation)
+                 scale (api.core/scaling scale)
+                 visibility (j/assoc! :visibility visibility)
+                 (some? visible?) (j/assoc! :isVisible visible?)
+                 (some? infinite-distance?) (j/assoc! :infiniteDistance infinite-distance?))))
 
 (defn capsule [name & {:keys [height radius visibility]
                        :as opts}]
@@ -87,7 +89,7 @@
                                                        :radius radius})]
     (api.core/add-node-to-db name c opts)
     (cond-> c
-      visibility (j/assoc! :visibility visibility))))
+            visibility (j/assoc! :visibility visibility))))
 
 (defn plane [name & {:keys [position
                             rotation
@@ -103,12 +105,12 @@
   (let [p (j/call MeshBuilder :CreatePlane name #js {:width width
                                                      :height height})]
     (m/cond-doto p
-      billboard-mode (j/assoc! :billboardMode (j/get Mesh billboard-mode))
-      visibility (j/assoc! :visibility visibility)
-      position (j/assoc! :position position)
-      rotation (j/assoc! :rotation rotation)
-      scale (api.core/scaling scale)
-      material (j/assoc! :material material))
+                 billboard-mode (j/assoc! :billboardMode (j/get Mesh billboard-mode))
+                 visibility (j/assoc! :visibility visibility)
+                 position (j/assoc! :position position)
+                 rotation (j/assoc! :rotation rotation)
+                 scale (api.core/scaling scale)
+                 material (j/assoc! :material material))
     (api.core/add-node-to-db name p (assoc opts :type type))))
 
 (defn plane-rounded [name & {:keys [radius
@@ -149,12 +151,12 @@
         mesh (j/call MeshBuilder :CreatePolygon "polygon" (clj->js {:shape shape
                                                                     :sideOrientation side-orientation}) nil earcut)]
     (m/cond-doto mesh
-      billboard-mode (j/assoc! :billboardMode (j/get Mesh billboard-mode))
-      visibility (j/assoc! :visibility visibility)
-      position (j/assoc! :position position)
-      rotation (j/assoc! :rotation rotation)
-      scale (api.core/scaling scale)
-      material (j/assoc! :material material))
+                 billboard-mode (j/assoc! :billboardMode (j/get Mesh billboard-mode))
+                 visibility (j/assoc! :visibility visibility)
+                 position (j/assoc! :position position)
+                 rotation (j/assoc! :rotation rotation)
+                 scale (api.core/scaling scale)
+                 material (j/assoc! :material material))
     (j/assoc-in! mesh [:rotation :x] (/ Math/PI -2))
     (api.core/add-node-to-db name mesh (assoc opts :type type))))
 
@@ -168,7 +170,7 @@
                                                                                 :onReady on-ready})]
     (api.core/add-node-to-db name ground opts)
     (cond-> ground
-      mat (j/assoc! :material mat))))
+            mat (j/assoc! :material mat))))
 
 (defn create-ground [name & {:keys [width height mat]
                              :as opts}]
@@ -176,7 +178,7 @@
                                                            :height height})]
     (api.core/add-node-to-db name ground opts)
     (cond-> ground
-      mat (j/assoc! :material mat))))
+            mat (j/assoc! :material mat))))
 
 (defn text [name & {:keys [text
                            size
@@ -216,13 +218,13 @@
     (api.core/add-node-to-db name text (assoc opts :type :text3D))
     (when-not nme
       (cond-> mat
-        emissive-color (j/assoc! :emissiveColor emissive-color)))
+              emissive-color (j/assoc! :emissiveColor emissive-color)))
     (cond-> text
-      billboard-mode (j/assoc! :billboardMode (j/get Mesh billboard-mode))
-      mat (j/assoc! :material mat)
-      visibility (j/assoc! :visibility visibility)
-      position (j/assoc! :position position)
-      rotation (j/assoc! :rotation rotation))))
+            billboard-mode (j/assoc! :billboardMode (j/get Mesh billboard-mode))
+            mat (j/assoc! :material mat)
+            visibility (j/assoc! :visibility visibility)
+            position (j/assoc! :position position)
+            rotation (j/assoc! :rotation rotation))))
 
 (defn line [name & {:keys [points]
                     :as opts}]
@@ -240,26 +242,73 @@
     (doseq [[name {:keys [albedo-color]}] update-materials]
       (let [mat (api.core/get-mat-by-name name)]
         (m/cond-doto mat
-          albedo-color (j/assoc! :albedoColor albedo-color))))
+                     albedo-color (j/assoc! :albedoColor albedo-color))))
     (m/cond-doto m
-      position (j/assoc! :position position)
-      rotation (j/assoc! :rotation rotation)
-      scale (api.core/scaling scale))
+                 position (j/assoc! :position position)
+                 rotation (j/assoc! :rotation rotation)
+                 scale (api.core/scaling scale))
     (api.core/set-enabled m true)
     m))
 
-(comment
-  (api.core/dispose "2d-slide-text-2")
+(defn- get-points-from-text [& {:keys [text size resolution font]}]
+  (j/call GreasedLineTools :GetPointsFromText text size resolution font))
 
-  (api.material/parse-from-snippet
-    "#IL1K1C#8"
-    (fn [mat]
-      (text "2d-slide-text-2" {:type :text3D
-                               :text "3D IMMERSION"
-                               :depth 0.1
-                               :size 0.35
-                               :billboard-mode api.const/mesh-billboard-mode-all
-                               :mat mat
-                               :position (v3 0 2.75 5)
-                               :visibility 1})))
+(defn greased-line [name & {:keys [text
+                                   position
+                                   rotation
+                                   visibility
+                                   size
+                                   resolution
+                                   font
+                                   material-type
+                                   color-mode
+                                   width
+                                   color]
+                            :or {width 0.1
+                                 size 1
+                                 resolution 4
+                                 font font/droid
+                                 color api.const/color-white}
+                            :as opts}]
+  (let [points (get-points-from-text :text text
+                                     :size size
+                                     :resolution resolution
+                                     :font font)
+        gl (CreateGreasedLine. name
+                               #js {:points points}
+                               #js {:color color
+                                    :colorMode color-mode
+                                    :materialType material-type
+                                    :width width}
+                               (api.core/get-scene))]
+    (m/cond-doto gl
+                 position (j/assoc! :position position)
+                 rotation (j/assoc! :rotation rotation)
+                 visibility (j/assoc! :visibility visibility))
+    (api.core/add-node-to-db name gl (assoc opts :type :greased-line))))
+
+(comment
+  (api.core/dispose "sphere-text-2" "sphere-text-3" "test")
+  (js/console.log CreateGreasedLine)
+  (greased-line "sphere-text-2"
+                {:type :greased-line
+                 :text "Over 30 ready-made materials"
+                 :color api.const/color-white
+                 :position (v3 -0.5 2 5)
+                 :rotation (v3 (/ Math/PI  2) 0 0)
+                 :width 0.01
+                 :size 0.27
+                 :visibility 1})
+
+  (let [gl (greased-line "sphere-text-3"
+                      {:type :greased-line
+                       :text "for enhancing texts and models"
+                       ;:material-type api.const/greased-line-material-pbr
+                       ;:color-mode api.const/greased-line-color-mode-multi
+                       :color api.const/color-white
+                       :position (v3 -0.25 1.6 5)
+                       :width 0.01
+                       :size 0.23
+                       :visibility 1})]
+    )
   )

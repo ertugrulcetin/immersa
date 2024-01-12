@@ -25,7 +25,6 @@
     ["p5" :as p5]
     [applied-science.js-interop :as j]
     [cljs.core.async :as a]
-    [clojure.string :as str]
     [immersa.scene.api.assets :refer [assets]])
   (:require-macros
     [immersa.scene.macros :as m]))
@@ -196,10 +195,10 @@
   (check-if-not-exists-in-assets :textures path)
   (let [tex (Texture. path)]
     (m/cond-doto tex
-      u-scale (j/assoc! :uScale u-scale)
-      v-scale (j/assoc! :vScale v-scale)
-      on-load (j/call-in [:onLoadObservable :add] on-load)
-      on-error (j/assoc! :onError on-error))))
+                 u-scale (j/assoc! :uScale u-scale)
+                 v-scale (j/assoc! :vScale v-scale)
+                 on-load (j/call-in [:onLoadObservable :add] on-load)
+                 on-error (j/assoc! :onError on-error))))
 
 (defn register-on-before-render [f]
   (j/call-in db [:scene :onBeforeRenderObservable :add] f))
@@ -250,7 +249,7 @@
                                            :height height
                                            :generateMipMaps generate-mipmaps?})]
     (m/cond-doto texture
-      (some? alpha?) (j/assoc! :hasAlpha alpha?))))
+                 (some? alpha?) (j/assoc! :hasAlpha alpha?))))
 
 (defn clear-scene-color [color]
   (j/assoc-in! db [:scene :clearColor] color))
@@ -260,10 +259,10 @@
                                       inner-glow?
                                       outer-glow?]}]
   (m/cond-doto (HighlightLayer. name)
-    blur-horizontal-size (j/assoc! :blurHorizontalSize blur-horizontal-size)
-    blur-vertical-size (j/assoc! :blurVerticalSize blur-vertical-size)
-    inner-glow? (j/assoc! :innerGlow inner-glow?)
-    outer-glow? (j/assoc! :outerGlow outer-glow?)))
+               blur-horizontal-size (j/assoc! :blurHorizontalSize blur-horizontal-size)
+               blur-vertical-size (j/assoc! :blurVerticalSize blur-vertical-size)
+               inner-glow? (j/assoc! :innerGlow inner-glow?)
+               outer-glow? (j/assoc! :outerGlow outer-glow?)))
 
 (defn glow-layer [name & {:keys [main-texture-samples
                                  main-texture-fixed-size
@@ -275,7 +274,7 @@
                                                    :mainTextureFixedSize main-texture-fixed-size
                                                    :blurKernelSize blur-kernel-size})]
     (m/cond-doto gl
-      intensity (j/assoc! :intensity intensity))))
+                 intensity (j/assoc! :intensity intensity))))
 
 (defn transform-node [name & {:keys [position
                                      rotation
@@ -284,9 +283,9 @@
   (let [tn (TransformNode. name)]
     (add-node-to-db name tn opts)
     (m/cond-doto tn
-      position (j/assoc! :position position)
-      rotation (j/assoc! :rotation rotation)
-      scale (scaling scale))))
+                 position (j/assoc! :position position)
+                 rotation (j/assoc! :rotation rotation)
+                 scale (scaling scale))))
 
 (defn mesh [name & {:keys [position
                            rotation
@@ -296,10 +295,10 @@
   (let [tn (Mesh. name)]
     (add-node-to-db name tn opts)
     (m/cond-doto tn
-      position (j/assoc! :position position)
-      visibility (j/assoc! :visibility visibility)
-      rotation (j/assoc! :rotation rotation)
-      scale (scaling scale))))
+                 position (j/assoc! :position position)
+                 visibility (j/assoc! :visibility visibility)
+                 rotation (j/assoc! :rotation rotation)
+                 scale (scaling scale))))
 
 (defn add-children [parent & children]
   (add-prop-to-db (j/get parent :name) :children children)
@@ -317,7 +316,7 @@
   (let [pcs (PointsCloudSystem. name point-size)]
     (add-node-to-db name pcs opts)
     (m/cond-doto pcs
-      on-add-point (j/call :addPoints point-count on-add-point))
+                 on-add-point (j/call :addPoints point-count on-add-point))
     (when build-mesh?
       (let [p (j/call pcs :buildMeshAsync)]
         (when on-build-done
@@ -344,9 +343,9 @@
   (check-if-not-exists-in-assets :cube-textures root-url)
   (let [cb (CubeTexture. root-url nil extensions no-mipmaps? (clj->js files))]
     (m/cond-doto cb
-      coordinates-mode (j/assoc! :coordinatesMode (j/get Texture coordinates-mode))
-      on-load (j/call-in [:onLoadObservable :add] on-load)
-      on-error (j/assoc! :onError on-error))))
+                 coordinates-mode (j/assoc! :coordinatesMode (j/get Texture coordinates-mode))
+                 on-load (j/call-in [:onLoadObservable :add] on-load)
+                 on-error (j/assoc! :onError on-error))))
 
 (defn create-assets-manager [& {:keys [on-finish]}]
   (let [am (AssetsManager.)]
@@ -429,3 +428,22 @@
 
 (defn get-mat-by-name [name]
   (j/call-in db [:scene :getMaterialByName] name))
+
+(defn create-from-prefiltered-data [path]
+  (j/call CubeTexture :CreateFromPrefilteredData path (get-scene)))
+
+(defn lerp-colors [old-color new-color callback]
+  (when-not (equals? old-color new-color)
+    (let [p (a/promise-chan)
+         elapsed-time (atom 0)
+         transition-duration 0.5
+         fn-name (gensym "lerp-colors-")
+         _ (register-before-render-fn fn-name (fn []
+                                                (let [elapsed-time (swap! elapsed-time + (get-delta-time))
+                                                      amount (min (/ elapsed-time transition-duration) 1)
+                                                      color (color-lerp old-color new-color amount)]
+                                                  (callback (j/get color :r) (j/get color :g) (j/get color :b))
+                                                  (when (>= elapsed-time transition-duration)
+                                                    (remove-before-render-fn fn-name)
+                                                    (a/put! p true)))))]
+     p)))

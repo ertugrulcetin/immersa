@@ -7,6 +7,8 @@
     ["@babylonjs/core/Maths/math.color" :refer [Color3]]
     ["@babylonjs/core/Meshes/mesh" :refer [Mesh]]
     ["@babylonjs/core/Particles/particleSystem" :refer [ParticleSystem]]
+    ["@babylonjs/core/Materials/GreasedLine/greasedLineMaterialInterfaces" :refer [GreasedLineMeshColorMode
+                                                                                   GreasedLineMeshMaterialType]]
     [applied-science.js-interop :as j]))
 
 (def v3-up (j/call Vector3 :Up))
@@ -54,3 +56,6 @@
 (def keyboard-type-key-up (j/get KeyboardEventTypes :KEYUP))
 
 (def particle-blend-mode-standard (j/get ParticleSystem :BLENDMODE_STANDARD))
+
+(def greased-line-material-pbr (j/get GreasedLineMeshMaterialType :MATERIAL_TYPE_PBR))
+(def greased-line-color-mode-multi (j/get GreasedLineMeshColorMode :COLOR_MODE_MULTIPLY))

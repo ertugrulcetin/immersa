@@ -32,10 +32,10 @@
                                     {:frame (* duration fps) :value to}]))
         anim (Animation. name target-prop fps (j/get Animation data-type) (j/get Animation loop-mode))]
     (m/cond-doto anim
-      duration (j/assoc! :duration duration)
-      delay (j/assoc! :delay delay)
-      easing (j/call :setEasingFunction easing)
-      keys (j/call :setKeys (clj->js keys)))))
+                 duration (j/assoc! :duration duration)
+                 delay (j/assoc! :delay delay)
+                 easing (j/call :setEasingFunction easing)
+                 keys (j/call :setKeys (clj->js keys)))))
 
 (defn begin-direct-animation [& {:keys [target
                                         animations
@@ -129,8 +129,8 @@
                         :data-type api.const/animation-type-v3
                         :loop-mode api.const/animation-loop-cons
                         :easing (cubic-ease api.const/easing-ease-in-out)}
-                 keys (assoc :keys keys)
-                 (nil? keys) (assoc :from start :to end)))))
+                       keys (assoc :keys keys)
+                       (nil? keys) (assoc :from start :to end)))))
 
 (defn create-visibility-animation [{:keys [start end duration delay]
                                     :or {duration 1.0}}]
@@ -272,6 +272,17 @@
     (api.core/register-before-render-fn dissolve-fn-name dissolve-fn)
     p))
 
+(defn create-background->background-color-anim [& {:keys [objects-data
+                                                          speed-factor]
+                                                   :or {speed-factor 1}}]
+  (let [skybox-material (j/get-in api.core/db [:environment-helper :skybox :material])
+        ground-material (j/get-in api.core/db [:environment-helper :ground :material])
+        current-color (j/get skybox-material :primaryColor)
+        new-color (-> objects-data :skybox :background?)]
+    (api.core/lerp-colors current-color new-color (fn [r g b]
+                                                    (j/assoc! skybox-material :primaryColor (api.core/color r g b))
+                                                    (j/assoc! ground-material :primaryColor (api.core/color r g b))))))
+
 (defn create-skybox-dissolve-anim [& {:keys [skybox-path
                                              speed-factor]
                                       :or {speed-factor 1}}]
@@ -377,8 +388,8 @@
         (api.core/add-node-to-db name mesh (assoc opts :type :pcs-text))
         (api.core/add-prop-to-db name :pcs pcs)
         (m/cond-doto mesh
-          position (j/assoc! :position position)
-          visibility (j/assoc! :visibility visibility))
+                     position (j/assoc! :position position)
+                     visibility (j/assoc! :visibility visibility))
         (let [end-positions (j/call mesh :getPositionData)
               end-positions-len (j/get end-positions :length)
               points-count (/ end-positions-len 3)
