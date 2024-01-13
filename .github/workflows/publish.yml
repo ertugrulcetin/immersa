@@ -33,7 +33,7 @@ jobs:
         run: npm run release
 
       - name: Update Index.html with Commit SHA
-        run: sed -i "s/__COMMIT_SHA__/${CF_PAGES_COMMIT_SHA}/g" resources/public/index.html
+        run: sed -i "s/__COMMIT_SHA__/${GITHUB_SHA}/g" resources/public/index.html
 
       # Publish to Cloudflare Pages
       - name: Publish to Cloudflare Pages
