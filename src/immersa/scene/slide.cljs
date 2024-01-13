@@ -456,7 +456,15 @@
                                       :width 3
                                       :height 3
                                       :font-size 30
-                                      :visibility 0}}}
+                                      :visibility 0}
+                        "join-text" {:type :billboard
+                                     :position (v3 0 -0.75 0)
+                                     :text "Join Waitlist"
+                                     :scale 5
+                                     :width 3
+                                     :height 3
+                                     :font-size 30
+                                     :visibility 0}}}
 
                 {:data {:camera {:position (v3 0 0 -10)
                                  :rotation (v3 0 0 0)}
@@ -464,12 +472,10 @@
                                  :speed-factor 1.0}
                         "enjoy-text" {:type :billboard
                                       :visibility 1
-                                      :delay 600}}}
-
-                {:data {:camera {:position (v3 0 0 50)}
-                        :skybox {:gradient? true
-                                 :speed-factor 1.0}
-                        "enjoy-text" {:visibility 0}}}]
+                                      :delay 600}
+                        "join-text" {:type :billboard
+                                     :visibility 1
+                                     :delay 900}}}]
         slides-vec (vec (map-indexed #(assoc %2 :index %1) slides))
         props-to-copy [:type :position :rotation :visibility]
         clone-if-exists (fn [data]
@@ -851,13 +857,13 @@
             (some-> skybox-dissolve-anim a/<!)
 
             #_(cond
-                     ;(-> objects-data :skybox :gradient?)
-                     ;(a/<! (api.animation/create-sky-sphere-dissolve-anim))
+                       ;(-> objects-data :skybox :gradient?)
+                       ;(a/<! (api.animation/create-sky-sphere-dissolve-anim))
 
-                     prev-and-gradient?
-                     (do
-                       (a/<! (api.animation/create-reverse-sky-sphere-dissolve-anim))
-                       (some-> (run-skybox-dissolve-animation objects-data) a/<!)))
+                       prev-and-gradient?
+                       (do
+                         (a/<! (api.animation/create-reverse-sky-sphere-dissolve-anim))
+                         (some-> (run-skybox-dissolve-animation objects-data) a/<!)))
 
             (doseq [c channels]
               (a/<! c))

@@ -98,7 +98,9 @@
 (defclass right-controls []
   {:display :flex
    :flex-direction :row
-   :gap "10px"})
+   :gap "10px"
+   :align-items :center
+   :height "30px"})
 
 (defattrs arrow-keys-text []
   {:display :flex
@@ -112,3 +114,23 @@
    :left "50%"
    :transform "translate(-50%, -50%)"
    :z-index 5})
+
+(defclass wait-list-button []
+  {:font-family "'Open Sans', sans-serif"
+   :font-size "16px"
+   :cursor :pointer
+   :transition "all 0.3s ease"
+   :width "120px"
+   :height "100%"
+   :border-radius "50px"}
+  [:&:hover {:transition "all 0.3s ease"}])
+
+(defclass wait-list-button-glow []
+  [:&:hover {:box-shadow "rgba(111, 76, 255, 0.5) 0px 0px 20px 0px"}])
+
+(defclass wait-list-button-gradient-border []
+  {:color "rgba(256, 256, 256)"
+   :border "2px double transparent"
+   :background-image "linear-gradient(rgb(13, 14, 33), rgb(13, 14, 33)), radial-gradient(circle at left top, rgb(1, 110, 218), rgb(217, 0, 192))"
+   :background-origin "border-box"
+   :background-clip "padding-box, border-box"})
