@@ -212,9 +212,8 @@
     (when hl-color
       (let [hl (api.core/highlight-layer (str name "-hl")
                                          :blur-vertical-size hl-blur
-                                         :blur-horizontal-size hl-blur)
-            [r g b] hl-color]
-        (j/call hl :addMesh text (api.core/color r g b))))
+                                         :blur-horizontal-size hl-blur)]
+        (j/call hl :addMesh text hl-color)))
     (api.core/add-node-to-db name text (assoc opts :type :text3D))
     (when-not nme
       (cond-> mat
