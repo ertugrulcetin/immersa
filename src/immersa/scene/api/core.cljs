@@ -112,12 +112,6 @@
   ([r g b]
    (j/call Color3 :FromInts r g b)))
 
-(defn scaling
-  ([m n]
-   (scaling m n n n))
-  ([m x y z]
-   (j/assoc! m :scaling (v3 x y z))))
-
 (defn get-node-by-name [name]
   (j/get-in db [:nodes name]))
 
@@ -285,7 +279,7 @@
     (m/cond-doto tn
       position (j/assoc! :position position)
       rotation (j/assoc! :rotation rotation)
-      scale (scaling scale))))
+      scale (j/assoc! :scaling scale))))
 
 (defn mesh [name & {:keys [position
                            rotation
@@ -298,7 +292,7 @@
       position (j/assoc! :position position)
       visibility (j/assoc! :visibility visibility)
       rotation (j/assoc! :rotation rotation)
-      scale (scaling scale))))
+      scale (j/assoc! :scaling scale))))
 
 (defn add-children [parent & children]
   (add-prop-to-db (j/get parent :name) :children children)

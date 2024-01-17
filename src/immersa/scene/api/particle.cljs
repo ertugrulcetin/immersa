@@ -252,8 +252,8 @@
   (api.core/dispose "cloud-particle")
   (start
     (clouds "cloud-particle"
-           :scale 0.9
-           :update-speed 0.01
+           :scale (v3 0.9)
+            :update-speed 0.01
            :position (v3 0 2.1 2)))
 
   (let [origin (v3 0 0 0)

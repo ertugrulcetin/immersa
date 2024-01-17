@@ -200,12 +200,12 @@
         sp (api.mesh/sphere (str name "-earth-sphere")
                             :mat mat
                             :visibility visibility
-                            :scale 1.2
+                            :scale (v3 1.2)
                             :rotation (v3 0 0 js/Math.PI))
         clouds (api.mesh/sphere (str name "-cloud-sphere")
                                 :mat mat-clouds
                                 :visibility visibility
-                                :scale 1.21
+                                :scale (v3 1.21)
                                 :rotation (v3 0 0 js/Math.PI))
         ;; TODO it's suggested to use only one highlight layer for a scene
         hl (api.core/highlight-layer "hl"
@@ -315,13 +315,3 @@
     (if (and radius (> radius 0))
       (api.mesh/plane-rounded name opts)
       (api.mesh/plane name opts))))
-
-(comment
-  (api.core/dispose "2d-slide")
-  (image "2d-slide" {:type :image
-                     :path "img/texture/2d-slide.png"
-                     :scale 3.7
-                     :position (v3 0 1 9)
-                     :rotation (v3)
-                     :visibility 1})
-  )

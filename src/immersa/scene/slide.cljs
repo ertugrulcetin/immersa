@@ -18,33 +18,28 @@
 
 (defn- get-position-anim [object-slide-info object-name]
   (let [object (api.core/get-object-by-name object-name)
-        start-pos (j/get object :position)
-        end-pos (:position object-slide-info)]
-    (cond
-      (and start-pos end-pos (vector? end-pos))
-      [object-name (api.animation/create-multiple-position-animation {:start start-pos
-                                                                      :end end-pos
-                                                                      :duration (:duration object-slide-info)
-                                                                      :delay (:delay object-slide-info)})]
+        start-position (j/get object :position)
+        end-position (:position object-slide-info)
+        camera? (= object-name :camera)]
+    (let [end-position (cond
+                         (and start-position
+                              end-position
+                              (or (and
+                                    (not (vector? end-position))
+                                    (not (api.core/equals? start-position end-position)))
+                                  (and (vector? end-position)
+                                       (> (count end-position) 1))))
+                         end-position
 
-      (and start-pos end-pos (not (api.core/equals? start-pos end-pos)))
-      [object-name (api.animation/create-position-animation {:start start-pos
-                                                             :end end-pos
-                                                             :duration (:duration object-slide-info)
-                                                             :delay (:delay object-slide-info)})]
-
-      ;; TODO handle here
-      (and (= object-name :camera) start-pos end-pos (not (api.core/equals? start-pos end-pos)))
-      [object-name (api.animation/create-position-animation {:start start-pos
-                                                             :end end-pos
-                                                             :duration (:duration object-slide-info)
-                                                             :delay (:delay object-slide-info)})]
-
-      (and (= object-name :camera) (not end-pos) (not (api.core/equals? start-pos (j/get object :init-position))))
-      [object-name (api.animation/create-position-animation {:start start-pos
-                                                             :end (api.core/clone (j/get object :init-position))
-                                                             :duration (:duration object-slide-info)
-                                                             :delay (:delay object-slide-info)})])))
+                         (and camera?
+                              start-position
+                              (not end-position)
+                              (not (api.core/equals? start-position (j/get object :init-position))))
+                         (api.core/clone (j/get object :init-position)))]
+      (when end-position
+        [object-name (api.animation/create-position-animation (assoc object-slide-info
+                                                                     :start start-position
+                                                                     :end end-position))]))))
 
 (defn- get-rotation-anim [object-slide-info object-name]
   (let [object (api.core/get-object-by-name object-name)
@@ -69,6 +64,26 @@
                                                                      :start start-rotation
                                                                      :end end-rotation))]))))
 
+(defn- get-scale-anim [object-slide-info object-name]
+  (let [object (api.core/get-object-by-name object-name)
+        start-scale (j/get object :scaling)
+        end-scale (:scale object-slide-info)
+        camera? (= object-name :camera)]
+    (when-not camera?
+      (let [end-scale (when
+                        (and start-scale
+                             end-scale
+                             (or (and
+                                   (not (vector? end-scale))
+                                   (not (api.core/equals? start-scale end-scale)))
+                                 (and (vector? end-scale)
+                                      (> (count end-scale) 1))))
+                        end-scale)]
+        (when end-scale
+          [object-name (api.animation/create-scale-animation (assoc object-slide-info
+                                                                    :start start-scale
+                                                                    :end end-scale))])))))
+
 (defn- get-visibility-anim [object-slide-info object-name]
   (let [end-visibility (:visibility object-slide-info)
         start-visibility (j/get (api.core/get-object-by-name object-name) :visibility)]
@@ -88,20 +103,19 @@
 (defn get-target-anim [object-slide-info object-name]
   (when (and object-slide-info (= object-name :camera))
     (let [camera (api.camera/active-camera)
-          start (j/call camera :getTarget)
-          target (:target object-slide-info)]
-      (cond
-        (and start target (not (vector? target)) (not (api.core/equals? start target)))
+          start-target (j/call camera :getTarget)
+          end-target (:target object-slide-info)
+          end-target (and end-target
+                          (or (and
+                                (not (vector? end-target))
+                                (not (api.core/equals? start-target end-target)))
+                              (and (vector? end-target)
+                                   (> (count end-target) 1))))]
+      (when end-target
         [object-name (api.animation/create-camera-target-anim {:camera camera
-                                                               :target target
+                                                               :target end-target
                                                                :duration (:duration object-slide-info)
-                                                               :delay (:delay object-slide-info)})]
-
-        (and start target (vector? target))
-        [object-name (api.animation/create-multiple-target-animation {:camera camera
-                                                                      :target target
-                                                                      :duration (:duration object-slide-info)
-                                                                      :delay (:delay object-slide-info)})]))))
+                                                               :delay (:delay object-slide-info)})]))))
 
 (defn- get-animations-from-slide-info [acc object-slide-info object-name]
   (reduce
@@ -109,6 +123,7 @@
       (let [[object-name anim :as anim-vec] (case anim-type
                                               :position (get-position-anim object-slide-info object-name)
                                               :rotation (get-rotation-anim object-slide-info object-name)
+                                              :scale (get-scale-anim object-slide-info object-name)
                                               :visibility (get-visibility-anim object-slide-info object-name)
                                               :alpha (get-alpha-anim object-slide-info object-name)
                                               :focus (api.animation/create-focus-camera-anim object-slide-info)
@@ -120,7 +135,7 @@
           (and (= anim-type :focus) anim-vec)
           (conj [object-name (first anim)] [object-name (second anim)]))))
     acc
-    [:position :rotation :visibility :alpha :focus :target]))
+    [:position :rotation :scale :visibility :alpha :focus :target]))
 
 (defn- notify-ui [index slides-count]
   (dispatch [::events/update-slide-info index slides-count]))
@@ -130,7 +145,7 @@
                         "immersa-text" {:type :billboard
                                         :position (v3)
                                         :text "IMMERSA"
-                                        :scale 4
+                                        :scale (v3 4)
                                         :visibility 0}
                         "world" {:type :earth
                                  :position (v3 0 -0.7 -9.5)
@@ -146,7 +161,7 @@
                         "immersa-text-2" {:type :billboard
                                           :position (v3 0 -0.8 -7.5)
                                           :text "A 3D Presentation Tool for the Web"
-                                          :scale 1
+                                          :scale (v3 1)
                                           :width 3
                                           :height 3
                                           :font-size 35
@@ -217,7 +232,7 @@
                                            :visibility 0}
                         "2d-slide" {:type :image
                                     :path "img/texture/2d-slide.png"
-                                    :scale 3.7
+                                    :scale (v3 2)
                                     :position (v3 0 1 9)
                                     :rotation (v3)
                                     :visibility 0}
@@ -228,7 +243,8 @@
 
                 {:data {:camera {:position (v3 0 2 -1)}
                         :skybox {:path "img/skybox/space/space"}
-                        "2d-slide" {:visibility 1}
+                        "2d-slide" {:visibility 1
+                                    :scale (v3 3.7)}
                         "2d-slide-text-1" {:visibility 1}
                         "2d-slide-text-2" {:visibility 0}
                         "plane" {:type :glb
@@ -311,7 +327,7 @@
                                          :visibility 1}
                         "cloud-particle" {:type :particle
                                           :particle-type :cloud
-                                          :scale 0.9
+                                          :scale (v3 0.9)
                                           :update-speed 0.01
                                           :position (v3 10 2.1 2)}}}
 
@@ -452,7 +468,7 @@
                         "sphere6" {:position (v3 -2.5 3.25 4)}
                         "enjoy-text" {:type :billboard
                                       :text "✦ Enjoy the Immersive Experience ✦"
-                                      :scale 5
+                                      :scale (v3 5)
                                       :width 3
                                       :height 3
                                       :font-size 30
@@ -460,7 +476,7 @@
                         "join-text" {:type :billboard
                                      :position (v3 0 -0.75 0)
                                      :text "Join Waitlist"
-                                     :scale 5
+                                     :scale (v3 5)
                                      :width 3
                                      :height 3
                                      :font-size 30

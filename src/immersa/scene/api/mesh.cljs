@@ -78,7 +78,7 @@
       mat (j/assoc! :material mat)
       position (j/assoc! :position position)
       rotation (j/assoc! :rotation rotation)
-      scale (api.core/scaling scale)
+      scale (j/assoc! :scaling scale)
       visibility (j/assoc! :visibility visibility)
       (some? visible?) (j/assoc! :isVisible visible?)
       (some? infinite-distance?) (j/assoc! :infiniteDistance infinite-distance?))))
@@ -109,7 +109,7 @@
       visibility (j/assoc! :visibility visibility)
       position (j/assoc! :position position)
       rotation (j/assoc! :rotation rotation)
-      scale (api.core/scaling scale)
+      scale  (j/assoc! :scaling scale)
       material (j/assoc! :material material))
     (api.core/add-node-to-db name p (assoc opts :type type))))
 
@@ -155,7 +155,7 @@
       visibility (j/assoc! :visibility visibility)
       position (j/assoc! :position position)
       rotation (j/assoc! :rotation rotation)
-      scale (api.core/scaling scale)
+      scale (j/assoc! :scaling scale)
       material (j/assoc! :material material))
     (j/assoc-in! mesh [:rotation :x] (/ Math/PI -2))
     (api.core/add-node-to-db name mesh (assoc opts :type type))))
@@ -246,7 +246,7 @@
     (m/cond-doto m
       position (j/assoc! :position position)
       rotation (j/assoc! :rotation rotation)
-      scale (api.core/scaling scale))
+      scale (j/assoc! :scaling scale))
     (api.core/set-enabled m true)
     m))
 

@@ -12,6 +12,8 @@
   (:require-macros
     [immersa.scene.macros :as m]))
 
+(def fps 30)
+
 (defn cubic-ease [mode]
   (doto (CubicEase.)
     (j/call :setEasingMode (j/get EasingFunction mode))))
@@ -68,47 +70,10 @@
       (f))
     p))
 
-(defn create-position-animation [{:keys [start end duration delay]}]
-  (let [duration (or duration 1.0)]
-    (animation "position-animation"
-               :target-prop "position"
-               :duration duration
-               :delay delay
-               :from start
-               :to end
-               :data-type api.const/animation-type-v3
-               :loop-mode api.const/animation-loop-cons
-               :easing (cubic-ease api.const/easing-ease-in-out))))
-
-(defn create-multiple-position-animation [{:keys [start end duration delay fps]
-                                           :or {duration 1.0
-                                                fps 30}}]
-  (let [duration (or duration 1.0)
-        from {:frame 0 :value start}
-        n-positions (count end)
-        keys (vec
-               (cons
-                 from
-                 (map
-                   (fn [frame value]
-                     {:frame frame :value value})
-                   (rest (take (inc n-positions) (iterate (partial + (/ (* fps duration) n-positions)) 0)))
-                   end)))]
-    (animation "multiple-position-animation"
-               :target-prop "position"
-               :fps fps
-               :duration duration
-               :delay delay
-               :keys keys
-               :data-type api.const/animation-type-v3
-               :loop-mode api.const/animation-loop-cons
-               :easing (cubic-ease api.const/easing-ease-in-out))))
-
 (defn- get-anim-keys [{:keys [start end duration]}]
   (when (vector? end)
     (let [from {:frame 0 :value start}
-          n-positions (count end)
-          fps 30]
+          n-positions (count end)]
       (->> (map
              (fn [frame value]
                {:frame frame :value value})
@@ -117,6 +82,21 @@
            (cons from)
            vec))))
 
+(defn create-position-animation [{:keys [start end duration delay]}]
+  (let [duration (or duration 1.0)
+        keys (get-anim-keys {:start start
+                             :end end
+                             :duration duration})]
+    (animation "position-animation"
+               (cond-> {:target-prop "position"
+                        :duration duration
+                        :delay delay
+                        :data-type api.const/animation-type-v3
+                        :loop-mode api.const/animation-loop-cons
+                        :easing (cubic-ease api.const/easing-ease-in-out)}
+                 keys (assoc :keys keys)
+                 (nil? keys) (assoc :from start :to end)))))
+
 (defn create-rotation-animation [{:keys [start end duration delay]}]
   (let [duration (or duration 1.0)
         keys (get-anim-keys {:start start
@@ -124,6 +104,21 @@
                              :duration duration})]
     (animation "rotation-animation"
                (cond-> {:target-prop "rotation"
+                        :duration duration
+                        :delay delay
+                        :data-type api.const/animation-type-v3
+                        :loop-mode api.const/animation-loop-cons
+                        :easing (cubic-ease api.const/easing-ease-in-out)}
+                 keys (assoc :keys keys)
+                 (nil? keys) (assoc :from start :to end)))))
+
+(defn create-scale-animation [{:keys [start end duration delay]}]
+  (let [duration (or duration 1.0)
+        keys (get-anim-keys {:start start
+                             :end end
+                             :duration duration})]
+    (animation "scale-animation"
+               (cond-> {:target-prop "scaling"
                         :duration duration
                         :delay delay
                         :data-type api.const/animation-type-v3
@@ -156,40 +151,22 @@
              :loop-mode api.const/animation-loop-cons
              :easing (cubic-ease api.const/easing-ease-in-out)))
 
-(defn create-camera-target-anim [{:keys [camera target duration delay]
-                                  :or {duration 1.0}}]
-  (animation "camera-target-anim"
-             :delay delay
-             :target-prop "target"
-             :duration duration
-             :from (j/call camera :getTarget)
-             :to target
-             :data-type api.const/animation-type-v3
-             :loop-mode api.const/animation-loop-cons
-             :easing (cubic-ease api.const/easing-ease-in-out)))
-
-(defn create-multiple-target-animation [{:keys [camera target duration delay fps]
-                                         :or {duration 1.0
-                                              fps 30}}]
-  (let [from {:frame 0 :value (j/call camera :getTarget)}
-        n-positions (count target)
-        keys (vec
-               (cons
-                 from
-                 (map
-                   (fn [frame value]
-                     {:frame frame :value value})
-                   (rest (take (inc n-positions) (iterate (partial + (/ (* fps duration) n-positions)) 0)))
-                   target)))]
-    (animation "multiple-camera-target-anim"
-               :target-prop "target"
-               :fps fps
-               :duration duration
-               :delay delay
-               :keys keys
-               :data-type api.const/animation-type-v3
-               :loop-mode api.const/animation-loop-cons
-               :easing (cubic-ease api.const/easing-ease-in-out))))
+(defn create-camera-target-anim [{:keys [camera target duration delay]}]
+  (let [duration (or duration 1.0)
+        start (j/call camera :getTarget)
+        end target
+        keys (get-anim-keys {:start start
+                             :end end
+                             :duration duration})]
+    (animation "camera-target-anim"
+               (cond-> {:target-prop "target"
+                        :duration duration
+                        :delay delay
+                        :data-type api.const/animation-type-v3
+                        :loop-mode api.const/animation-loop-cons
+                        :easing (cubic-ease api.const/easing-ease-in-out)}
+                 keys (assoc :keys keys)
+                 (nil? keys) (assoc :from start :to end)))))
 
 (defn create-focus-camera-anim [object-slide-info]
   (when-let [object-name (:focus object-slide-info)]
