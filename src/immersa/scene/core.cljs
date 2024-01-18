@@ -115,16 +115,16 @@
               color (<! color-ch)
               new-color (api.core/color (j/get color 0) (j/get color 1) (j/get color 2))
               _ (when-not (api.core/equals? @prev-color new-color)
-                  (<! (api.core/lerp-colors {:start-color @prev-color
-                                             :end-color new-color
-                                             :on-lerp on-lerp})))]
+                  (<! (:ch (api.core/lerp-colors {:start-color @prev-color
+                                                  :end-color new-color
+                                                  :on-lerp on-lerp}))))]
           (reset! prev-color new-color)
           (j/call worker :postMessage #js[pixels width height])
           (<! (a/timeout 500))
           (recur))))))
 
 (defn when-scene-ready [engine scene start-slide-show?]
-  (api.core/clear-scene-color api.const/color-white)
+  (api.core/clear-scene-color (api.const/color-white))
   ;; (api.core/clear-scene-color (api.core/color-rgb 239 239 239))
   ;; (api.core/clear-scene-color api.const/color-black)
   (j/assoc-in! (api.core/get-object-by-name "sky-box") [:rotation :y] js/Math.PI)

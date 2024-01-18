@@ -267,7 +267,7 @@
                                  size 1
                                  resolution 4
                                  font font/droid
-                                 color api.const/color-white}
+                                 color (api.const/color-white)}
                             :as opts}]
   (let [points (get-points-from-text :text text
                                      :size size
@@ -292,22 +292,22 @@
   (greased-line "sphere-text-2"
                 {:type :greased-line
                  :text "Over 30 ready-made materials"
-                 :color api.const/color-white
+                 :color (api.const/color-white)
                  :position (v3 -0.5 2 5)
-                 :rotation (v3 (/ Math/PI  2) 0 0)
+                 :rotation (v3 (/ Math/PI 2) 0 0)
                  :width 0.01
                  :size 0.27
                  :visibility 1})
 
   (let [gl (greased-line "sphere-text-3"
-                      {:type :greased-line
-                       :text "for enhancing texts and models"
+                         {:type :greased-line
+                          :text "for enhancing texts and models"
                        ;:material-type api.const/greased-line-material-pbr
                        ;:color-mode api.const/greased-line-color-mode-multi
-                       :color api.const/color-white
-                       :position (v3 -0.25 1.6 5)
-                       :width 0.01
-                       :size 0.23
-                       :visibility 1})]
+                       :color (api.const/color-white)
+                          :position (v3 -0.25 1.6 5)
+                          :width 0.01
+                          :size 0.23
+                          :visibility 1})]
     )
   )

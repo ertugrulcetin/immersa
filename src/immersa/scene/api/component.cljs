@@ -49,6 +49,7 @@
 (comment
   (create-sky-box)
   (api.core/dispose "skybox-shader")
+  (api.core/dispose "sky-box")
   (j/call (api.core/get-object-by-name "skybox-shader") :setFloat "transparency" 0.2)
   (j/call (api.core/get-object-by-name "skybox-shader") :getFloat "transparency")
   (j/assoc! (api.core/get-object-by-name "skybox-shader") :alpha 0)
@@ -299,7 +300,7 @@
         mat (api.material/standard-mat
               (str name "-image-mat")
               (cond-> {:diffuse-texture texture
-                       :emissive-color api.const/color-white}
+                       :emissive-color (api.const/color-white)}
                 transparent? (assoc :opacity-texture texture
                                     :has-alpha? transparent?)))
         opts {:width width

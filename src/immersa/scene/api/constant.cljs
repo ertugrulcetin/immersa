@@ -34,12 +34,12 @@
 
 (def mesh-billboard-mode-all :BILLBOARDMODE_ALL)
 
-(def color-white (j/call Color3 :White))
-(def color-black (j/call Color3 :Black))
-(def color-yellow (j/call Color3 :Yellow))
-(def color-red (j/call Color3 :Red))
-(def color-teal (j/call Color3 :Teal))
-(def color-gray (j/call Color3 :Gray))
+(defn color-white [] (j/call Color3 :White))
+(defn color-black [] (j/call Color3 :Black))
+(defn color-yellow [] (j/call Color3 :Yellow))
+(defn color-red [] (j/call Color3 :Red))
+(defn color-teal [] (j/call Color3 :Teal))
+(defn color-gray [] (j/call Color3 :Gray))
 
 (def coordinates-mode-skybox :SKYBOX_MODE)
 

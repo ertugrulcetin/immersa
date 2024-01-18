@@ -165,12 +165,12 @@
 (defn- parse-colors [type form]
   (let [color-kw->color (fn [kw]
                           (case kw
-                            :color/white api.const/color-white
-                            :color/black api.const/color-black
-                            :color/red api.const/color-red
-                            :color/yellow api.const/color-yellow
-                            :color/teal api.const/color-teal
-                            :color/gray api.const/color-gray))]
+                            :color/white (api.const/color-white)
+                            :color/black (api.const/color-black)
+                            :color/red (api.const/color-red)
+                            :color/yellow (api.const/color-yellow)
+                            :color/teal (api.const/color-teal)
+                            :color/gray (api.const/color-gray)))]
     (cond
       (and (map? form)
            (type form)
@@ -180,7 +180,12 @@
       (and (map? form)
            (type form)
            (vector? (type form)))
-      (assoc form type (apply api.core/color (type form)))
+      (assoc form type (apply api.core/color-rgb (type form)))
+
+      (and (map? form)
+           (type form)
+           (number? (type form)))
+      (assoc form type (api.core/color-rgb (type form) (type form) (type form)))
 
       :else form)))
 
@@ -197,22 +202,10 @@
            (parse-colors :emissive-color)))
     slides))
 
-(comment
-
-  (parse-slides [{:data {"wave" {:type :wave}
-                         "immersa-text" {:type :billboard
-                                         :position [1 2 3]
-                                         :text "IMMERSA"
-                                         :scale (v3 4)
-                                         :visibility 0}
-                         "world" {:type :earth
-                                  :position (v3 0 -0.7 -9.5)
-                                  :visibility 0}}}])
-  )
-
 ;; TODO is is called every time a slide is changed
 (defn get-slides []
-  (let [slides [{:data {"wave" {:type :wave}
+  (let [slides [{:data {:skybox {:background {:color 103}}
+                        "wave" {:type :wave}
                         "immersa-text" {:type :billboard
                                         :position 0
                                         :text "IMMERSA"
@@ -221,7 +214,8 @@
                         "world" {:type :earth
                                  :position [0 -0.7 -9.5]
                                  :visibility 0}}}
-                {:data {"wave" {:type :wave}
+                {:data {:skybox {:background {:color 0}}
+                        "wave" {:type :wave}
                         "immersa-text" {:type :billboard
                                         :visibility 1}
                         "world" {:type :earth
@@ -273,8 +267,8 @@
                         :skybox {:path "img/skybox/space/space"}
                         "text-dots" {:type :pcs-text
                                      :text "      Welcome to the\n\n\n\n\n\n\n\nFuture of Presentation"
-                                     :visibility 1
                                      :duration 1.5
+                                     :delay 2500
                                      :point-size 5
                                      :rand-range [-10 20]
                                      :position [-5.5 1 9]
@@ -328,7 +322,7 @@
                                            :depth 0.1
                                            :size 0.25
                                            :position [-1.5 1.5 5]
-                                           :hl-color [0.99 0.8 1]
+                                           :hl-color [252.45 204 255]
                                            :hl-blur 0.5
                                            :visibility 0}
                         "3d-slide-text-2" {:type :text3D
@@ -336,7 +330,7 @@
                                            :depth 0.1
                                            :size 0.25
                                            :position [0 1.5 5]
-                                           :hl-color [0.9 0.8 0.4]
+                                           :hl-color [229.5 204 102]
                                            :hl-blur 0.5
                                            :visibility 0}
                         "3d-slide-text-3" {:type :text3D
@@ -344,7 +338,7 @@
                                            :depth 0.1
                                            :size 0.25
                                            :position [1.5 1.5 5]
-                                           :hl-color [0.9 0.88 0.88]
+                                           :hl-color [229.5 224.4 224.4]
                                            :hl-blur 0.5
                                            :visibility 0}}}
 
@@ -405,7 +399,7 @@
                 {:data {:camera {:position [0 2 -1]
                                  :rotation 0}
                         ;; TODO replace color and parse here as well
-                        :skybox {:background? (api.core/color-rgb 103)
+                        :skybox {:background {:color 103}
                                  :speed-factor 1.0}
                         "porche" {:type :glb
                                   :position [-1.25 1 5]}
@@ -446,7 +440,7 @@
                                          :visibility 1}}}
 
                 {:data {:camera {:position [0 1 -1]}
-                        :skybox {:background? (api.core/color-rgb 103)
+                        :skybox {:background {:color 103}
                                  :speed-factor 1.0}
                         "porche" {:type :glb
                                   :path "model/porche_911.glb"
@@ -493,7 +487,7 @@
 
                 {:data {:camera {:position [0 2 -1]
                                  :rotation 0}
-                        :skybox {:background? (api.core/color-rgb 80 157 105)
+                        :skybox {:background {:color [80 157 105]}
                                  :speed-factor 1.0}
                         "porche" {:type :glb
                                   :path "model/porche_911.glb"
@@ -524,7 +518,7 @@
 
                 {:data {:camera {:position [0 2 -1.5]
                                  :rotation 0}
-                        :skybox {:background? (api.core/color-rgb 80 157 105)
+                        :skybox {:background {:color [80 157 105]}
                                  :speed-factor 1.0}
                         "sphere-text-2" {:position [-0.5 2 5]
                                          :rotation 0
@@ -786,11 +780,28 @@
 (defmethod enable-component :default [name]
   (println "enable-component Default: " name))
 
+(let [circuit-breaker-running? (atom false)]
+  (defn process-next-prev-command [type ch slide-in-progress? current-running-anims]
+
+    (if (and @slide-in-progress? (not @circuit-breaker-running?))
+      (do
+        (reset! circuit-breaker-running? true)
+        (println "Circuit breaker tripped")
+        (doseq [{:keys [force-finish-fn force-finish-fn-atom]} @current-running-anims]
+          (if-let [force-finish-fn (some-> force-finish-fn-atom deref)]
+            (force-finish-fn)
+            (force-finish-fn)))
+        (reset! current-running-anims [])
+        (reset! circuit-breaker-running? false))
+      (a/put! ch type))))
+
 (defn start-slide-show []
   (let [command-ch (a/chan (a/dropping-buffer 1))
         slide-controls (js/document.getElementById "slide-controls")
         prev-button (j/get-in slide-controls [:children 0])
-        next-button (j/get-in slide-controls [:children 2])]
+        next-button (j/get-in slide-controls [:children 2])
+        current-running-anims (atom [])
+        slide-in-progress? (atom false)]
     (a/put! command-ch :next)
     (api.core/dispose-all (concat (api.core/get-objects-by-type "box")
                                   (api.core/get-objects-by-type "billboard")
@@ -802,26 +813,27 @@
     (common.utils/register-event-listener prev-button "click"
                                           (fn [e]
                                             (when-not (j/get e :repeat)
-                                              (a/put! command-ch :prev))))
+                                              (process-next-prev-command :prev command-ch slide-in-progress? current-running-anims))))
     (common.utils/register-event-listener next-button "click"
                                           (fn [e]
                                             (when-not (j/get e :repeat)
-                                              (a/put! command-ch :next))))
+                                              (process-next-prev-command :next command-ch slide-in-progress? current-running-anims))))
     (common.utils/register-event-listener js/window "keydown"
                                           (fn [e]
                                             (when-not (j/get e :repeat)
                                               (cond
                                                 (or (= (.-keyCode e) 39)
-                                                    (= (.-keyCode e) 40)) (a/put! command-ch :next)
+                                                    (= (.-keyCode e) 40))
+                                                (process-next-prev-command :next command-ch slide-in-progress? current-running-anims)
                                                 (or (= (.-keyCode e) 37)
-                                                    (= (.-keyCode e) 38)) (a/put! command-ch :prev)))))
+                                                    (= (.-keyCode e) 38))
+                                                (process-next-prev-command :prev command-ch slide-in-progress? current-running-anims)))))
     (go-loop [index -1]
       (let [command (a/<! command-ch)
             current-index (case command
                             :next (inc index)
                             :prev (dec index))
             slides (get-slides)]
-        ;; (cljs.pprint/pprint slides)
         (if (and (>= current-index 0) (< current-index (count slides)))
           (let [_ (notify-ui current-index (count slides))
                 slide (slides current-index)
@@ -886,74 +898,74 @@
                                     {}
                                     (group-by first animations)))
                 gradient? (-> objects-data :skybox :gradient?)
-                background? (-> objects-data :skybox :background?)
+                background? (-> objects-data :skybox :background)
                 prev-and-gradient? (and (= :prev command)
                                         (-> (:data (slides (inc current-index))) :skybox :gradient?))
-                skybox-dissolve-anim (when (and (not prev-and-gradient?) (not background?))
-                                       (run-skybox-dissolve-animation objects-data))
                 _ (doseq [name (set/difference current-slide-object-names
                                                object-names-to-dispose
                                                (set prev-slide-object-names))]
                     (enable-component name (get-in slide [:data name])))
-                channels (mapv #(api.animation/begin-direct-animation %) animations-data)
+                anims (mapv #(api.animation/begin-direct-animation %) animations-data)
+                _ (reset! slide-in-progress? true)
+                _ (swap! current-running-anims #(vec (concat % anims)))
+                channels (map :ch anims)
                 pcs-animations (keep
                                  (fn [object-name]
                                    (let [object-slide-info (get-in slide [:data object-name])]
                                      (when (and (#{:pcs-text} (:type object-slide-info)))
                                        (api.animation/pcs-text-anim object-name object-slide-info))))
                                  object-names-from-slide-info)]
-
-            (when (and (= :next command)
-                       background?
-                       (not (-> (:data (slides (dec current-index))) :skybox :background?)))
-              (a/<! (api.animation/create-skybox->background-dissolve-anim :speed-factor 0.5)))
-
-            (when (and (= :prev command)
-                       (not background?)
-                       (-> (:data (slides (inc current-index))) :skybox :background?))
-              (a/<! (api.animation/create-background->skybox-dissolve-anim :objects-data objects-data)))
-
+            (swap! current-running-anims #(vec (concat % pcs-animations)))
+            ;;
+            ;; (when (and (not prev-and-gradient?) (not background?))
+            ;;  (a/<! (run-skybox-dissolve-animation objects-data)))
+            ;;
+            ;; (when (and (= :next command)
+            ;;           background?
+            ;;           (not (-> (:data (slides (dec current-index))) :skybox :background?)))
+            ;;  (<! (api.animation/create-skybox->background-dissolve-anim :speed-factor 0.5)))
+            ;;
+            ;; (when (and (= :prev command)
+            ;;           (not background?)
+            ;;           (-> (:data (slides (inc current-index))) :skybox :background?))
+            ;;  (<! (api.animation/create-background->skybox-dissolve-anim :objects-data objects-data)))
+            ;;
             (when (or (and background?
                            (= :prev command)
-                           (-> (:data (slides (inc current-index))) :skybox :background?))
+                           (-> (:data (slides (inc current-index))) :skybox :background :color))
                       (and background?
                            (= :next command)
-                           (-> (:data (slides (dec current-index))) :skybox :background?)))
+                           (> current-index 0)
+                           (-> (:data (slides (dec current-index))) :skybox :background :color)))
               (do
                 (println "background color changing")
-                (some-> (api.animation/create-background->background-color-anim :objects-data objects-data) a/<!)))
+                (some->> (api.animation/create-background->background-color-anim (:skybox objects-data))
+                         (swap! current-running-anims conj))))
+            ;;
+            ;; (when (and background?
+            ;;           (= :next command)
+            ;;           (-> (:data (slides (dec current-index))) :skybox :background?))
+            ;;  (api.animation/create-background->background-color-anim :objects-data objects-data))
+            ;;
+            ;; (when (and (= :next command)
+            ;;           gradient?
+            ;;           (-> (:data (slides (dec current-index))) :skybox :background?))
+            ;;  (some-> (api.animation/create-background->gradient-anim :objects-data objects-data) a/<!))
+            ;;
+            ;; (when (and (= :prev command)
+            ;;           background?
+            ;;           (-> (:data (slides (inc current-index))) :skybox :gradient?))
+            ;;  (some-> (api.animation/create-gradient->background-anim :objects-data objects-data) a/<!))
 
-            (when (and background?
-                       (= :next command)
-                       (-> (:data (slides (dec current-index))) :skybox :background?))
-              (api.animation/create-background->background-color-anim :objects-data objects-data))
 
-            (when (and (= :next command)
-                       gradient?
-                       (-> (:data (slides (dec current-index))) :skybox :background?))
-              (some-> (api.animation/create-background->gradient-anim :objects-data objects-data) a/<!))
+            ;; (doseq [c channels]
+            ;;  (a/<! c))
+            ;; (doseq [{:keys [ch]} pcs-animations]
+            ;;  (a/<! ch))
 
-            (when (and (= :prev command)
-                       background?
-                       (-> (:data (slides (inc current-index))) :skybox :gradient?))
-              (some-> (api.animation/create-gradient->background-anim :objects-data objects-data) a/<!))
+            (doseq [{:keys [ch]} @current-running-anims]
+              (a/<! ch))
 
-            (some-> skybox-dissolve-anim a/<!)
-
-            #_(cond
-                       ;(-> objects-data :skybox :gradient?)
-                       ;(a/<! (api.animation/create-sky-sphere-dissolve-anim))
-
-                       prev-and-gradient?
-                       (do
-                         (a/<! (api.animation/create-reverse-sky-sphere-dissolve-anim))
-                         (some-> (run-skybox-dissolve-animation objects-data) a/<!)))
-
-            (doseq [c channels]
-              (a/<! c))
-
-            (doseq [c pcs-animations]
-              (a/<! c))
-
+            (reset! slide-in-progress? false)
             (recur current-index))
           (recur index))))))

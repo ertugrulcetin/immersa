@@ -64,11 +64,20 @@
                       to
                       loop?
                       speed-ratio
-                      on-animation-end)]
+                      on-animation-end)
+        time-out-fn-id (atom nil)]
     (if (and delay (> delay 0))
-      (js/setTimeout f delay)
+      (reset! time-out-fn-id (js/setTimeout f delay))
       (f))
-    p))
+    {:ch p
+     :force-finish-fn (fn []
+                        (when @time-out-fn-id
+                          (js/clearTimeout @time-out-fn-id))
+                        (j/call-in api.core/db [:scene :stopAnimation] target)
+                        (doseq [anim animations]
+                          (j/assoc! target (j/get anim :targetProperty) (-> anim (j/call :getKeys) last (j/get :value))))
+                        (when on-animation-end
+                          (on-animation-end)))}))
 
 (defn- get-anim-keys [{:keys [start end duration]}]
   (when (vector? end)
@@ -249,18 +258,21 @@
     (api.core/register-before-render-fn dissolve-fn-name dissolve-fn)
     p))
 
-(defn create-background->background-color-anim [& {:keys [objects-data
-                                                          speed-factor]
-                                                   :or {speed-factor 1}}]
+(defn create-background->background-color-anim [{:keys [background duration]
+                                                 :or {duration 1.0}}]
   (let [skybox-material (j/get-in api.core/db [:environment-helper :skybox :material])
         ground-material (j/get-in api.core/db [:environment-helper :ground :material])
         current-color (j/get skybox-material :primaryColor)
-        new-color (-> objects-data :skybox :background?)]
+        new-color (:color background)]
     (api.core/lerp-colors {:start-color current-color
                            :end-color new-color
-                           :on-lerp (fn [r g b]
-                                      (j/assoc! skybox-material :primaryColor (api.core/color r g b))
-                                      (j/assoc! ground-material :primaryColor (api.core/color r g b)))})))
+                           :duration duration
+                           :targets [[skybox-material :primaryColor]
+                                     [ground-material :primaryColor]]})))
+
+(comment
+  (create-skybox->background-dissolve-anim)
+  )
 
 (defn create-skybox-dissolve-anim [& {:keys [skybox-path
                                              speed-factor]
@@ -411,7 +423,8 @@
         font (api.core/get-p5-font font)
         points (j/call font :textToPoints text 0 0 font-size #js {:sampleFactor sample-factor
                                                                   :simplifyThreshold simplify-threshold})
-        pcs (api.core/pcs (str name "-pcs") :point-size point-size)]
+        pcs (api.core/pcs (str name "-pcs") :point-size point-size)
+        force-finish-fn (atom nil)]
     (doseq [p points]
       (api.core/add-points pcs 1 (fn [particle]
                                    (j/assoc! particle
@@ -449,29 +462,35 @@
                               :fps fps
                               :data-type api.const/animation-type-float
                               :loop-mode api.const/animation-loop-cons
-                              :easing (cubic-ease api.const/easing-ease-in-out))]
-          (api.core/register-before-render-fn
-            (str name "-pcs-morph-before-render")
-            (fn []
-              (let [inter (j/get interpolate-factor :value)]
-                (doseq [p (range 0 points-count)]
-                  (doseq [axis (range 0 3)]
-                    (let [index (+ (* 3 p) axis)
-                          start-value (j/get init-positions index)
-                          end-value (j/get end-positions index)]
-                      (j/assoc! new-positions index (api.core/lerp start-value end-value inter))))))
-              (api.core/update-vertices-data mesh new-positions)))
+                              :easing (cubic-ease api.const/easing-ease-in-out))
+              before-render-fn-name (str name "-pcs-morph-before-render")
+              _ (api.core/register-before-render-fn
+                  before-render-fn-name
+                  (fn []
+                    (let [inter (j/get interpolate-factor :value)]
+                      (doseq [p (range 0 points-count)]
+                        (doseq [axis (range 0 3)]
+                          (let [index (+ (* 3 p) axis)
+                                start-value (j/get init-positions index)
+                                end-value (j/get end-positions index)]
+                            (j/assoc! new-positions index (api.core/lerp start-value end-value inter))))))
+                    (api.core/update-vertices-data mesh new-positions)))
+              on-animation-end (fn []
+                                 (api.core/update-vertices-data mesh end-positions)
+                                 (api.core/remove-before-render-fn before-render-fn-name)
+                                 (a/put! p true))]
           (begin-direct-animation
             :delay delay
             :target interpolate-factor
             :animations anim
             :from 0
             :to (* fps duration)
-            :on-animation-end (fn []
-                                (a/put! p true)
-                                (api.core/update-vertices-data mesh end-positions)
-                                (api.core/remove-before-render-fn (str name "-pcs-morph-before-render")))))))
-    p))
+            :on-animation-end on-animation-end)
+          (reset! force-finish-fn (fn []
+                                    (j/call-in api.core/db [:scene :stopAnimation] interpolate-factor)
+                                    (on-animation-end))))))
+    {:ch p
+     :force-finish-fn-atom force-finish-fn}))
 
 (comment
   (api.core/dispose (api.core/get-object-by-name "text-dots"))
@@ -483,5 +502,5 @@
                   :point-size 5
                   :rand-range [-10 20]
                   :position (v3 -5.5 1 9)
-                  :color api.const/color-white})
+                  :color (api.const/color-white)})
   )

@@ -110,7 +110,12 @@
   ([c]
    (color-rgb c c c))
   ([r g b]
-   (j/call Color3 :FromInts r g b)))
+   (j/call Color3 :FromInts r g b))
+  ([r g b a]
+   (j/call Color4 :FromInts r g b a)))
+
+(defn color->color-rgb [[r g b]]
+  [(* 255.0 r) (* 255.0 g) (* 255.0 b)])
 
 (defn get-node-by-name [name]
   (j/get-in db [:nodes name]))
@@ -430,22 +435,39 @@
                            end-color
                            on-lerp
                            on-end
+                           targets
                            duration]
                     :or {duration 0.5}}]
   (if (and start-color end-color (not (equals? start-color end-color)))
     (let [p (a/promise-chan)
           elapsed-time (atom 0)
           fn-name (gensym "lerp-colors-")
-          _ (register-before-render-fn fn-name (fn []
-                                                 (let [elapsed-time (swap! elapsed-time + (get-delta-time))
-                                                       amount (min (/ elapsed-time duration) 1)
-                                                       color (color-lerp start-color end-color amount)]
-                                                   (on-lerp (j/get color :r) (j/get color :g) (j/get color :b))
-                                                   (when (>= elapsed-time duration)
-                                                     (remove-before-render-fn fn-name)
-                                                     (when on-end (on-end))
-                                                     (a/put! p true)))))]
-      p)
+          _ (register-before-render-fn
+              fn-name
+              (fn []
+                (let [elapsed-time (swap! elapsed-time + (get-delta-time))
+                      amount (min (/ elapsed-time duration) 1)
+                      new-color (color-lerp start-color end-color amount)
+                      r (j/get new-color :r)
+                      g (j/get new-color :g)
+                      b (j/get new-color :b)]
+                  (when on-lerp (on-lerp r g b))
+                  (when (seq targets)
+                    (doseq [[obj prop] targets]
+                      (j/assoc! obj prop (color r g b))))
+                  (when (>= elapsed-time duration)
+                    (remove-before-render-fn fn-name)
+                    (when on-end (on-end))
+                    (a/put! p true)))))]
+      {:ch p
+       :force-finish-fn (fn []
+                          (remove-before-render-fn fn-name)
+                          (when (seq targets)
+                            (doseq [[obj prop] targets]
+                              (j/assoc! obj prop (clone end-color))))
+                          (when on-end (on-end))
+                          (a/put! p true))})
     (do
       (when on-end (on-end))
       nil)))
+
