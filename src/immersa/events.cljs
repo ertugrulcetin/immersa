@@ -33,6 +33,11 @@
     (assoc db :show-arrow-keys-text? show-arrow-keys-text?)))
 
 (reg-event-db
+  ::set-show-pre-warm-text?
+  (fn [db [_ show-pre-warm-text?]]
+    (assoc db :show-pre-warm-text? show-pre-warm-text?)))
+
+(reg-event-db
   ::set-background-color
   (fn [db [_ background-color]]
     (assoc db :background-color background-color)))

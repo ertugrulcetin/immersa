@@ -204,7 +204,7 @@
 
 ;; TODO is is called every time a slide is changed
 (defn get-slides []
-  (let [slides [{:data {:skybox {:background {:color 103}}
+  (let [slides [{:data {:skybox {:background {:image "img/skybox/space/space"}}
                         "wave" {:type :wave}
                         "immersa-text" {:type :billboard
                                         :position 0
@@ -795,13 +795,66 @@
         (reset! circuit-breaker-running? false))
       (a/put! ch type))))
 
+(defn- create-objects [objects-to-create objects-data]
+  (doseq [name objects-to-create]
+    (let [params (get objects-data name)
+          type (:type params)
+          params (dissoc params :type)]
+      (case type
+        :glb (api.mesh/glb->mesh name params)
+        :wave (api.component/wave name)
+        :box (api.component/create-box-with-numbers name params)
+        :earth (api.component/earth name params)
+        :text3D (api.mesh/text name params)
+        :text (api.gui/add-control
+                (api.core/get-advanced-texture)
+                (api.gui/text-block name params))
+        :image (api.component/image name params)
+        :particle (case (:particle-type params)
+                    :sparkle (api.particle/sparkles name params)
+                    :cloud (api.particle/clouds name params))
+        :billboard (api.component/billboard name params)
+        :sphere-mat (mat.spheres/get-sphere name params)
+        :greased-line (api.mesh/greased-line name params)
+        nil))))
+
+(defn- pre-warm-the-scene [slides]
+  (doseq [slide (map-indexed #(assoc %2 :index %1) slides)]
+    (let [slide-data (:data slide)
+          objects-to-create (set/difference (set (keys slide-data)) #{:camera :skybox})
+          objects-to-create (filter #(not (api.core/get-object-by-name %)) objects-to-create)]
+      (create-objects objects-to-create slide-data)
+      (when-not (= (:index slide) 0)
+        (doseq [obj objects-to-create]
+          (disable-component obj)))))
+  (dispatch [::events/set-show-pre-warm-text? false]))
+
+(defn- prepare-first-skybox [slides]
+  (let [{:keys [color image]} (-> slides first :data :skybox :background)
+        skybox-shader-mat (api.core/get-object-by-name "skybox-shader")
+        bg-skybox-material (j/get-in api.core/db [:environment-helper :skybox :material])
+        bg-ground-material (j/get-in api.core/db [:environment-helper :ground :material])]
+    (cond
+      color (do
+              (j/call skybox-shader-mat :setFloat "dissolve" 1.5)
+              (j/call skybox-shader-mat :setFloat "transparency" 1.5)
+              (j/assoc! skybox-shader-mat :alpha 0)
+              (j/assoc! bg-skybox-material :primaryColor color)
+              (j/assoc! bg-ground-material :primaryColor color))
+      image (do
+              (j/call skybox-shader-mat :setFloat "dissolve" 0)
+              (j/call skybox-shader-mat :setFloat "transparency" 0)
+              (j/assoc! skybox-shader-mat :alpha 1)
+              (j/call skybox-shader-mat :setTexture "skybox1" (api.core/cube-texture :root-url image))))))
+
 (defn start-slide-show []
   (let [command-ch (a/chan (a/dropping-buffer 1))
         slide-controls (js/document.getElementById "slide-controls")
         prev-button (j/get-in slide-controls [:children 0])
         next-button (j/get-in slide-controls [:children 2])
         current-running-anims (atom [])
-        slide-in-progress? (atom false)]
+        slide-in-progress? (atom false)
+        slides (get-slides)]
     (a/put! command-ch :next)
     (api.core/dispose-all (concat (api.core/get-objects-by-type "box")
                                   (api.core/get-objects-by-type "billboard")
@@ -828,6 +881,9 @@
                                                 (or (= (.-keyCode e) 37)
                                                     (= (.-keyCode e) 38))
                                                 (process-next-prev-command :prev command-ch slide-in-progress? current-running-anims)))))
+    (pre-warm-the-scene slides)
+    (prepare-first-skybox slides)
+    (api.core/hide-loading-ui)
     (go-loop [index -1]
       (let [command (a/<! command-ch)
             current-index (case command
@@ -853,27 +909,7 @@
 
                 _ (doseq [name object-names-to-dispose]
                     (disable-component name))
-                _ (doseq [name objects-to-create]
-                    (let [params (get objects-data name)
-                          type (:type params)
-                          params (dissoc params :type)]
-                      (case type
-                        :glb (api.mesh/glb->mesh name params)
-                        :wave (api.component/wave name)
-                        :box (api.component/create-box-with-numbers name params)
-                        :earth (api.component/earth name params)
-                        :text3D (api.mesh/text name params)
-                        :text (api.gui/add-control
-                                (api.core/get-advanced-texture)
-                                (api.gui/text-block name params))
-                        :image (api.component/image name params)
-                        :particle (case (:particle-type params)
-                                    :sparkle (api.particle/sparkles name params)
-                                    :cloud (api.particle/clouds name params))
-                        :billboard (api.component/billboard name params)
-                        :sphere-mat (mat.spheres/get-sphere name params)
-                        :greased-line (api.mesh/greased-line name params)
-                        nil)))
+                _ (create-objects objects-to-create objects-data)
                 animations (reduce
                              (fn [acc object-name]
                                (let [object-slide-info (get-in slide [:data object-name])]
@@ -897,10 +933,7 @@
                                           acc)))
                                     {}
                                     (group-by first animations)))
-                gradient? (-> objects-data :skybox :gradient?)
                 background? (-> objects-data :skybox :background)
-                prev-and-gradient? (and (= :prev command)
-                                        (-> (:data (slides (inc current-index))) :skybox :gradient?))
                 _ (doseq [name (set/difference current-slide-object-names
                                                object-names-to-dispose
                                                (set prev-slide-object-names))]
@@ -908,7 +941,6 @@
                 anims (mapv #(api.animation/begin-direct-animation %) animations-data)
                 _ (reset! slide-in-progress? true)
                 _ (swap! current-running-anims #(vec (concat % anims)))
-                channels (map :ch anims)
                 pcs-animations (keep
                                  (fn [object-name]
                                    (let [object-slide-info (get-in slide [:data object-name])]
@@ -916,20 +948,7 @@
                                        (api.animation/pcs-text-anim object-name object-slide-info))))
                                  object-names-from-slide-info)]
             (swap! current-running-anims #(vec (concat % pcs-animations)))
-            ;;
-            ;; (when (and (not prev-and-gradient?) (not background?))
-            ;;  (a/<! (run-skybox-dissolve-animation objects-data)))
-            ;;
-            ;; (when (and (= :next command)
-            ;;           background?
-            ;;           (not (-> (:data (slides (dec current-index))) :skybox :background?)))
-            ;;  (<! (api.animation/create-skybox->background-dissolve-anim :speed-factor 0.5)))
-            ;;
-            ;; (when (and (= :prev command)
-            ;;           (not background?)
-            ;;           (-> (:data (slides (inc current-index))) :skybox :background?))
-            ;;  (<! (api.animation/create-background->skybox-dissolve-anim :objects-data objects-data)))
-            ;;
+
             (when (or (and background?
                            (= :prev command)
                            (-> (:data (slides (inc current-index))) :skybox :background :color))
@@ -941,27 +960,6 @@
                 (println "background color changing")
                 (some->> (api.animation/create-background->background-color-anim (:skybox objects-data))
                          (swap! current-running-anims conj))))
-            ;;
-            ;; (when (and background?
-            ;;           (= :next command)
-            ;;           (-> (:data (slides (dec current-index))) :skybox :background?))
-            ;;  (api.animation/create-background->background-color-anim :objects-data objects-data))
-            ;;
-            ;; (when (and (= :next command)
-            ;;           gradient?
-            ;;           (-> (:data (slides (dec current-index))) :skybox :background?))
-            ;;  (some-> (api.animation/create-background->gradient-anim :objects-data objects-data) a/<!))
-            ;;
-            ;; (when (and (= :prev command)
-            ;;           background?
-            ;;           (-> (:data (slides (inc current-index))) :skybox :gradient?))
-            ;;  (some-> (api.animation/create-gradient->background-anim :objects-data objects-data) a/<!))
-
-
-            ;; (doseq [c channels]
-            ;;  (a/<! c))
-            ;; (doseq [{:keys [ch]} pcs-animations]
-            ;;  (a/<! ch))
 
             (doseq [{:keys [ch]} @current-running-anims]
               (a/<! ch))

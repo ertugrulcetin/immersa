@@ -33,6 +33,10 @@
   :show-arrow-keys-text?)
 
 (reg-sub
+  ::show-pre-warm-text?
+  :show-pre-warm-text?)
+
+(reg-sub
   ::background-color
   (fn [db]
     (str "radial-gradient(" (:background-color db) ", rgb(0,0,0))")))

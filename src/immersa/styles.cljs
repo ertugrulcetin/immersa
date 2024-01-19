@@ -111,6 +111,7 @@
    :top "65%"
    :left "50%"
    :transform "translate(-50%, -50%)"
+   :user-select :none
    :z-index 5})
 
 (defclass wait-list-button []

@@ -142,7 +142,9 @@
   (a/go
     (let [engine (api.core/create-engine canvas)
           scene (api.core/create-scene engine)
-          _ (api.core/create-assets-manager :on-finish #(dispatch [::events/set-show-arrow-keys-text? false]))
+          _ (api.core/create-assets-manager :on-finish #(do
+                                                          (dispatch [::events/set-show-arrow-keys-text? false])
+                                                          (dispatch [::events/set-show-pre-warm-text? true])))
           _ (a/<! (api.core/load-async))
           _ (api.core/init-p5)
           free-camera (api.camera/create-free-camera "free-camera" :position (v3 0 0 -10))

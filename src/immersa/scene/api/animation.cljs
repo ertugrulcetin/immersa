@@ -270,10 +270,6 @@
                            :targets [[skybox-material :primaryColor]
                                      [ground-material :primaryColor]]})))
 
-(comment
-  (create-skybox->background-dissolve-anim)
-  )
-
 (defn create-skybox-dissolve-anim [& {:keys [skybox-path
                                              speed-factor]
                                       :or {speed-factor 1}}]

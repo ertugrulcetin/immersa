@@ -349,7 +349,7 @@
 (defn create-assets-manager [& {:keys [on-finish]}]
   (let [am (AssetsManager.)]
     (j/assoc! db :assets-manager am)
-    (j/assoc! am :autoHideLoadingUI true)
+    (j/assoc! am :autoHideLoadingUI false)
     (j/assoc! am :onFinish on-finish)))
 
 (defn add-texture-task [name url]
@@ -385,6 +385,9 @@
           :models (add-mesh-task (str "mesh-" index) "" path))))
     (j/call (j/call-in db [:assets-manager :loadAsync]) :then #(a/put! p true))
     p))
+
+(defn hide-loading-ui []
+  (j/call (get-engine) :hideLoadingUI))
 
 (defn pcs [name & {:keys [point-size]
                    :or {point-size 1}

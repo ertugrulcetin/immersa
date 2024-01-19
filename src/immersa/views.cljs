@@ -53,6 +53,9 @@
            [icon-arrow-right {:size 32
                               :color "white"
                               :weight "bold"}]]])
+       (when @(subscribe [::subs/show-pre-warm-text?])
+         [:div (styles/arrow-keys-text)
+          [:h1 "Pre-warming scene..."]])
        [canvas]])))
 
 (defn- progress-bar-line []
