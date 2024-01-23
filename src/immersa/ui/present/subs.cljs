@@ -1,12 +1,7 @@
-(ns immersa.subs
+(ns immersa.ui.present.subs
   (:require
     [breaking-point.core :as bp]
     [re-frame.core :refer [reg-sub]]))
-
-(reg-sub
-  ::name
-  (fn [db]
-    (:name db)))
 
 (reg-sub
   ::calculated-canvas-dimensions
@@ -25,18 +20,20 @@
 (reg-sub
   ::slide-info
   (fn [db]
-    {:current-slide-index (:current-slide-index db "-")
-     :slide-count (:slide-count db "-")}))
+    {:current-slide-index (-> db :present :current-slide-index (or "-"))
+     :slide-count (-> db :present :slide-count (or "-"))}))
 
 (reg-sub
   ::show-arrow-keys-text?
-  :show-arrow-keys-text?)
+  (fn [db]
+    (-> db :present :show-arrow-keys-text?)))
 
 (reg-sub
   ::show-pre-warm-text?
-  :show-pre-warm-text?)
+  (fn [db]
+    (-> db :present :show-pre-warm-text?)))
 
 (reg-sub
   ::background-color
   (fn [db]
-    (str "radial-gradient(" (:background-color db) ", rgb(0,0,0))")))
+    (str "radial-gradient(" (-> db :present :background-color) ", rgb(0,0,0))")))

@@ -6,7 +6,6 @@
     [clojure.string :as str]
     [goog.functions :as functions]
     [immersa.common.utils :as common.utils]
-    [immersa.events :as events]
     [immersa.scene.api.camera :as api.camera]
     [immersa.scene.api.component :as api.component]
     [immersa.scene.api.constant :as api.const]
@@ -16,6 +15,7 @@
     [immersa.scene.api.material :as api.material]
     [immersa.scene.api.mesh :as api.mesh]
     [immersa.scene.slide :as slide]
+    [immersa.ui.present.events :as events]
     [re-frame.core :refer [dispatch]]))
 
 (defn register-before-render []
@@ -99,7 +99,6 @@
       (when-not (str/blank? renderer)
         (some #(str/includes? renderer %) ["Apple M1" "Apple M2" "Apple M3"])))))
 
-;; TODO check OffscreenCanvas support
 (defn- start-background-lighting [engine]
   (when (and (j/get js/window :Worker) (strong-machine? engine))
     (let [worker (js/Worker. "js/worker/worker.js")

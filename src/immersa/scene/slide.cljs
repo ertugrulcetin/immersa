@@ -5,7 +5,6 @@
     [clojure.set :as set]
     [clojure.walk :as walk]
     [immersa.common.utils :as common.utils]
-    [immersa.events :as events]
     [immersa.scene.api.animation :as api.animation]
     [immersa.scene.api.camera :as api.camera]
     [immersa.scene.api.component :as api.component]
@@ -15,6 +14,7 @@
     [immersa.scene.api.mesh :as api.mesh]
     [immersa.scene.api.particle :as api.particle]
     [immersa.scene.materials-in-sphere :as mat.spheres]
+    [immersa.ui.present.events :as events]
     [re-frame.core :refer [dispatch]]))
 
 (defn- get-position-anim [object-slide-info object-name]
@@ -578,6 +578,7 @@
 
                               (and rotation (not (vector? rotation)))
                               (assoc :rotation (api.core/clone (:rotation data))))))]
+    ;; TODO this should be removed
     (reduce
       (fn [slides-vec slide]
         (let [prev-slide-data (get-in slides-vec [(dec (:index slide)) :data])
@@ -869,10 +870,8 @@
                  (api.animation/create-background->skybox-dissolve-anim skybox))]
       (some->> anim (swap! current-running-anims conj)))))
 
-(def command-ch)
-
 (defn start-slide-show []
-  (let [_ (set! command-ch (a/chan (a/dropping-buffer 1)))
+  (let [command-ch (a/chan (a/dropping-buffer 1))
         slide-controls (js/document.getElementById "slide-controls")
         prev-button (j/get-in slide-controls [:children 0])
         next-button (j/get-in slide-controls [:children 2])
@@ -913,8 +912,7 @@
       (let [command (a/<! command-ch)
             current-index (case command
                             :next (inc index)
-                            :prev (dec index)
-                            command)
+                            :prev (dec index))
             slides (get-slides)]
         (if (and (>= current-index 0) (< current-index (count slides)))
           (let [_ (notify-ui current-index (count slides))
@@ -925,7 +923,7 @@
                     (api.camera/update-active-camera))
                 objects-to-create (filter #(not (api.core/get-object-by-name %)) object-names-from-slide-info)
                 current-slide-object-names (-> slide :data keys set)
-                [prev-slide-object-names object-names-to-dispose] (when @prev-slide
+                [prev-slide-object-names object-names-to-dispose] (when (and @prev-slide (> current-index 0))
                                                                     (let [prev-slide-object-names (-> @prev-slide keys set)]
                                                                       [prev-slide-object-names
                                                                        (set/difference prev-slide-object-names current-slide-object-names #{:camera :skybox})]))
@@ -980,7 +978,3 @@
             (reset! slide-in-progress? false)
             (recur current-index))
           (recur index))))))
-
-(comment
-  (a/put! command-ch 8)
-  )

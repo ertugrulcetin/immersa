@@ -157,7 +157,6 @@
       rotation (j/assoc! :rotation rotation)
       scale (j/assoc! :scaling scale)
       material (j/assoc! :material material))
-    (j/assoc-in! mesh [:rotation :x] (/ Math/PI -2))
     (api.core/add-node-to-db name mesh (assoc opts :type type))))
 
 (defn create-ground-from-hm [name & {:keys [texture subdivisions width height max-height min-height on-ready mat]

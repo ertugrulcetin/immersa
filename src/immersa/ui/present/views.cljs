@@ -1,4 +1,4 @@
-(ns immersa.views
+(ns immersa.ui.present.views
   (:require
     ["@phosphor-icons/react" :refer [CaretLeft
                                      CaretRight
@@ -11,10 +11,10 @@
     ["progressbar.js" :as ProgressBar]
     [applied-science.js-interop :as j]
     [immersa.common.utils :as common.utils]
-    [immersa.events :as events]
     [immersa.scene.core :as scene.core]
-    [immersa.styles :as styles]
-    [immersa.subs :as subs]
+    [immersa.ui.present.events :as events]
+    [immersa.ui.present.styles :as styles]
+    [immersa.ui.present.subs :as subs]
     [re-frame.core :refer [dispatch subscribe]]
     [reagent.core :as r]))
 
@@ -116,48 +116,47 @@
                    (styles/wait-list-button-gradient-border)]}
           "Join Waitlist"])})))
 
-(defn main-panel []
-  [:div (styles/app-container)
+(defn present-panel []
+  [:div
+   {:id "content-container"
+    :class (styles/content-container)
+    :style {:background @(subscribe [::subs/background-color])}}
+   [canvas-container]
    [:div
-    {:id "content-container"
-     :class (styles/content-container)
-     :style {:background @(subscribe [::subs/background-color])}}
-    [canvas-container]
+    {:id "progress-bar"
+     :class (styles/progress-bar)}
+    [progress-bar-line]
     [:div
-     {:id "progress-bar"
-      :class (styles/progress-bar)}
-     [progress-bar-line]
+     {:id "progress-controls"
+      :class (styles/progress-controls)}
      [:div
-      {:id "progress-controls"
-       :class (styles/progress-controls)}
-      [:div
-       {:id "slide-controls"
-        :class (styles/slide-controls)}
-       [icon-prev {:size 24
-                   :color "white"
-                   :weight "bold"
-                   :cursor "pointer"}]
-       [:span {:id "slide-indicator"
-               :class (styles/current-slide-indicator)}
-        (let [{:keys [current-slide-index slide-count]} @(subscribe [::subs/slide-info])]
-          (str current-slide-index " / " slide-count))]
-       [icon-next {:size 24
-                   :color "white"
-                   :weight "bold"
-                   :cursor "pointer"}]]
-      [:div {:id "right-controls"
-             :class (styles/right-controls)}
-       [wait-list-button]
-       [icon-control {:size 24
-                      :color "white"
-                      :cursor "pointer"}]
-       [icon-smiley {:size 24
+      {:id "slide-controls"
+       :class (styles/slide-controls)}
+      [icon-prev {:size 24
+                  :color "white"
+                  :weight "bold"
+                  :cursor "pointer"}]
+      [:span {:id "slide-indicator"
+              :class (styles/current-slide-indicator)}
+       (let [{:keys [current-slide-index slide-count]} @(subscribe [::subs/slide-info])]
+         (str current-slide-index " / " slide-count))]
+      [icon-next {:size 24
+                  :color "white"
+                  :weight "bold"
+                  :cursor "pointer"}]]
+     [:div {:id "right-controls"
+            :class (styles/right-controls)}
+      [wait-list-button]
+      [icon-control {:size 24
                      :color "white"
                      :cursor "pointer"}]
-       [icon-chat {:size 24
-                   :color "white"
-                   :cursor "pointer"}]
-       [icon-dots {:size 24
-                   :color "white"
-                   :weight "bold"
-                   :cursor "pointer"}]]]]]])
+      [icon-smiley {:size 24
+                    :color "white"
+                    :cursor "pointer"}]
+      [icon-chat {:size 24
+                  :color "white"
+                  :cursor "pointer"}]
+      [icon-dots {:size 24
+                  :color "white"
+                  :weight "bold"
+                  :cursor "pointer"}]]]]])
