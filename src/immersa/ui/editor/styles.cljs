@@ -34,13 +34,19 @@
 
 (defattrs side-bar []
   {:flex-shrink 0
-   :width "200px"
+   :width "170px"
    :border-right (str "1px solid " colors/panel-border)
    :box-sizing :border-box
    :box-shadow :none
    :display :flex
    :position :relative
-   :flex-direction :column})
+   :flex-direction :column
+   :align-items :center
+   :gap "8px"})
+
+(defclass add-slide-button []
+  {:width "150px"
+   :font-size typography/l})
 
 (defattrs options-bar []
   {:width "340px"
@@ -134,12 +140,12 @@
    :display :flex
    :align-items :center
    :position :relative
-   :gap "32px"})
+   :gap "16px"})
 
 (defclass presentation-component []
   {:display :flex
-   :width "36px"
-   :height "36px"
+   :gap "2px"
+   :width "45px"
    :padding "5px"
    :user-select :none
    :cursor :default
@@ -167,3 +173,19 @@
 (defattrs header-right-container []
   {:display :flex
    :gap "16px"})
+
+(defattrs private-badge []
+  {:display :flex
+   :user-select :none
+   :margin-left "4px"
+   :align-items :center
+   :border (str "1px solid " colors/border2)
+   :color colors/text-primary
+   :border-radius "10px"
+   :gap "3px"
+   :height "16px"
+   :padding "0px 6px"})
+
+(defattrs private-badge-label []
+  {:font-size typography/s
+   :font-weight "300"})

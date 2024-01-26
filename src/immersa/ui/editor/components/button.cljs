@@ -32,18 +32,26 @@
   [:&:hover {:background colors/hover-bg}]
   [:&:active {:background colors/active-bg}])
 
+(defclass button-primary []
+  (merge common
+         {:color colors/text-primary
+          :background colors/button-outline-bg
+          :border (str "1px solid " colors/border2)})
+  [:&:hover {:background colors/hover-bg}]
+  [:&:active {:background colors/active-bg}])
+
 (defn button [{:keys [text
                       on-click
                       icon-left
                       icon-right
                       class
-                      type]
-               :or {type :regular}}]
+                      type]}]
   [:button
    {:on-click on-click
-    :class [(if (= type :regular)
-              (button-regular)
-              (button-outline))
+    :class [(case type
+              :regular (button-regular)
+              :outline (button-outline)
+              (button-primary))
             class]}
    (when icon-left icon-left)
    [:span text]

@@ -70,14 +70,14 @@
                  (switch-camera-if-needed scene)))
     (j/call-in scene [:onKeyboardObservable :add]
                (fn [info]
-                 (let [key (j/get-in info [:event :key])]
+                 (let [key (str/lower-case (j/get-in info [:event :key]))]
                    (cond
                      (and (= (j/get info :type) api.const/keyboard-type-key-down)
-                          (wasd (j/get-in info [:event :key])))
+                          (wasd key))
                      (j/assoc-in! api.core/db [:keyboard key] true)
 
                      (and (= (j/get info :type) api.const/keyboard-type-key-up)
-                          (wasd (j/get-in info [:event :key])))
+                          (wasd key))
                      (j/assoc-in! api.core/db [:keyboard key] false))
                    (switch-camera-if-needed scene))))))
 

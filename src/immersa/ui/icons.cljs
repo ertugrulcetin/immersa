@@ -11,7 +11,9 @@
     ["@phosphor-icons/react/dist/csr/Image" :refer [Image]]
     ["@phosphor-icons/react/dist/csr/Lightbulb" :refer [Lightbulb]]
     ["@phosphor-icons/react/dist/csr/List" :refer [List]]
+    ["@phosphor-icons/react/dist/csr/LockSimple" :refer [LockSimple]]
     ["@phosphor-icons/react/dist/csr/Play" :refer [Play]]
+    ["@phosphor-icons/react/dist/csr/PlusCircle" :refer [PlusCircle]]
     ["@phosphor-icons/react/dist/csr/ShareNetwork" :refer [ShareNetwork]]
     ["@phosphor-icons/react/dist/csr/SmileySticker" :refer [SmileySticker]]
     ["@phosphor-icons/react/dist/csr/TextT" :refer [TextT]]
@@ -32,3 +34,5 @@
 (def light (r/adapt-react-class Lightbulb))
 (def share (r/adapt-react-class ShareNetwork))
 (def play (r/adapt-react-class Play))
+(def lock (r/adapt-react-class LockSimple))
+(def plus (r/adapt-react-class PlusCircle))

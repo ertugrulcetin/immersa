@@ -19,6 +19,7 @@
     "@babylonjs/loaders": "^6.34.1",
     "@babylonjs/materials": "^6.34.1",
     "@phosphor-icons/react": "^2.0.15",
+    "@radix-ui/react-scroll-area": "^1.0.5",
     "earcut": "^2.2.4",
     "highlight.js": "11.5.1",
     "p5": "^1.9.0",
