@@ -178,6 +178,8 @@
                      :cameraContrast 1.2
                      :toneMappingEnabled true}
         eh (EnvironmentHelper. options (api.core/get-scene))]
+    (m/assoc! eh :ground.isPickable false
+              :skybox.isPickable false)
     (j/assoc! api.core/db :environment-helper eh)
     eh))
 

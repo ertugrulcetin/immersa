@@ -153,6 +153,7 @@
 
 (defn add-node-to-db [name obj opts]
   (remove-if-exists name)
+  (j/assoc! obj :immersa-id name)
   (j/assoc-in! db [:nodes name] (clj->js (assoc opts :obj obj :name name)))
   obj)
 
@@ -255,13 +256,19 @@
 
 (defn highlight-layer [name & {:keys [blur-horizontal-size
                                       blur-vertical-size
+                                      main-texture-ratio
+                                      stroke?
                                       inner-glow?
                                       outer-glow?]}]
-  (m/cond-doto (HighlightLayer. name)
-    blur-horizontal-size (j/assoc! :blurHorizontalSize blur-horizontal-size)
-    blur-vertical-size (j/assoc! :blurVerticalSize blur-vertical-size)
-    inner-glow? (j/assoc! :innerGlow inner-glow?)
-    outer-glow? (j/assoc! :outerGlow outer-glow?)))
+  (let [opts #js {}]
+    (cond-> opts
+      (some? stroke?) (j/assoc! :isStroke stroke?)
+      main-texture-ratio (j/assoc! :mainTextureRatio main-texture-ratio))
+    (m/cond-doto (HighlightLayer. name (get-scene) opts)
+      blur-horizontal-size (j/assoc! :blurHorizontalSize blur-horizontal-size)
+      blur-vertical-size (j/assoc! :blurVerticalSize blur-vertical-size)
+      (some? inner-glow?) (j/assoc! :innerGlow inner-glow?)
+      (some? outer-glow?) (j/assoc! :outerGlow outer-glow?))))
 
 (defn glow-layer [name & {:keys [main-texture-samples
                                  main-texture-fixed-size

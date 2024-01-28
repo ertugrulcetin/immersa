@@ -109,7 +109,7 @@
       visibility (j/assoc! :visibility visibility)
       position (j/assoc! :position position)
       rotation (j/assoc! :rotation rotation)
-      scale  (j/assoc! :scaling scale)
+      scale (j/assoc! :scaling scale)
       material (j/assoc! :material material))
     (api.core/add-node-to-db name p (assoc opts :type type))))
 
@@ -171,13 +171,14 @@
     (cond-> ground
       mat (j/assoc! :material mat))))
 
-(defn create-ground [name & {:keys [width height mat]
+(defn create-ground [name & {:keys [width height mat pickable?]
                              :as opts}]
   (let [ground (j/call MeshBuilder :CreateGround name #js {:width width
                                                            :height height})]
     (api.core/add-node-to-db name ground opts)
     (cond-> ground
-      mat (j/assoc! :material mat))))
+      mat (j/assoc! :material mat)
+      (some? pickable?) (j/assoc! :isPickable pickable?))))
 
 (defn text [name & {:keys [text
                            size
@@ -234,19 +235,26 @@
                                 rotation
                                 scale
                                 update-materials]}]
-  (let [m (api.core/clone (j/get-in api.core/db [:models path]))]
-    (api.core/add-node-to-db name m {:type :glb})
+  (let [model (api.core/clone (j/get-in api.core/db [:models path]))]
+    (api.core/add-node-to-db name model {:type :glb
+                                         :init-position (api.core/clone (j/get model :position))
+                                         :init-rotation (api.core/clone (j/get model :rotation))
+                                         :init-scaling (api.core/clone (j/get model :scaling))})
     ;; TODO this apply to all meshes in the glb,it is not per mesh! fix it
     (doseq [[name {:keys [albedo-color]}] update-materials]
       (let [mat (api.core/get-mat-by-name name)]
         (m/cond-doto mat
           albedo-color (j/assoc! :albedoColor albedo-color))))
-    (m/cond-doto m
+    (m/cond-doto model
       position (j/assoc! :position position)
       rotation (j/assoc! :rotation rotation)
       scale (j/assoc! :scaling scale))
-    (api.core/set-enabled m true)
-    m))
+    (api.core/set-enabled model true)
+    model))
+
+(comment
+  (glb->mesh "porche" :path "model/porche_911.glb")
+  )
 
 (defn- get-points-from-text [& {:keys [text size resolution font]}]
   (j/call GreasedLineTools :GetPointsFromText text size resolution font))
@@ -301,9 +309,9 @@
   (let [gl (greased-line "sphere-text-3"
                          {:type :greased-line
                           :text "for enhancing texts and models"
-                       ;:material-type api.const/greased-line-material-pbr
-                       ;:color-mode api.const/greased-line-color-mode-multi
-                       :color (api.const/color-white)
+                          ;:material-type api.const/greased-line-material-pbr
+                          ;:color-mode api.const/greased-line-color-mode-multi
+                          :color (api.const/color-white)
                           :position (v3 -0.25 1.6 5)
                           :width 0.01
                           :size 0.23

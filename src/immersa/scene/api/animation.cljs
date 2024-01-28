@@ -7,8 +7,7 @@
     [cljs.core.async :as a]
     [immersa.scene.api.camera :as api.camera]
     [immersa.scene.api.constant :as api.const]
-    [immersa.scene.api.core :as api.core :refer [v3]]
-    [immersa.scene.api.material :as api.material])
+    [immersa.scene.api.core :as api.core :refer [v3]])
   (:require-macros
     [immersa.scene.macros :as m]))
 

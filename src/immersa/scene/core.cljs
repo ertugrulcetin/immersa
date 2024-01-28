@@ -10,6 +10,7 @@
     [immersa.scene.api.component :as api.component]
     [immersa.scene.api.constant :as api.const]
     [immersa.scene.api.core :as api.core :refer [v2 v3 v4]]
+    [immersa.scene.api.gizmo :as api.gizmo]
     [immersa.scene.api.gui :as api.gui]
     [immersa.scene.api.light :as api.light]
     [immersa.scene.api.material :as api.material]
@@ -78,7 +79,14 @@
 
                      (and (= (j/get info :type) api.const/keyboard-type-key-up)
                           (wasd key))
-                     (j/assoc-in! api.core/db [:keyboard key] false))
+                     (j/assoc-in! api.core/db [:keyboard key] false)
+
+                     (= key "escape")
+                     (api.gizmo/clear-selected-mesh)
+
+                     (and (= key "f") (j/get-in api.core/db [:gizmo :selected-mesh]))
+                     (j/call (api.camera/active-camera)
+                             :setTarget (api.core/clone (j/get-in api.core/db [:gizmo :selected-mesh :position]))))
                    (switch-camera-if-needed scene))))))
 
 (defn- read-pixels [engine]
@@ -166,11 +174,14 @@
           ground (api.mesh/create-ground "ground"
                                          :width 50
                                          :height 50
-                                         :mat ground-material)
+                                         :mat ground-material
+                                         :pickable? false)
           ;; _ (api.component/create-sky-box)
-          _ (api.component/create-sky-sphere)
+          ;; _ (api.component/create-sky-sphere)
           _ (api.material/create-environment-helper)
-          _ (api.material/init-nme-materials)]
+          _ (api.material/init-nme-materials)
+          _ (api.gizmo/init-gizmo-manager)]
+      (api.mesh/box "box1")
       (when dev?
         (common.utils/remove-element-listeners))
       (common.utils/register-event-listener js/window "resize" (functions/debounce #(j/call engine :resize) 250))
