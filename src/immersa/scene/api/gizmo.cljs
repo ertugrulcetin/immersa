@@ -27,7 +27,10 @@
                                        :main-texture-ratio 1
                                        :inner-glow? true
                                        :outer-glow? false))
-    (js/console.log hl)
+    ;; TODO add more meshes to exclude
+    (j/call hl :addExcludedMesh (api.core/get-object-by-name "ground"))
+    (j/call hl :addExcludedMesh (j/get-in api.core/db [:environment-helper :skybox]))
+    (j/call hl :addExcludedMesh (j/get-in api.core/db [:environment-helper :ground]))
     (m/assoc! gizmo-manager
               :positionGizmoEnabled true
               :rotationGizmoEnabled true

@@ -77,7 +77,7 @@
                         :as opts}]
   (let [gm (GridMaterial. name)]
     (api.core/add-node-to-db name gm opts)
-    (m/cond-doto (GridMaterial. name)
+    (m/cond-doto gm
       major-unit-frequency (j/assoc! :majorUnitFrequency major-unit-frequency)
       minor-unit-visibility (j/assoc! :minorUnitVisibility minor-unit-visibility)
       grid-ratio (j/assoc! :gridRatio grid-ratio)

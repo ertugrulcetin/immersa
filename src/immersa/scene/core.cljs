@@ -207,6 +207,7 @@
   (j/call (api.camera/active-camera) :attachControl (api.core/canvas) true)
 
   (api.core/show-debug)
+
   (api.camera/reset-camera)
 
   (restart-engine)
