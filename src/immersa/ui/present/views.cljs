@@ -13,7 +13,7 @@
 
 (defn- canvas []
   (r/create-class
-    {:component-did-mount #(scene.core/start-scene (js/document.getElementById "renderCanvas"))
+    {:component-did-mount #(scene.core/start-scene (js/document.getElementById "renderCanvas") :mode :present)
      :reagent-render (fn []
                        [:canvas
                         {:id "renderCanvas"

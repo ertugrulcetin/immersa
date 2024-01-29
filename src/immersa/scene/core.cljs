@@ -16,6 +16,7 @@
     [immersa.scene.api.material :as api.material]
     [immersa.scene.api.mesh :as api.mesh]
     [immersa.scene.slide :as slide]
+    [immersa.scene.ui-listener :as ui-listener]
     [immersa.ui.present.events :as events]
     [re-frame.core :refer [dispatch]]))
 
@@ -130,21 +131,22 @@
           (<! (a/timeout 500))
           (recur))))))
 
-(defn when-scene-ready [engine scene start-slide-show?]
+(defn when-scene-ready [engine scene mode]
   (api.core/clear-scene-color (api.const/color-white))
-  ;; (api.core/clear-scene-color (api.core/color-rgb 239 239 239))
-  ;; (api.core/clear-scene-color api.const/color-black)
   (j/assoc-in! (api.core/get-object-by-name "sky-box") [:rotation :y] js/Math.PI)
   (api.gui/advanced-dynamic-texture)
   (j/call scene :registerBeforeRender (fn [] (register-before-render)))
-  (when-not start-slide-show?
-    (api.core/hide-loading-ui)
-    (register-scene-mouse-events scene))
-  (when start-slide-show?
-    (slide/start-slide-show)
-    (start-background-lighting engine)))
+  (case mode
+    :editor (do
+              (api.core/hide-loading-ui)
+              (register-scene-mouse-events scene)
+              (ui-listener/init-ui-update-listener))
+    :present (do
+               (slide/start-slide-show)
+               (start-background-lighting engine))))
 
 (defn start-scene [canvas & {:keys [start-slide-show?
+                                    mode
                                     dev?]
                              :or {start-slide-show? true}}]
   (a/go
@@ -180,6 +182,7 @@
           ;; _ (api.component/create-sky-sphere)
           _ (api.material/create-environment-helper)
           _ (api.material/init-nme-materials)
+          ;; TODO only in editor mode, update here
           _ (api.gizmo/init-gizmo-manager)]
       (api.mesh/box "box1")
       (when dev?
@@ -189,14 +192,14 @@
       (j/call free-camera :setTarget (v3))
       (j/call free-camera :attachControl canvas false)
       (j/call engine :runRenderLoop #(j/call scene :render))
-      (j/call scene :executeWhenReady #(when-scene-ready engine scene start-slide-show?)))))
+      (j/call scene :executeWhenReady #(when-scene-ready engine scene mode)))))
 
 (defn restart-engine [& {:keys [start-slide-show?
                                 dev?]
                          :or {start-slide-show? true}}]
   (api.core/dispose-engine)
   (start-scene (js/document.getElementById "renderCanvas")
-               :start-slide-show? start-slide-show?
+               :mode :editor
                :dev? dev?))
 
 (comment

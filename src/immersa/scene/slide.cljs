@@ -838,16 +838,16 @@
         bg-ground-material (j/get-in api.core/db [:environment-helper :ground :material])]
     (cond
       color (do
-              (j/call skybox-shader-mat :setFloat "dissolve" 1.5)
-              (j/call skybox-shader-mat :setFloat "transparency" 1.5)
-              (j/assoc! skybox-shader-mat :alpha 0)
+              (some-> skybox-shader-mat (j/call :setFloat "dissolve" 1.5))
+              (some-> skybox-shader-mat (j/call :setFloat "transparency" 1.5))
+              (some-> skybox-shader-mat (j/assoc! :alpha 0))
               (j/assoc! bg-skybox-material :primaryColor color)
               (j/assoc! bg-ground-material :primaryColor color))
       image (do
-              (j/call skybox-shader-mat :setFloat "dissolve" 0)
-              (j/call skybox-shader-mat :setFloat "transparency" 0)
-              (j/assoc! skybox-shader-mat :alpha 1)
-              (j/call skybox-shader-mat :setTexture "skybox1" (api.core/cube-texture :root-url image))))))
+              (some-> skybox-shader-mat (j/call :setFloat "dissolve" 0))
+              (some-> skybox-shader-mat (j/call :setFloat "transparency" 0))
+              (some-> skybox-shader-mat (j/assoc! :alpha 1))
+              (some-> (j/call skybox-shader-mat :setTexture "skybox1" (api.core/cube-texture :root-url image)))))))
 
 (defn- add-skybox-anims [{:keys [prev-slide objects-data current-running-anims skybox]}]
   (when prev-slide

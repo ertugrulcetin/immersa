@@ -9,7 +9,7 @@
     [immersa.ui.editor.components.scroll-area :refer [scroll-area]]
     [immersa.ui.editor.components.separator :refer [separator]]
     [immersa.ui.editor.components.text :refer [text]]
-    [immersa.ui.editor.events :as event]
+    [immersa.ui.editor.events :as events]
     [immersa.ui.editor.styles :as styles]
     [immersa.ui.editor.subs :as subs]
     [immersa.ui.icons :as icon]
@@ -20,10 +20,9 @@
 
 (defn- canvas []
   (r/create-class
-    {:component-did-mount #(scene.core/start-scene
-                             (js/document.getElementById "renderCanvas")
-                             :start-slide-show? false)
+    {:component-did-mount #(scene.core/start-scene (js/document.getElementById "renderCanvas") :mode :editor)
      :reagent-render (fn []
+                       (println "canvas render")
                        [:canvas
                         {:id "renderCanvas"
                          :class (styles/canvas)}])}))
@@ -40,19 +39,23 @@
 
 (defn- canvas-wrapper []
   (let [ref (r/atom nil)
+        ob (atom nil)
         on-resize (functions/debounce
                     (fn [entries]
                       ;; TODO resize the BabylonJS
                       (doseq [e entries]
-                        (dispatch [::event/set-canvas-wrapper-dimensions
+                        (dispatch [::events/set-canvas-wrapper-dimensions
                                    (j/get-in e [:contentRect :width])
                                    (j/get-in e [:contentRect :height])])))
                     200)]
     (r/create-class
       {:component-did-mount (fn []
+                              (println "canvas-wrapper did mount")
                               (when @ref
                                 (let [observer (js/ResizeObserver. on-resize)]
+                                  (reset! ob observer)
                                   (j/call observer :observe @ref))))
+       :component-will-unmount #(some-> @ob (j/call :disconnect))
        :reagent-render (fn []
                          [:div
                           {:id "canvas-wrapper"
@@ -132,12 +135,19 @@
    [header-center-panel]
    [header-right-panel]])
 
-(defn pos-rot-scale-comp [{:keys [label type]}]
-  [:div (styles/pos-rot-scale-comp-container)
-   [text {:class (styles/pos-rot-scale-comp-label)} label]
-   [input-number {:label "X" :prop-to-update [type :x]}]
-   [input-number {:label "Y" :prop-to-update [type :y]}]
-   [input-number {:label "Z" :prop-to-update [type :z]}]])
+(defn pos-rot-scale-comp [{:keys [label type value]}]
+  (let [[x y z] value]
+    [:div (styles/pos-rot-scale-comp-container)
+     [text {:class (styles/pos-rot-scale-comp-label)} label]
+     [input-number {:label "X"
+                    :value x
+                    :on-change #(dispatch [::events/update-selected-mesh type 0 %])}]
+     [input-number {:label "Y"
+                    :value y
+                    :on-change #(dispatch [::events/update-selected-mesh type 1 %])}]
+     [input-number {:label "Z"
+                    :value z
+                    :on-change #(dispatch [::events/update-selected-mesh type 2 %])}]]))
 
 (defn editor-panel []
   [:div (styles/editor-container)
@@ -192,6 +202,12 @@
               :weight :semi-bold} "3D Model"]
        [separator]
 
-       [pos-rot-scale-comp {:label "Position" :type :position}]
-       [pos-rot-scale-comp {:label "Rotation" :type :rotation}]
-       [pos-rot-scale-comp {:label "Scale" :type :scale}]]]]]])
+       [pos-rot-scale-comp {:label "Position"
+                            :type :position
+                            :value @(subscribe [::subs/selected-mesh-position])}]
+       [pos-rot-scale-comp {:label "Rotation"
+                            :type :rotation
+                            :value @(subscribe [::subs/selected-mesh-rotation])}]
+       [pos-rot-scale-comp {:label "Scale"
+                            :type :scaling
+                            :value @(subscribe [::subs/selected-mesh-scaling])}]]]]]])

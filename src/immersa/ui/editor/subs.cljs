@@ -15,3 +15,23 @@
       (if (> height-based-width max-width)
         {:width max-width :height width-based-height}
         {:width height-based-width :height max-height}))))
+
+(reg-sub
+  ::selected-mesh
+  (fn [db]
+    (-> db :editor :selected-mesh)))
+
+(reg-sub
+  ::selected-mesh-position
+  (fn [db]
+    (-> db :editor :selected-mesh :position)))
+
+(reg-sub
+  ::selected-mesh-rotation
+  (fn [db]
+    (-> db :editor :selected-mesh :rotation)))
+
+(reg-sub
+  ::selected-mesh-scaling
+  (fn [db]
+    (-> db :editor :selected-mesh :scaling)))

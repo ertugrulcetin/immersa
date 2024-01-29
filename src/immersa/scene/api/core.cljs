@@ -92,6 +92,12 @@
 (defn set-v3 [v x y z]
   (j/call v :set x y z))
 
+(defn v3->v [v3]
+  [(j/get v3 :x) (j/get v3 :y) (j/get v3 :z)])
+
+(defn v->v3 [[x y z :as v]]
+  (v3 x y z))
+
 (defn equals? [v1 v2]
   (j/call v1 :equals v2))
 

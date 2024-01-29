@@ -1,5 +1,6 @@
 (ns immersa.ui.editor.components.input
   (:require
+    [applied-science.js-interop :as j]
     [clojure.string :as str]
     [immersa.ui.editor.components.text :refer [text]]
     [immersa.ui.theme.colors :as colors]
@@ -51,26 +52,27 @@
    :border-top-right-radius "1rem"
    :border-bottom-right-radius "1rem"})
 
-(defn input-number [{:keys [min max step class style label on-change]
-                     :or {min "-Infinity"
-                          max "Infinity"
-                          step "1"}}]
-  (r/with-let [error? (r/atom false)]
-    [:div (input-wrapper)
-     [:input {:class [(input-number-style) class (when @error? "invalid")]
-              :style (merge {:width "56px"
-                             :height "24px"} style)
-              :type "number"
-              :min min
-              :max max
-              :default-value 0
-              :step step
-              :on-change (fn [e]
-                           (let [v (-> e .-target .-value)]
-                             (if (str/blank? v)
-                               (reset! error? true)
-                               (do
-                                 (reset! error? false)
-                                 (when on-change (on-change (js/parseFloat v)))))))}]
-     [:label (label-style)
-      [text {:size :s} label]]]))
+(defn input-number [_]
+  (let [error? (r/atom false)]
+    (fn [{:keys [min max step class style label on-change value]
+          :or {min "-Infinity"
+               max "Infinity"
+               step "any"}}]
+      [:div (input-wrapper)
+       [:input {:class [(input-number-style) class (when @error? "invalid")]
+                :style (merge {:width "56px"
+                               :height "24px"} style)
+                :value value
+                :type "number"
+                :min min
+                :max max
+                :step step
+                :on-change (fn [e]
+                             (let [v (-> e .-target .-value)]
+                               (when on-change (on-change v))
+                               (reset! error? (str/blank? v))))
+                :on-key-down (fn [e]
+                               (when (= (j/get e :key) ".")
+                                 (.preventDefault e)))}]
+       [:label (label-style)
+        [text {:size :s} label]]])))
