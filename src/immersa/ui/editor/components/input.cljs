@@ -63,6 +63,7 @@
                 :style (merge {:width "56px"
                                :height "24px"} style)
                 :value value
+                :disabled (nil? value)
                 :type "number"
                 :min min
                 :max max

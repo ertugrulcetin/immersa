@@ -35,6 +35,26 @@
                        :data {:update type
                               :value (mapv parse-double updated-attr)}})))))
 
+(reg-event-db
+  ::set-camera
+  (fn [db [_ {:keys [position rotation]}]]
+    (-> db
+        (assoc-in [:editor :camera :position] position)
+        (assoc-in [:editor :camera :rotation] rotation))))
+
+(reg-event-fx
+  ::update-camera
+  (fn [{:keys [db]} [_ type index value]]
+    (let [camera (-> db :editor :camera)
+          camera (assoc-in camera [type index] value)
+          updated-attr (type camera)]
+      (cond-> {:db (assoc-in db [:editor :camera] camera)}
+
+        (not (str/blank? value))
+        (assoc :scene {:type :update-camera
+                       :data {:update type
+                              :value (mapv parse-double updated-attr)}})))))
+
 (reg-fx
   :scene
   (fn [data]

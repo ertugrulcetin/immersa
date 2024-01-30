@@ -485,3 +485,6 @@
     (do
       (when on-end (on-end))
       nil)))
+
+(defn selected-mesh []
+  (j/get-in db [:gizmo :selected-mesh]))

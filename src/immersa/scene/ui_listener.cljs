@@ -2,6 +2,7 @@
   (:require
     [applied-science.js-interop :as j]
     [immersa.common.communication :refer [event-bus-pub]]
+    [immersa.scene.api.camera :as api.camera]
     [immersa.scene.api.core :as api.core])
   (:require-macros
     [immersa.common.macros :refer [go-loop-sub]]))
@@ -14,6 +15,12 @@
       :position (j/assoc! mesh :position (api.core/v->v3 value))
       :rotation (j/assoc! mesh :rotation (api.core/v->v3 (mapv api.core/to-rad value)))
       :scaling (j/assoc! mesh :scaling (api.core/v->v3 value)))))
+
+(defmethod handle-ui-update :update-camera [{{:keys [update value]} :data}]
+  (when-let [camera (api.camera/active-camera)]
+    (case update
+      :position (j/assoc! camera :position (api.core/v->v3 value))
+      :rotation (j/assoc! camera :rotation (api.core/v->v3 (mapv api.core/to-rad value))))))
 
 (defn init-ui-update-listener []
   (go-loop-sub event-bus-pub :get-ui-update [_ data]

@@ -6,8 +6,8 @@
     [clojure.string :as str]
     [goog.functions :as functions]
     [immersa.common.utils :as common.utils]
+    [immersa.scene.api.animation :as api.anim]
     [immersa.scene.api.camera :as api.camera]
-    [immersa.scene.api.component :as api.component]
     [immersa.scene.api.constant :as api.const]
     [immersa.scene.api.core :as api.core :refer [v2 v3 v4]]
     [immersa.scene.api.gizmo :as api.gizmo]
@@ -17,6 +17,8 @@
     [immersa.scene.api.mesh :as api.mesh]
     [immersa.scene.slide :as slide]
     [immersa.scene.ui-listener :as ui-listener]
+    [immersa.scene.utils :as utils]
+    [immersa.ui.editor.events :as editor.events]
     [immersa.ui.present.events :as events]
     [re-frame.core :refer [dispatch]]))
 
@@ -28,37 +30,6 @@
     (doseq [f (api.core/get-before-render-fns)]
       (f))))
 
-(defn switch-camera-if-needed [scene]
-  (let [wasd? (boolean (seq (filter true? (map #(j/get-in api.core/db [:keyboard %]) ["w" "a" "s" "d" "e" "q"]))))
-        left-click? (j/get-in api.core/db [:mouse :left-click?])
-        switch-type (cond
-                      wasd? :free
-                      (and left-click? (not wasd?)) :arc
-                      :else :arc)
-        camera (api.camera/active-camera)
-        camera-type (j/get camera :type)
-        arc-camera (api.core/get-object-by-name "arc-camera")
-        free-camera (api.core/get-object-by-name "free-camera")
-        canvas (api.core/canvas)]
-    (cond
-      (and (= switch-type :free) (not (= camera-type :free)))
-      (let [position (api.core/clone (j/get arc-camera :position))
-            target (j/call arc-camera :getTarget)]
-        (j/call-in free-camera [:position :copyFrom] position)
-        (j/call free-camera :setTarget (api.core/clone target))
-        (j/assoc! scene :activeCamera free-camera)
-        (api.camera/detach-control arc-camera)
-        (j/call free-camera :attachControl canvas true))
-
-      (and (= switch-type :arc) (not (= camera-type :arc)))
-      (let [position (api.core/clone (j/get free-camera :position))
-            target (j/call free-camera :getTarget)]
-        (api.core/set-pos arc-camera position)
-        (j/call arc-camera :setTarget (api.core/clone target))
-        (j/assoc! scene :activeCamera arc-camera)
-        (api.camera/detach-control free-camera)
-        (j/call arc-camera :attachControl canvas true)))))
-
 (defn- register-scene-mouse-events [scene]
   (let [wasd #{"w" "a" "s" "d" "e" "q"}]
     (j/call-in scene [:onPointerObservable :add]
@@ -69,7 +40,7 @@
 
                    (= (j/get info :type) api.const/pointer-type-up)
                    (j/assoc-in! api.core/db [:mouse :left-click?] false))
-                 (switch-camera-if-needed scene)))
+                 (api.camera/switch-camera-if-needed scene)))
     (j/call-in scene [:onKeyboardObservable :add]
                (fn [info]
                  (let [key (str/lower-case (j/get-in info [:event :key]))]
@@ -86,9 +57,10 @@
                      (api.gizmo/clear-selected-mesh)
 
                      (and (= key "f") (j/get-in api.core/db [:gizmo :selected-mesh]))
-                     (j/call (api.camera/active-camera)
-                             :setTarget (api.core/clone (j/get-in api.core/db [:gizmo :selected-mesh :position]))))
-                   (switch-camera-if-needed scene))))))
+                     (api.anim/run-camera-focus-anim (j/get-in api.core/db [:gizmo :selected-mesh]))
+                     #_(j/call (api.camera/active-camera)
+                               :setTarget (api.core/clone (j/get-in api.core/db [:gizmo :selected-mesh :position]))))
+                   (api.camera/switch-camera-if-needed scene))))))
 
 (defn- read-pixels [engine]
   (let [p (a/promise-chan)
@@ -131,6 +103,12 @@
           (<! (a/timeout 500))
           (recur))))))
 
+(defn- add-camera-view-matrix-listener []
+  (let [free-camera (api.core/get-object-by-name "free-camera")
+        f #(dispatch [::editor.events/set-camera (utils/v3->v-data free-camera [:position :rotation])])]
+    (j/call-in free-camera [:onViewMatrixChangedObservable :add] f)
+    (dispatch [::editor.events/set-camera (utils/v3->v-data free-camera [:position :rotation])])))
+
 (defn when-scene-ready [engine scene mode]
   (api.core/clear-scene-color (api.const/color-white))
   (j/assoc-in! (api.core/get-object-by-name "sky-box") [:rotation :y] js/Math.PI)
@@ -140,7 +118,8 @@
     :editor (do
               (api.core/hide-loading-ui)
               (register-scene-mouse-events scene)
-              (ui-listener/init-ui-update-listener))
+              (ui-listener/init-ui-update-listener)
+              (add-camera-view-matrix-listener))
     :present (do
                (slide/start-slide-show)
                (start-background-lighting engine))))

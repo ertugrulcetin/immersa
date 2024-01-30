@@ -60,7 +60,8 @@
    :box-sizing :border-box})
 
 (defclass canvas-container []
-  {:box-sizing "border-box"})
+  {:box-sizing "border-box"
+   :border (str "3px solid " colors/button-border)})
 
 (defclass canvas-wrapper []
   {:display :flex
@@ -77,7 +78,6 @@
 (defclass canvas []
   {:width "100%"
    :height "100%"
-   :border-bottom "1px solid rgb(239, 241, 244)"
    :box-sizing "border-box"
    :margin 0
    :padding 0

@@ -135,19 +135,19 @@
    [header-center-panel]
    [header-right-panel]])
 
-(defn pos-rot-scale-comp [{:keys [label type value]}]
+(defn pos-rot-scale-comp [{:keys [label type value event]}]
   (let [[x y z] value]
     [:div (styles/pos-rot-scale-comp-container)
      [text {:class (styles/pos-rot-scale-comp-label)} label]
      [input-number {:label "X"
                     :value x
-                    :on-change #(dispatch [::events/update-selected-mesh type 0 %])}]
+                    :on-change #(dispatch [event type 0 %])}]
      [input-number {:label "Y"
                     :value y
-                    :on-change #(dispatch [::events/update-selected-mesh type 1 %])}]
+                    :on-change #(dispatch [event type 1 %])}]
      [input-number {:label "Z"
                     :value z
-                    :on-change #(dispatch [::events/update-selected-mesh type 2 %])}]]))
+                    :on-change #(dispatch [event type 2 %])}]]))
 
 (defn editor-panel []
   [:div (styles/editor-container)
@@ -198,16 +198,32 @@
                      :gap "12px"
                      :padding "16px"}}
 
-       [text {:size :xxl
-              :weight :semi-bold} "3D Model"]
-       [separator]
-
-       [pos-rot-scale-comp {:label "Position"
-                            :type :position
-                            :value @(subscribe [::subs/selected-mesh-position])}]
-       [pos-rot-scale-comp {:label "Rotation"
-                            :type :rotation
-                            :value @(subscribe [::subs/selected-mesh-rotation])}]
-       [pos-rot-scale-comp {:label "Scale"
-                            :type :scaling
-                            :value @(subscribe [::subs/selected-mesh-scaling])}]]]]]])
+       (if @(subscribe [::subs/selected-mesh])
+         [:<>
+          [text {:size :xxl
+                 :weight :semi-bold} "3D Model"]
+          [separator]
+          [pos-rot-scale-comp {:label "Position"
+                               :type :position
+                               :event ::events/update-selected-mesh
+                               :value @(subscribe [::subs/selected-mesh-position])}]
+          [pos-rot-scale-comp {:label "Rotation"
+                               :type :rotation
+                               :event ::events/update-selected-mesh
+                               :value @(subscribe [::subs/selected-mesh-rotation])}]
+          [pos-rot-scale-comp {:label "Scale"
+                               :type :scaling
+                               :event ::events/update-selected-mesh
+                               :value @(subscribe [::subs/selected-mesh-scaling])}]]
+         [:<>
+          [text {:size :xxl
+                 :weight :semi-bold} "Camera"]
+          [separator]
+          [pos-rot-scale-comp {:label "Position"
+                               :type :position
+                               :event ::events/update-camera
+                               :value @(subscribe [::subs/camera-position])}]
+          [pos-rot-scale-comp {:label "Rotation"
+                               :type :rotation
+                               :event ::events/update-camera
+                               :value @(subscribe [::subs/camera-rotation])}]])]]]]])

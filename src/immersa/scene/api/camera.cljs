@@ -94,6 +94,36 @@
 (defn calculate-new-fov [original-fov frame-height container-height]
   (* 2 (Math/atan (* (Math/tan (/ original-fov 2)) (/ container-height frame-height)))))
 
+(defn switch-camera-if-needed [scene]
+  (let [wasd? (boolean (seq (filter true? (map #(j/get-in api.core/db [:keyboard %]) ["w" "a" "s" "d" "e" "q"]))))
+        switch-type (cond
+                      wasd? :free
+                      (api.core/selected-mesh) :arc
+                      :else :free)
+        camera (active-camera)
+        camera-type (j/get camera :type)
+        arc-camera (api.core/get-object-by-name "arc-camera")
+        free-camera (api.core/get-object-by-name "free-camera")
+        canvas (api.core/canvas)]
+    (cond
+      (and (= switch-type :free) (not (= camera-type :free)))
+      (let [position (api.core/clone (j/get arc-camera :position))
+            target (j/call arc-camera :getTarget)]
+        (j/call-in free-camera [:position :copyFrom] position)
+        (j/call free-camera :setTarget (api.core/clone target))
+        (j/assoc! scene :activeCamera free-camera)
+        (detach-control arc-camera)
+        (j/call free-camera :attachControl canvas true))
+
+      (and (= switch-type :arc) (not (= camera-type :arc)))
+      (let [position (api.core/clone (j/get free-camera :position))
+            target (j/call free-camera :getTarget)]
+        (api.core/set-pos arc-camera position)
+        (j/call arc-camera :setTarget (api.core/clone target))
+        (j/assoc! scene :activeCamera arc-camera)
+        (detach-control free-camera)
+        (j/call arc-camera :attachControl canvas true)))))
+
 ;; 931 522
 ;; 1026 576
 (comment

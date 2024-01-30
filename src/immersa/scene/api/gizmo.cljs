@@ -2,8 +2,10 @@
   (:require
     ["@babylonjs/core/Gizmos/gizmoManager" :refer [GizmoManager]]
     [applied-science.js-interop :as j]
+    [immersa.common.utils :as common.utils]
     [immersa.scene.api.core :as api.core]
     [immersa.scene.macros :as m]
+    [immersa.scene.utils :as utils]
     [immersa.ui.editor.events :as events]
     [re-frame.core :refer [dispatch]]))
 
@@ -19,18 +21,9 @@
     (j/call child-meshes :forEach #(j/call hl :addMesh % outline-color)))
   (j/call hl :addMesh mesh outline-color))
 
-(defn number->fixed [n]
-  (j/call n :toFixed 2))
-
 (defn- notify-ui-selected-mesh [mesh]
-  (let [name (j/get mesh :immersa-id)
-        position (mapv number->fixed (api.core/v3->v (j/get mesh :position)))
-        rotation (mapv (comp number->fixed api.core/to-deg) (api.core/v3->v (j/get mesh :rotation)))
-        scaling (mapv number->fixed (api.core/v3->v (j/get mesh :scaling)))]
-    (dispatch [::events/set-selected-mesh {:name name
-                                           :position position
-                                           :rotation rotation
-                                           :scaling scaling}])))
+  (let [name (j/get mesh :immersa-id)]
+    (dispatch [::events/set-selected-mesh (assoc (utils/v3->v-data mesh [:position :rotation :scaling]) :name name)])))
 
 (defn- on-attached-to-mesh [mesh]
   (j/call hl :removeAllMeshes)

@@ -35,3 +35,18 @@
   ::selected-mesh-scaling
   (fn [db]
     (-> db :editor :selected-mesh :scaling)))
+
+(reg-sub
+  ::camera
+  (fn [db]
+    (-> db :editor :camera)))
+
+(reg-sub
+  ::camera-position
+  (fn [db]
+    (-> db :editor :camera :position)))
+
+(reg-sub
+  ::camera-rotation
+  (fn [db]
+    (-> db :editor :camera :rotation)))

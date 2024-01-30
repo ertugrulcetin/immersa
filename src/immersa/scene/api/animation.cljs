@@ -176,6 +176,40 @@
                  keys (assoc :keys keys)
                  (nil? keys) (assoc :from start :to end)))))
 
+(defn run-camera-focus-anim [mesh]
+  (let [duration 0.5
+        _ (j/call mesh :computeWorldMatrix true)
+        bounding-box (j/get (j/call mesh :getBoundingInfo) :boundingBox)
+        diagonal-size (j/call-in bounding-box [:maximumWorld :subtract] (j/get bounding-box :minimumWorld))
+        diagonal-size (j/call diagonal-size :length)
+        camera (api.camera/active-camera)
+        camera-pos (api.core/clone (j/get camera :position))
+        mesh-world-center (j/get bounding-box :centerWorld)
+        radius-factor -1.5
+        final-radius (* radius-factor diagonal-size)
+        direction (j/get (j/call camera :getForwardRay) :direction)
+        final-position (j/call mesh-world-center :add (j/call direction :scale final-radius))
+        easing-function (cubic-ease api.const/easing-ease-in)
+        #_#_position-animation (animation "camera-position-anim"
+                                      :duration duration
+                                      :target-prop "position"
+                                      :from camera-pos
+                                      :to final-position
+                                      :data-type api.const/animation-type-v3
+                                      :loop-mode api.const/animation-loop-cons
+                                      :easing easing-function)
+        target-animation (animation "camera-target-anim"
+                                    :duration duration
+                                    :target-prop "target"
+                                    :from (j/call camera :getTarget)
+                                    :to mesh-world-center
+                                    :data-type api.const/animation-type-v3
+                                    :loop-mode api.const/animation-loop-cons
+                                    :easing easing-function)]
+    (begin-direct-animation :target camera
+                            :to (* fps duration)
+                            :animations [#_position-animation target-animation])))
+
 (defn create-focus-camera-anim [object-slide-info]
   (when-let [object-name (:focus object-slide-info)]
     (let [object (api.core/get-object-by-name object-name)

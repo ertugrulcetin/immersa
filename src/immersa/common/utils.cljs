@@ -24,3 +24,6 @@
     (j/assoc! canvas :height (* (j/get canvas :height) scale-factor))
     (j/call ctx :drawImage canvas 0 0 (j/get canvas :width) (j/get canvas :height))
     (j/call canvas :toDataURL "image/webp" quality)))
+
+(defn number->fixed [n]
+  (j/call n :toFixed 2))
