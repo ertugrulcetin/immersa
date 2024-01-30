@@ -18,24 +18,27 @@
     [re-frame.core :refer [dispatch subscribe]]
     [reagent.core :as r]))
 
-(defn- canvas []
+(defn- canvas [state]
   (r/create-class
     {:component-did-mount #(scene.core/start-scene (js/document.getElementById "renderCanvas") :mode :editor)
      :reagent-render (fn []
-                       (println "canvas render")
                        [:canvas
                         {:id "renderCanvas"
+                         :on-blur #(reset! state :blur)
+                         :on-focus #(reset! state :focus)
                          :class (styles/canvas)}])}))
 
 (defn- canvas-container []
-  (let [{:keys [width height]} @(subscribe [::subs/calculated-canvas-wrapper-dimensions])]
-    (when (and width height (> width 0) (> height 0))
-      [:div
-       {:id "canvas-container"
-        :style {:width (str width "px")
-                :height (str height "px")}
-        :class (styles/canvas-container)}
-       [canvas]])))
+  (let [state (r/atom :blur)]
+    (fn []
+      (let [{:keys [width height]} @(subscribe [::subs/calculated-canvas-wrapper-dimensions])]
+        (when (and width height (> width 0) (> height 0))
+          [:div
+           {:id "canvas-container"
+            :style {:width (str width "px")
+                    :height (str height "px")}
+            :class (styles/canvas-container @state)}
+           [canvas state]])))))
 
 (defn- canvas-wrapper []
   (let [ref (r/atom nil)

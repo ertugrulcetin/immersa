@@ -59,9 +59,11 @@
    :border-left (str "1px solid " colors/panel-border)
    :box-sizing :border-box})
 
-(defclass canvas-container []
+(defclass canvas-container [state]
   {:box-sizing "border-box"
-   :border (str "3px solid " colors/button-border)})
+   :border "3px solid transparent"}
+  (when (= state :focus) {:border (str "3px solid " colors/button-border)})
+  (when (= state :blur) {:border-bottom (str "3px solid " colors/panel-border)}))
 
 (defclass canvas-wrapper []
   {:display :flex

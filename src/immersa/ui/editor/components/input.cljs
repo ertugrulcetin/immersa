@@ -68,6 +68,8 @@
                 :min min
                 :max max
                 :step step
+                :on-wheel (fn [e]
+                            (-> e .-target .focus))
                 :on-change (fn [e]
                              (let [v (-> e .-target .-value)]
                                (when on-change (on-change v))
