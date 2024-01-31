@@ -164,7 +164,12 @@
           _ (api.material/init-nme-materials)
           ;; TODO only in editor mode, update here
           _ (api.gizmo/init-gizmo-manager)]
-      (api.mesh/box "box1")
+      ;; (api.mesh/box "box1")
+      (api.mesh/text "test" {:text "Text"
+                             :depth 0.001
+                             ;; :emissive-color :color/white
+                             ;; :size 1
+                             })
       (when dev?
         (common.utils/remove-element-listeners))
       (common.utils/register-event-listener js/window "resize" (functions/debounce #(j/call engine :resize) 250))

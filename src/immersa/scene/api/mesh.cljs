@@ -187,6 +187,7 @@
                            visibility
                            position
                            rotation
+                           scale
                            emissive-color
                            mat
                            billboard-mode
@@ -195,7 +196,7 @@
                            nme]
                     :or {size 1
                          resolution 8
-                         depth 1.0
+                         depth 0.2
                          mat (api.material/standard-mat (str name "-mat"))
                          hl-blur 1.0}
                     :as opts}]
@@ -223,7 +224,26 @@
       mat (j/assoc! :material mat)
       visibility (j/assoc! :visibility visibility)
       position (j/assoc! :position position)
-      rotation (j/assoc! :rotation rotation))))
+      rotation (j/assoc! :rotation rotation)
+      scale (j/assoc! :scaling scale))))
+
+(comment
+  (text "test" {:text "Text2"
+                :depth 0.1
+                ;:emissive-color (api.const/color-teal)
+                :size 1
+                :visibility 0.001
+                :mat (api.material/pbr-mat "pbr"
+                                           :alpha 0.5
+                                           :albedo-color (api.const/color-teal)
+                                           :emissive-color (api.const/color-teal)
+                                           :emissive-intensity 0
+                                           :metallic 1
+                                           :roughness 1
+                                           )
+                })
+
+  )
 
 (defn line [name & {:keys [points]
                     :as opts}]

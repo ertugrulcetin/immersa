@@ -48,11 +48,11 @@
         ob (atom nil)
         on-resize (functions/debounce
                     (fn [entries]
-                      ;; TODO resize the BabylonJS
                       (doseq [e entries]
                         (dispatch [::events/set-canvas-wrapper-dimensions
                                    (j/get-in e [:contentRect :width])
-                                   (j/get-in e [:contentRect :height])])))
+                                   (j/get-in e [:contentRect :height])]))
+                      (js/setTimeout #(dispatch [::events/resize-scene]) 200))
                     200)]
     (r/create-class
       {:component-did-mount (fn []
@@ -157,31 +157,20 @@
 
 (defn color-picker []
   (r/with-let [open? (r/atom false)]
-    [:div {:style {:display "flex"
-                   :flex-direction "column"
-                   :gap "12px"}}
-     [:div
-      {:style {:display "flex"
-               :align-items "center"
-               :justify-content "space-between"}}
+    [:div (styles/color-picker-container)
+     [:div (styles/color-picker-button-container)
       [text "Background color"]
-      [:button {:style {:border (str "1px solid " colors/border2)
-                        :border-radius "5px"
-                        :cursor "pointer"
-                        :width "24px"
-                        :height "24px"
-                        :background @(subscribe [::subs/scene-background-color])}
+      [:button {:class (styles/color-picker-button)
+                :style {:background @(subscribe [::subs/scene-background-color])}
                 :on-click #(swap! open? not)}]]
      (when @open?
-       [:div {:style {:position "relative"}}
-        [button {:style {:position "absolute"
-                         :z-index 3
-                         :right "44px"}
+       [:div (styles/color-picker-component-container)
+        [button {:class (styles/color-picker-close-button)
                  :on-click #(reset! open? false)
                  :icon-right [icon/x {:size 12
                                       :weight "bold"
                                       :color colors/text-primary}]}]
-        [:div {:style {:margin-top "1px"}}
+        [:div (styles/color-picker-component-wrapper)
          [color-picker* {:disable-alpha true
                          :color @(subscribe [::subs/scene-background-color])
                          :on-change #(let [{:keys [r g b]} (j/lookup (j/get % :rgb))]

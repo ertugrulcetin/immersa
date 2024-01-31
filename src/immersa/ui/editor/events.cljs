@@ -62,6 +62,11 @@
      :scene {:type :update-background-color
              :data {:value rgb}}}))
 
+(reg-event-fx
+  ::resize-scene
+  (fn []
+    {:scene {:type :resize}}))
+
 (reg-fx
   :scene
   (fn [data]

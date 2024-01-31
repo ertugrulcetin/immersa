@@ -218,3 +218,34 @@
   {:width "56px"
    :padding-right "5px"
    :user-select :none})
+
+(defattrs color-picker-container []
+  {:display :flex
+   :flex-direction :column
+   :gap "12px"})
+
+(defattrs color-picker-button-container []
+  {:display :flex
+   :align-items :center
+   :justify-content :space-between})
+
+(defclass color-picker-button []
+  {:border (str "1px solid " colors/border2)
+   :border-radius "5px"
+   :cursor :pointer
+   :width "24px"
+   :height "24px"}
+  [:&:hover
+   {:border (str "1px solid " colors/border3)
+    :box-shadow (str colors/button-box-shadow " 0px 1px 2px")}])
+
+(defclass color-picker-close-button []
+  {:position :absolute
+   :z-index 3
+   :right "44px"})
+
+(defattrs color-picker-component-container []
+  {:position "relative"})
+
+(defattrs color-picker-component-wrapper []
+  {:margin-top "1px"})

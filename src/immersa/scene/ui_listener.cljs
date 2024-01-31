@@ -37,6 +37,9 @@
     (j/assoc! skybox-material :primaryColor new-color)
     (j/assoc! ground-material :primaryColor new-color)))
 
+(defmethod handle-ui-update :resize [_]
+  (j/call (api.core/get-engine) :resize))
+
 (defn init-ui-update-listener []
   (go-loop-sub event-bus-pub :get-ui-update [_ data]
     (handle-ui-update data)))

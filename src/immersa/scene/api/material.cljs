@@ -117,16 +117,24 @@
               :primaryColor primary-color)
     (api.core/add-node-to-db name bm opts)))
 
-(defn pbr-mat [name & {:keys [metallic
+(defn pbr-mat [name & {:keys [alpha
+                              metallic
                               roughness
                               reflection-texture
+                              emissive-color
+                              emissive-intensity
                               albedo-texture
+                              albedo-color
                               bump-texture]
                        :as opts}]
   (let [pbr (PBRMaterial. name)]
     (m/cond-doto pbr
+      alpha (j/assoc! :alpha alpha)
+      emissive-color (j/assoc! :emissiveColor emissive-color)
+      emissive-intensity (j/assoc! :emissiveIntensity emissive-intensity)
       reflection-texture (j/assoc! :reflectionTexture reflection-texture)
       albedo-texture (j/assoc! :albedoTexture albedo-texture)
+      albedo-color (j/assoc! :albedoColor albedo-color)
       bump-texture (j/assoc! :bumpTexture bump-texture)
       metallic (j/assoc! :metallic metallic)
       roughness (j/assoc! :roughness roughness))
