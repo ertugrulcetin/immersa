@@ -27,6 +27,7 @@
      [:span
       {:style (merge {:font-size font-size
                       :font-weight font-weight
-                      :color color} style)
+                      :color color
+                      :user-select "none"} style)
        :class [(when class class)]}
       text])))

@@ -4,7 +4,10 @@
     [immersa.ui.theme.typography :as typography]
     [spade.core :refer [defclass defattrs]]))
 
+(def header-height "57px")
+
 (def slides-panel-size "170px")
+(def options-panel-size "340px")
 
 (def hover-style
   [:&:hover
@@ -93,7 +96,7 @@
    :justify-content :space-between
    :padding "12px 16px"
    :width "100%"
-   :height "57px"
+   :height header-height
    :box-sizing :border-box
    :border-bottom (str "1px solid " colors/panel-border)})
 
@@ -202,7 +205,19 @@
   [:&:before
    {:content "''"
     :position "fixed"
-    :width "170px"
+    :width slides-panel-size
+    :height "8px"
+    :background "linear-gradient(180deg,#ffffff 0%,rgba(252,252,253,0) 100%)"}])
+
+(defclass options-scroll-area []
+  {:width options-panel-size
+   :height "calc(100vh - 57px)"
+   :overflow :hidden}
+  ;; Fade out effect
+  [:&:before
+   {:content "''"
+    :position "fixed"
+    :width options-panel-size
     :height "8px"
     :background "linear-gradient(180deg,#ffffff 0%,rgba(252,252,253,0) 100%)"}])
 

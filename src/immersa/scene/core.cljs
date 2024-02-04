@@ -1,5 +1,6 @@
 (ns immersa.scene.core
   (:require
+    ["@babylonjs/core/Meshes/Compression/dracoCompression" :refer [DracoCompression]]
     [applied-science.js-interop :as j]
     [cljs.core.async :as a]
     [cljs.core.async :as a :refer [go-loop <!]]
@@ -125,6 +126,12 @@
                (slide/start-slide-show)
                (start-background-lighting engine))))
 
+(defn- update-draco-url []
+  (j/assoc-in! DracoCompression [:Configuration :decoder]
+               #js {:wasmUrl "js/draco/draco_wasm_wrapper_gltf.js"
+                    :wasmBinaryUrl "js/draco/draco_decoder_gltf.wasm"
+                    :wasmBinaryFile "js/draco/draco_decoder_gltf.js"}))
+
 (defn start-scene [canvas & {:keys [start-slide-show?
                                     mode
                                     dev?]
@@ -132,6 +139,7 @@
   (a/go
     (let [engine (api.core/create-engine canvas)
           scene (api.core/create-scene engine)
+          _ (update-draco-url)
           _ (api.core/create-assets-manager :on-finish #(do
                                                           (dispatch [::events/set-show-arrow-keys-text? false])
                                                           (dispatch [::events/set-show-pre-warm-text? true])))

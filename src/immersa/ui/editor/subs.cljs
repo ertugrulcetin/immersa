@@ -56,3 +56,9 @@
   (fn [db]
     (let [[r g b] (or (-> db :editor :scene :background-color) [255 255 255])]
       (str "rgb(" r "," g "," b ")"))))
+
+(reg-sub
+  ::selected-mesh-color
+  (fn [db]
+    (-> db :editor :selected-mesh :color)))
+

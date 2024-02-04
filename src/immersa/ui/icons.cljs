@@ -6,6 +6,7 @@
     ["@phosphor-icons/react/dist/csr/CaretLeft" :refer [CaretLeft]]
     ["@phosphor-icons/react/dist/csr/CaretRight" :refer [CaretRight]]
     ["@phosphor-icons/react/dist/csr/ChatCenteredText" :refer [ChatCenteredText]]
+    ["@phosphor-icons/react/dist/csr/ChatsCircle" :refer [ChatsCircle]]
     ["@phosphor-icons/react/dist/csr/Command" :refer [Command]]
     ["@phosphor-icons/react/dist/csr/Cube" :refer [Cube]]
     ["@phosphor-icons/react/dist/csr/DotsThreeVertical" :refer [DotsThreeVertical]]
@@ -17,6 +18,7 @@
     ["@phosphor-icons/react/dist/csr/PlusCircle" :refer [PlusCircle]]
     ["@phosphor-icons/react/dist/csr/ShareNetwork" :refer [ShareNetwork]]
     ["@phosphor-icons/react/dist/csr/SmileySticker" :refer [SmileySticker]]
+    ["@phosphor-icons/react/dist/csr/Student" :refer [Student]]
     ["@phosphor-icons/react/dist/csr/TextT" :refer [TextT]]
     ["@phosphor-icons/react/dist/csr/X" :refer [X]]
     [reagent.core :as r]))
@@ -40,3 +42,5 @@
 (def plus (r/adapt-react-class PlusCircle))
 (def books (r/adapt-react-class Books))
 (def x (r/adapt-react-class X))
+(def chats-circle (r/adapt-react-class ChatsCircle))
+(def student (r/adapt-react-class Student))

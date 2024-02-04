@@ -13,5 +13,11 @@
    {:width "1px"
     :height "100%"}])
 
-(defn separator []
-  [:> Separator/Root {:class (separator-style)}])
+(defn separator
+  ([]
+   (separator {:orientation "horizontal"}))
+  ([{:keys [style orientation]}]
+   [:> Separator/Root {:decorative true
+                       :orientation orientation
+                       :style style
+                       :class (separator-style)}]))

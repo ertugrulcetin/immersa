@@ -77,5 +77,6 @@
                 :on-key-down (fn [e]
                                (when (= (j/get e :key) ".")
                                  (.preventDefault e)))}]
-       [:label (label-style)
-        [text {:size :s} label]]])))
+       (when label
+         [:label (label-style)
+          [text {:size :s} label]])])))

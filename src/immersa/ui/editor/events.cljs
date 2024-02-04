@@ -71,3 +71,8 @@
   :scene
   (fn [data]
     (fire :get-ui-update data)))
+
+(reg-fx
+  ::update-selected-mesh-color
+  (fn [{:keys [db]}]
+    {:db db}))
