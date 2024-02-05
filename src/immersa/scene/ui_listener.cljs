@@ -80,9 +80,14 @@
                       :scale scaling
                       :text text}
                      data)
-              opts (if (= (:depth data) 0)
+              opts (cond
+                     (= (:depth data) 0)
                      (assoc opts :depth 0.01)
-                     opts)
+
+                     (= (:size data) 0)
+                     (assoc opts :size 0.1)
+
+                     :else opts)
               mesh (api.mesh/text name opts)]
           (j/call-in api.core/db [:gizmo :manager :attachToMesh] mesh))))
     500))
