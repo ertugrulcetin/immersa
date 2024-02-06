@@ -1,6 +1,7 @@
 (ns immersa.scene.core
   (:require
     ["@babylonjs/core/Meshes/Compression/dracoCompression" :refer [DracoCompression]]
+    ["@babylonjs/core/Rendering/boundingBoxRenderer"]
     [applied-science.js-interop :as j]
     [cljs.core.async :as a]
     [cljs.core.async :as a :refer [go-loop <!]]

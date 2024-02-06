@@ -1,0 +1,17 @@
+diff --git a/node_modules/@phosphor-icons/react/package.json b/node_modules/@phosphor-icons/react/package.json
+index 81fe7d5..8de8c44 100644
+--- a/node_modules/@phosphor-icons/react/package.json
++++ b/node_modules/@phosphor-icons/react/package.json
+@@ -28,12 +28,10 @@
+     },
+     "./dist/csr/*": {
+       "import": "./dist/csr/*.mjs",
+-      "require": "./dist/index.cjs",
+       "types": "./dist/csr/*.d.ts"
+     },
+     "./dist/lib/*": {
+       "import": "./dist/lib/*.mjs",
+-      "require": "./dist/index.cjs",
+       "types": "./dist/lib/*.d.ts"
+     },
+     "./dist/ssr": {
