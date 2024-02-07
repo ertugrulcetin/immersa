@@ -1,4 +1,4 @@
-(ns immersa.ui.config)
+(ns immersa.common.config)
 
 (def debug?
   ^boolean goog.DEBUG)

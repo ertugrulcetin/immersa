@@ -1,9 +1,12 @@
 (ns immersa.scene.ui-listener
   (:require
+    ["@babylonjs/core/Maths/math" :refer [Vector3]]
+    ["@babylonjs/core/Maths/math.axis" :refer [Axis]]
     [applied-science.js-interop :as j]
     [goog.functions :as functions]
     [immersa.common.communication :refer [event-bus-pub]]
     [immersa.scene.api.camera :as api.camera]
+    [immersa.scene.api.constant :as api.const]
     [immersa.scene.api.core :as api.core]
     [immersa.scene.api.mesh :as api.mesh])
   (:require-macros
@@ -110,6 +113,27 @@
 
 (defmethod handle-ui-update :resize [_]
   (j/call (api.core/get-engine) :resize))
+
+(defmethod handle-ui-update :add-text-mesh [_]
+  (let [camera (api.camera/active-camera)
+        forward (j/get (j/call camera :getForwardRay) :direction)
+        scaled-forward (j/call forward :scale 10)
+        new-pos (j/call (j/get camera :position) :add scaled-forward)
+        mesh (api.mesh/text (str (random-uuid)) {:text "Text"
+                                                 :position new-pos
+                                                 :depth 0.01
+                                                 :size 1.0
+                                                 :roughness 1.0
+                                                 :color (api.const/color-white)})
+        direction (-> (j/get mesh :position)
+                      (j/call :subtract (j/get camera :position))
+                      (j/call :normalize))
+        target-position (-> (j/get mesh :position)
+                            (j/call :add direction))]
+    (j/call mesh :lookAt target-position)
+    (j/assoc-in! mesh [:rotation :x] 0)
+    (j/assoc-in! mesh [:rotation :z] 0)
+    (j/call-in api.core/db [:gizmo :manager :attachToMesh] mesh)))
 
 (defn init-ui-update-listener []
   (go-loop-sub event-bus-pub :get-ui-update [_ data]

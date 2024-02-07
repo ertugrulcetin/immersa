@@ -85,10 +85,11 @@
       [text {:size :s
              :weight :light} "Private"]]]]])
 
-(defn presentation-component [{:keys [icon class disabled? color text-weight]
+(defn presentation-component [{:keys [icon class disabled? color text-weight on-click]
                                :or {disabled? false}
                                :as opts}]
   [:div {:class [(styles/presentation-component disabled?) class]
+         :on-click on-click
          :disabled disabled?}
    [icon {:size 24
           :color (or color colors/text-primary)}]
@@ -98,18 +99,22 @@
 
 (defn- header-center-panel []
   [:div (styles/header-center-panel)
-   [dropdown
-    [presentation-component {:icon icon/text
-                             :text "Text"}]
-    [:<>
-     [dropdown-item
-      [text {:size :xl} "Normal text"]]
-     [dropdown-separator]
-     [dropdown-item
-      [text {:size :xl} "Greased line text"]]
-     [dropdown-separator]
-     [dropdown-item
-      [text {:size :xl} "Info text"]]]]
+
+   [presentation-component {:icon icon/text
+                            :text "Text"
+                            :on-click #(dispatch [::events/add-text-mesh])}]
+   #_[dropdown
+      [presentation-component {:icon icon/text
+                               :text "Text"}]
+      [:<>
+       [dropdown-item
+        [text {:size :xl} "Normal text"]]
+       [dropdown-separator]
+       [dropdown-item
+        [text {:size :xl} "Greased line text"]]
+       [dropdown-separator]
+       [dropdown-item
+        [text {:size :xl} "Info text"]]]]
    [presentation-component {:icon icon/image
                             :text "Image"}]
    [presentation-component {:icon icon/cube

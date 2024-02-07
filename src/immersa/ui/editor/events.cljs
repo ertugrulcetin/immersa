@@ -113,3 +113,8 @@
         (assoc :scene {:type :update-selected-mesh-text-depth-or-size
                        :data {:update type
                               :value (parse-double updated-attr)}})))))
+
+(reg-event-fx
+  ::add-text-mesh
+  (fn []
+    {:scene {:type :add-text-mesh}}))

@@ -36,6 +36,10 @@
 
 (defonce db #js {})
 
+(comment
+  (require '["@babylonjs/inspector"])
+  (show-debug))
+
 (defn create-engine [canvas]
   (let [e (Engine. canvas true #js {:preserveDrawingBuffer true
                                     :stencil true
