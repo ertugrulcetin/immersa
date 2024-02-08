@@ -16,8 +16,9 @@
     [immersa.scene.api.mesh :as api.mesh]
     [immersa.scene.api.particle :as api.particle]
     [immersa.scene.materials-in-sphere :as mat.spheres]
+    [immersa.ui.editor.events :as editor.events]
     [immersa.ui.present.events :as events]
-    [re-frame.core :refer [dispatch]]))
+    [re-frame.core :refer [dispatch dispatch-sync]]))
 
 (defn- get-position-anim [object-slide-info object-name]
   (let [object (api.core/get-object-by-name object-name)
@@ -530,7 +531,8 @@
   (reset! current-slide-index 0))
 
 (defn go-to-slide [index]
-  (a/put! command-ch index))
+  (when-not (= index @current-slide-index)
+    (a/put! command-ch index)))
 
 (comment
   (a/put! command-ch 11)
@@ -666,5 +668,6 @@
               (a/<! ch))
             (reset! prev-slide objects-data)
             (reset! slide-in-progress? false)
+            (dispatch-sync [::editor.events/set-slide-change-unlocked])
             (recur current-index))
           (recur index))))))

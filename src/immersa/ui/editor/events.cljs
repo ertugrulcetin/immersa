@@ -122,6 +122,15 @@
 (reg-event-fx
   ::go-to-slide
   (fn [{:keys [db]} [_ index]]
-    {:db (assoc-in db [:editor :slides :current-index] index)
-     :scene {:type :go-to-slide
-             :data {:index index}}}))
+    (let [slide-change-locked? (-> db :editor :slides :slide-change-locked?)]
+      (when-not slide-change-locked?
+        {:db (-> db
+                 (assoc-in [:editor :slides :current-index] index)
+                 (assoc-in [:editor :slides :slide-change-locked?] true))
+         :scene {:type :go-to-slide
+                 :data {:index index}}}))))
+
+(reg-event-db
+  ::set-slide-change-unlocked
+  (fn [db]
+    (assoc-in db [:editor :slides :slide-change-locked?] false)))
