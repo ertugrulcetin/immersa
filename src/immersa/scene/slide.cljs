@@ -531,8 +531,7 @@
   (reset! current-slide-index 0))
 
 (defn go-to-slide [index]
-  (when-not (= index @current-slide-index)
-    (a/put! command-ch index)))
+  (process-next-prev-command index command-ch slide-in-progress? current-running-anims))
 
 (comment
   (a/put! command-ch 11)
@@ -609,6 +608,8 @@
           (let [_ (reset! current-slide-index current-index)
                 _ (when (= mode :present)
                     (notify-ui current-index (count slides)))
+                _ (when (= mode :editor)
+                    (dispatch-sync [::editor.events/set-current-slide-index current-index]))
                 slide (slides current-index)
                 objects-data (:data slide)
                 object-names-from-slide-info (set (conj (keys (:data slide)) :camera))
@@ -668,6 +669,5 @@
               (a/<! ch))
             (reset! prev-slide objects-data)
             (reset! slide-in-progress? false)
-            (dispatch-sync [::editor.events/set-slide-change-unlocked])
             (recur current-index))
           (recur index))))))
