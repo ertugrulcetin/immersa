@@ -19,26 +19,29 @@
     (j/call child-meshes :forEach #(j/call hl :addMesh % outline-color)))
   (j/call hl :addMesh mesh outline-color))
 
-(defn- update-ui-by-selected-mesh-type [type mesh]
-  (case type
-    "text3D" (dispatch [::events/set-selected-text3D-data
-                        {:type "text3D"
-                         :text (api.core/get-node-attr mesh :text)
-                         :depth (api.core/get-node-attr mesh :depth)
-                         :size (api.core/get-node-attr mesh :size)
-                         :opacity (j/get mesh :visibility)
-                         :color (-> (j/get-in mesh [:material :albedoColor]) api.core/color->v)
-                         :emissive-color (some-> (j/get-in mesh [:material :emissiveColor]) api.core/color->v)
-                         :emissive-intensity (j/get-in mesh [:material :emissiveIntensity])
-                         :alpha (j/get-in mesh [:material :alpha])
-                         :metallic (j/get-in mesh [:material :metallic])
-                         :roughness (j/get-in mesh [:material :roughness])}])))
+(defn- update-ui-by-selected-mesh-type [name type mesh]
+  (let [pos-rot-scale-name (assoc (utils/v3->v-data mesh [:position :rotation :scaling]) :name name)]
+    (case type
+      "text3D" (dispatch [::events/set-selected-text3D-data
+                          (merge
+                            pos-rot-scale-name
+                            {:type "text3D"
+                             :text (api.core/get-node-attr mesh :text)
+                             :depth (api.core/get-node-attr mesh :depth)
+                             :size (api.core/get-node-attr mesh :size)
+                             :opacity (j/get mesh :visibility)
+                             :color (-> (j/get-in mesh [:material :albedoColor]) api.core/color->v)
+                             :emissive-color (some-> (j/get-in mesh [:material :emissiveColor]) api.core/color->v)
+                             :emissive-intensity (j/get-in mesh [:material :emissiveIntensity])
+                             :alpha (j/get-in mesh [:material :alpha])
+                             :metallic (j/get-in mesh [:material :metallic])
+                             :roughness (j/get-in mesh [:material :roughness])})])
+      "glb" (dispatch [::events/set-selected-glb-data (merge pos-rot-scale-name {:type "glb"})]))))
 
 (defn- notify-ui-selected-mesh [mesh]
   (let [name (j/get mesh :immersa-id)
         type (api.core/get-object-type-by-name name)]
-    (dispatch [::events/set-selected-mesh (assoc (utils/v3->v-data mesh [:position :rotation :scaling]) :name name)])
-    (update-ui-by-selected-mesh-type type mesh)))
+    (update-ui-by-selected-mesh-type name type mesh)))
 
 (def bb-types #{"text3D" "image"})
 

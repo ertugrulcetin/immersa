@@ -203,7 +203,6 @@
                                                           (dispatch [::events/set-show-arrow-keys-text? false])
                                                           (dispatch [::events/set-show-pre-warm-text? true])))
           _ (firebase/init-app)
-          _ (a/<! (api.core/load-async slides))
           _ (api.core/init-p5)
           free-camera (api.camera/create-free-camera "free-camera" :position (v3 0 0 -10))
           arc-camera (api.camera/create-arc-camera "arc-camera"
@@ -229,6 +228,7 @@
           _ (api.component/create-sky-box)
           ;; _ (api.component/create-sky-sphere)
           _ (api.material/create-environment-helper)
+          _ (a/<! (api.core/load-async slides))
           ;; _ (api.material/init-nme-materials)
           ]
       (when dev?

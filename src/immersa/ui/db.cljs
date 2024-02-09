@@ -92,11 +92,23 @@
                                                                            :transparent? true
                                                                            :position [-6.2 3.73 0],
                                                                            :rotation [0 0 0],
-                                                                           :scale [0.5 0.5 0.5]}}}
+                                                                           :scale [0.5 0.5 0.5]}
+                                   "55k4ee76-bb27-4904-9d30-360a40d8ab00" {:type :glb
+                                                                           :asset-type :model
+                                                                           :path "https://firebasestorage.googleapis.com/v0/b/immersa-6d29f.appspot.com/o/models%2Fschaltbau%2Ftrain.glb?alt=media&token=5059924a-b432-4c9a-9711-3c401259083b"
+                                                                           :position [-64 2 75]
+                                                                           :rotation [0 2.44 0]
+                                                                           :scale [0.001 0.001 0.001]}}}
                            {:id "3bc5da96-f729-4ca1-a5e4-ab22fecd29b7"
-                            :data {:camera {:position [0 5 -10]
+                            :data {:camera {:position [0 3 -10]
                                             :rotation [0 0 0]}
-                                   :skybox {:background {:color [255 255 255]}}}}]}}
+                                   :skybox {:background {:color [255 255 255]}}
+                                   "55k4ee76-bb27-4904-9d30-360a40d8ab00" {:type :glb
+                                                                           :asset-type :model
+                                                                           :path "https://firebasestorage.googleapis.com/v0/b/immersa-6d29f.appspot.com/o/models%2Fschaltbau%2Ftrain.glb?alt=media&token=5059924a-b432-4c9a-9711-3c401259083b"
+                                                                           :position [-9 2 11]
+                                                                           :rotation [0 2.44 0]
+                                                                           :scale [0.001 0.001 0.001]}}}]}}
    :present {:show-arrow-keys-text? true
              :show-pre-warm-text? false
              :background-color "rgb(0,0,0)"}})

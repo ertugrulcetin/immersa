@@ -13,11 +13,6 @@
         (assoc-in [:editor :canvas-wrapper :height] height))))
 
 (reg-event-db
-  ::set-selected-mesh
-  (fn [db [_ data]]
-    (assoc-in db [:editor :selected-mesh] data)))
-
-(reg-event-db
   ::clear-selected-mesh
   (fn [db]
     (dissoc-in db [:editor :selected-mesh])))
@@ -87,7 +82,12 @@
 (reg-event-db
   ::set-selected-text3D-data
   (fn [db [_ data]]
-    (update-in db [:editor :selected-mesh] merge data)))
+    (assoc-in db [:editor :selected-mesh] data)))
+
+(reg-event-db
+  ::set-selected-glb-data
+  (fn [db [_ data]]
+    (assoc-in db [:editor :selected-mesh] data)))
 
 (reg-event-fx
   ::update-selected-mesh-slider-value

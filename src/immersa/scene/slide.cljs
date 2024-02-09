@@ -543,6 +543,7 @@
   )
 
 (defn duplicate-slide-data [[id params]]
+  (println params)
   (let [mesh (api.core/get-object-by-name id)
         index @current-slide-index
         exists? (boolean (get-in @all-slides [index :data id]))
@@ -551,11 +552,14 @@
       (j/assoc! mesh :visibility (:visibility params))
       (api.core/set-enabled mesh true))
     (when exists?
-      (api.mesh/text id (->> params
-                             (parse-pos-rot-scale :position)
-                             (parse-pos-rot-scale :rotation)
-                             (parse-pos-rot-scale :scale)
-                             (parse-colors :color))))
+      (let [params (->> params
+                        (parse-pos-rot-scale :position)
+                        (parse-pos-rot-scale :rotation)
+                        (parse-pos-rot-scale :scale)
+                        (parse-colors :color))]
+        (case (:type params)
+          :text3D (api.mesh/text id params)
+          :glb (api.mesh/glb->mesh id params))))
     (sp/setval [sp/ATOM index :data id] params all-slides)
     (sp/setval [sp/ATOM id] params prev-slide)))
 
@@ -611,10 +615,12 @@
   (let [_ (init-slide-show-state)
         slides (reset! all-slides slides)
         slides (get-slides slides)]
-    (capture-thumbnail-changes)
-    (a/put! command-ch :next)
     (api.camera/reset-camera (-> slides first :data :camera :position)
                              (-> slides first :data :camera :rotation))
+    (pre-warm-the-scene slides)
+    (prepare-first-skybox slides)
+    (capture-thumbnail-changes)
+    (a/put! command-ch :next)
     (when (= mode :present)
       (api.camera/detach-control (api.camera/active-camera))
       (let [slide-controls (js/document.getElementById "slide-controls")
@@ -638,9 +644,7 @@
                 (or (= (.-keyCode e) 37)
                     (= (.-keyCode e) 38))
                 (process-next-prev-command :prev command-ch slide-in-progress? current-running-anims)))))))
-    (pre-warm-the-scene slides)
-    (prepare-first-skybox slides)
-    (api.core/hide-loading-ui)
+    (js/setTimeout #(api.core/hide-loading-ui) 500)
     (go-loop [index -1]
       (let [command (a/<! command-ch)
             current-index (case command
