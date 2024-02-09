@@ -603,7 +603,7 @@
     (<! (a/timeout 500))
     (let [{:keys [last-time-slide-updated last-time-thumbnail-updated]} @thumbnails]
       (when (> last-time-slide-updated last-time-thumbnail-updated)
-        ;; (update-thumbnail)
+        (update-thumbnail)
         (swap! thumbnails assoc :last-time-thumbnail-updated (js/Date.now))))
     (recur)))
 
