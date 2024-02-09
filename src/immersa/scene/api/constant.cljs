@@ -32,7 +32,7 @@
 
 (def gui-text-wrapping-word-wrap :WordWrap)
 
-(def mesh-billboard-mode-all :BILLBOARDMODE_ALL)
+(def mesh-billboard-mode-all (j/get Mesh :BILLBOARDMODE_ALL))
 
 (defn color-white [] (j/call Color3 :White))
 (defn color-black [] (j/call Color3 :Black))

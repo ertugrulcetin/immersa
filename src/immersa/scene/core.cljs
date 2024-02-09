@@ -7,6 +7,7 @@
     [cljs.core.async :as a :refer [go-loop <!]]
     [cljs.reader :as reader]
     [clojure.string :as str]
+    [com.rpl.specter :as sp]
     [goog.functions :as functions]
     [immersa.common.firebase :as firebase]
     [immersa.common.utils :as common.utils]
@@ -68,8 +69,9 @@
 
                      (and (= key "c")
                           (j/get-in info [:event :metaKey])
-                          (j/get-in api.core/db [:gizmo :selected-mesh]))
-                     (-> (j/get-in api.core/db [:gizmo :selected-mesh])
+                          (api.core/selected-mesh))
+                     ;; TODO  move this to data structure so browser does not have to ask for permission
+                     (-> (api.core/selected-mesh)
                          api.core/get-object-name
                          (#(vector % (get-in @slide/all-slides [@slide/current-slide-index :data %])))
                          common.utils/copy-to-clipboard)
@@ -85,7 +87,16 @@
                                                (js/console.warn "Clipboard data is not in EDN format.")
                                                (js/console.warn e))))))
                          (j/call :catch (fn []
-                                          (js/console.error "Clipboard failed.")))))
+                                          (js/console.error "Clipboard failed."))))
+                     (and (= key "backspace")
+                          (api.core/selected-mesh))
+                     (let [obj (api.core/selected-mesh)
+                           id (api.core/get-object-name obj)
+                           current-index @slide/current-slide-index]
+                       (api.core/clear-selected-mesh)
+                       (sp/setval [sp/ATOM current-index :data id] sp/NONE slide/all-slides)
+                       (sp/setval [sp/ATOM id] sp/NONE slide/prev-slide)
+                       (api.core/set-enabled obj false)))
                    (api.camera/switch-camera-if-needed scene))))))
 
 (defn- read-pixels [engine]

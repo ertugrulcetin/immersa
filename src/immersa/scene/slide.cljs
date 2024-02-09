@@ -543,21 +543,21 @@
   )
 
 (defn duplicate-slide-data [[id params]]
-  (when-let [mesh (api.core/get-object-by-name id)]
-    (let [index @current-slide-index
-          exists? (boolean (get-in @all-slides [index :data id]))
-          id (if exists? (str (random-uuid)) id)]
-      (when (and (not exists?) (> (:visibility params) 0))
-        (j/assoc! mesh :visibility (:visibility params))
-        (api.core/set-enabled mesh true))
-      (when exists?
-        (api.mesh/text id (->> params
-                               (parse-pos-rot-scale :position)
-                               (parse-pos-rot-scale :rotation)
-                               (parse-pos-rot-scale :scale)
-                               (parse-colors :color))))
-      (sp/setval [sp/ATOM index :data id] params all-slides)
-      (sp/setval [sp/ATOM id] params prev-slide))))
+  (let [mesh (api.core/get-object-by-name id)
+        index @current-slide-index
+        exists? (boolean (get-in @all-slides [index :data id]))
+        id (if exists? (str (random-uuid)) id)]
+    (when (and mesh (not exists?) (> (:visibility params) 0))
+      (j/assoc! mesh :visibility (:visibility params))
+      (api.core/set-enabled mesh true))
+    (when exists?
+      (api.mesh/text id (->> params
+                             (parse-pos-rot-scale :position)
+                             (parse-pos-rot-scale :rotation)
+                             (parse-pos-rot-scale :scale)
+                             (parse-colors :color))))
+    (sp/setval [sp/ATOM index :data id] params all-slides)
+    (sp/setval [sp/ATOM id] params prev-slide)))
 
 (defn vec-insert [lst elem index]
   (let [[l r] (split-at index lst)]

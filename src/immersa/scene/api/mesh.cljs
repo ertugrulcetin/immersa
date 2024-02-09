@@ -106,7 +106,7 @@
   (let [p (j/call MeshBuilder :CreatePlane name #js {:width width
                                                      :height height})]
     (m/cond-doto p
-      billboard-mode (j/assoc! :billboardMode (j/get Mesh billboard-mode))
+      billboard-mode (j/assoc! :billboardMode billboard-mode)
       visibility (j/assoc! :visibility visibility)
       position (j/assoc! :position position)
       rotation (j/assoc! :rotation rotation)
@@ -182,6 +182,7 @@
       mat (j/assoc! :material mat)
       (some? pickable?) (j/assoc! :isPickable pickable?))))
 
+;; TODO dispose material when disposing the mesh!!!
 (defn text [name & {:keys [text
                            size
                            resolution
@@ -198,7 +199,7 @@
                            alpha
                            mat
                            mat-type
-                           billboard-mode
+                           face-to-screen?
                            hl-color
                            hl-blur
                            nme]
@@ -237,7 +238,7 @@
         metallic (j/assoc! :metallic metallic)
         alpha (j/assoc! :alpha alpha)))
     (cond-> mesh
-      billboard-mode (j/assoc! :billboardMode (j/get Mesh billboard-mode))
+      face-to-screen? (j/assoc! :billboardMode api.const/mesh-billboard-mode-all)
       mat (j/assoc! :material mat)
       visibility (j/assoc! :visibility visibility)
       position (j/assoc! :position position)

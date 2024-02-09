@@ -118,19 +118,24 @@
        [dropdown-item
         [text {:size :xl} "Info text"]]]]
    [presentation-component {:icon icon/image
-                            :text "Image"}]
+                            :text "Image"
+                            :disabled? true}]
    [presentation-component {:icon icon/cube
                             :text "3D Model"
-                            :class (styles/presentation-component-cube)}]
+                            :class (styles/presentation-component-cube)
+                            :disabled? true}]
    [presentation-component {:icon icon/camera
-                            :text "Camera"}]
+                            :text "Camera"
+                            :disabled? true}]
    [presentation-component {:icon icon/student
-                            :text "Tutorial"}]
+                            :text "Tutorial"
+                            :disabled? true}]
    [presentation-component {:icon icon/chats-circle
                             :text "Feedback"
                             :text-weight :regular
                             :class (styles/presentation-component-cube)
-                            :color colors/button-outline-text}]
+                            :color colors/button-outline-text
+                            :disabled? true}]
    #_[presentation-component {:icon icon/books
                               :text "Library"
                               :disabled? true}]

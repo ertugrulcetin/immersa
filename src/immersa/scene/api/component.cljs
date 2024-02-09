@@ -216,7 +216,9 @@
     (j/call hl :addMesh clouds (api.core/color 0.3 0.74 0.94))
     tn))
 
-(defn wave [name & {:keys [width
+(defn wave [name & {:keys [position
+                           rotation
+                           width
                            height
                            resolution
                            point-size
@@ -227,7 +229,9 @@
                            noise-amp-2
                            noise-freq-2
                            spd-modifier-2]
-                    :or {width 50
+                    :or {position (v3 0 -5 35)
+                         rotation (v3 (/ js/Math.PI 70) 0 0)
+                         width 50
                          height 50
                          resolution 100
                          point-size 3.0
@@ -260,8 +264,8 @@
                                (m/assoc! mesh
                                          :material mat
                                          :material.pointsCloud true
-                                         :position (v3 0 -5 35)
-                                         :rotation (v3 (/ js/Math.PI 70) 0 0)
+                                         :position position
+                                         :rotation rotation
                                          :visibility 0.5)))
         start-time (js/Date.now)
         engine (api.core/get-engine)

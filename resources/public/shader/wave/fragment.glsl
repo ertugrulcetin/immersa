@@ -8,8 +8,8 @@ void main() {
     vec2 pos = gl_FragCoord.xy / u_resolution.xy;
 
     // Create a color gradient that goes from green to blue across the x-coordinate
-    vec3 colorFrom = vec3(0.0, 1.0, 0.0);// Green
-    vec3 colorTo = vec3(0.0, 0.0, 1.0);// Blue
+    vec3 colorFrom = vec3(1.0, 0.0, 0.0);// Green
+    vec3 colorTo = vec3(0.0, 0.0, 0.0);// Blue
     vec3 color = mix(colorFrom, colorTo, pos.x);// Interpolate between green and blue based on x position
 
     // Calculate glow intensity based on time and x-coordinate
