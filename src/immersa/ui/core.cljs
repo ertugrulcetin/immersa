@@ -27,6 +27,7 @@
 
 (defn init []
   (println "init...")
+  (js/console.log js/location)
   (js/console.log (j/get js/location :patname))
   (when-not (some-> (j/get js/location :patname) (= "/schaltbau"))
     (j/assoc! js/location :href "https://immersa.app"))
