@@ -415,7 +415,7 @@
             form)
           form))
       slides)
-    (doseq [[index {:keys [asset-type path]}] (map-indexed vector @assets)]
+    (doseq [[index {:keys [asset-type path]}] (map-indexed vector (distinct @assets))]
       (case asset-type
         :text (add-text-task (str "text-" index) path)
         :texture (add-texture-task (str "texture-" index) path)
