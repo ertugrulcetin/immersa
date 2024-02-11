@@ -7,7 +7,7 @@
                      :all [{:id "14e4ee76-bb27-4904-9d30-360a40d8abb7"
                             :data {:camera {:position [0 0 -10]
                                             :rotation [0 0 0]}
-                                   :skybox {:background {:color [1000 1000 1000]}}
+                                   :skybox {:background {:color [500 500 500]}}
                                    "wave" {:type :wave}
                                    "33e4ee76-bb27-4904-9d30-360a40d8abc1" {:type :image
                                                                            :asset-type :texture
@@ -213,7 +213,7 @@
                                                                            :rotation [0 7.1370003772552115 0]
                                                                            :scale [1 1 1]}
                                    "cab626c0-695a-44c4-a2fc-88484b5eb1dd" {:rotation [0 3.135921059200114 0], :color [255 255 255], :scale [1 1 1], :roughness 1, :metallic 0, :type :text3D, :size 0.3, :position [-3.6639790534973145 -2.1218996047973633 11.270173072814941], :depth 0.01, :visibility 1, :emissive-intensity 1, :text "• Güneş panelleri\n• Rüzgar türbinleri\n• izleme sistemleri\n• Yakıt hücreleri\n• Pil şarj istasyonları\n• Enerji dönüşümü\n• Pil yenileme\n• Sabit pil enerji depoları"}}}
-                           {:id "1166656e-5d43-4f2a-a15d-cd5b6617b7c6",
+                           {:id "1266656e-5d43-4f2a-a15d-cd5b6617b7c6",
                             :data {:camera {:position [-0.001132812497582604 -5.447031714567174e-16 21.272332594691633],
                                             :rotation [0.0020943951023931952 -3.1382765280110037 0]},
                                    :skybox {:background {:color [255 255 255]}},
@@ -248,20 +248,66 @@
                                    "dfcc126f-3c9d-489f-8784-0fc0dbc448f9" {:rotation [0 3.1449087792603736 0], :color [255 255 255], :scale [1 1 1], :roughness 1, :metallic 0, :type :text3D, :size 0.4, :position [-0.03429393470287323 -1.5883097648620605 11.272409439086914], :depth 0.01, :visibility 1, :emissive-intensity 1, :text "Patentli Ark Sönümleme Teknolojisi"}}}
                            {:id "1166656e-5d43-4f2a-a15d-cd5b6617b7c6",
                             :data {:camera {:position [-0.001132812497582604 -5.447031714567174e-16 21.272332594691633],
-                                            :rotation [0.0020943951023931952 -3.1382765280110037 0]},
+                                            :rotation [0 -3.1382765280110037 0]},
                                    :skybox {:background {:color [255 255 255]}}
                                    "27o4ss76-bb27-4904-9d30-360a40d8abc1" {:type :image, :asset-type :texture, :visibility 1, :path "https://firebasestorage.googleapis.com/v0/b/immersa-6d29f.appspot.com/o/models%2Fschaltbau%2Fc2.png?alt=media&token=cab78695-3d3b-4fd0-9751-8eca41c64554", :transparent? true, :position [-0.03429393470287323 1.6224138736724854 11.272409439086914], :rotation [0 3.141592653589793 0], :scale [4 4 4]}
                                    "dfcc126f-3c9d-489f-8784-0fc0dbc448f9" {:rotation [0 3.1449087792603736 0], :color [255 255 255], :scale [1 1 1], :roughness 1, :metallic 0, :type :text3D, :size 0.4, :position [-0.03429393470287323 -1.5883097648620605 11.272409439086914], :depth 0.01, :visibility 1, :emissive-intensity 1, :text "Patentli Ark Sönümleme Teknolojisi"}
                                    "kfcc126f-3c9d-489f-8784-0fc0dbc448f9" {:rotation [0 3.1449087792603736 0], :color [255 255 255], :scale [1 1 1], :roughness 1, :metallic 0, :type :text3D, :size 0.4, :position [-0.03429393470287323 -2.3460140228271484 11.272409439086914], :depth 0.01, :visibility 1, :emissive-intensity 1, :text "Kaynak/Yapışma Direnci"}}}
-                           {:id "1166656e-5d43-4f2a-a15d-cd5b6617b7c6",
-                            :data {:camera {:position [-0.001132812497582604 -5.447031714567174e-16 21.272332594691633],
-                                            :rotation [0.0020943951023931952 -3.1382765280110037 0]},
+                           {:id "0166656e-5d43-4f2a-a15d-cd5b6617b7c2",
+                            :data {:camera {:position [0 -5.447031714567174e-16 21.272332594691633],
+                                            :rotation [0 -3.1382765280110037 0]},
                                    :skybox {:background {:color [255 255 255]}}
                                    "97o4ss76-bb27-4904-9d30-360a40d8abc1" {:type :image, :asset-type :texture, :visibility 1, :path "https://firebasestorage.googleapis.com/v0/b/immersa-6d29f.appspot.com/o/models%2Fschaltbau%2Fc3.png?alt=media&token=94f10dfc-2952-4fe3-ad28-ba07bcaf24a2", :transparent? true, :position [-0.03429393470287323 1.6224138736724854 11.272409439086914], :rotation [0 3.141592653589793 0], :scale [4 4 4]}
                                    "dfcc126f-3c9d-489f-8784-0fc0dbc448f9" {:rotation [0 3.1449087792603736 0], :color [255 255 255], :scale [1 1 1], :roughness 1, :metallic 0, :type :text3D, :size 0.4, :position [-0.03429393470287323 -1.5883097648620605 11.272409439086914], :depth 0.01, :visibility 1, :emissive-intensity 1, :text "Patentli Ark Sönümleme Teknolojisi"}
                                    "kfcc126f-3c9d-489f-8784-0fc0dbc448f9" {:rotation [0 3.1449087792603736 0], :color [255 255 255], :scale [1 1 1], :roughness 1, :metallic 0, :type :text3D, :size 0.4, :position [-0.03429393470287323 -2.3460140228271484 11.272409439086914], :depth 0.01, :visibility 1, :emissive-intensity 1, :text "Kaynak/Yapışma Direnci"}
                                    "zlcc126f-3c9d-489f-8784-0fc0dbc448f9" {:rotation [0 3.1449087792603736 0], :color [255 255 255], :scale [1 1 1], :roughness 1, :metallic 0, :type :text3D, :size 0.4, :position [-0.03429393470287323 -3.1403250694274902 11.272409439086914], :depth 0.01, :visibility 1, :emissive-intensity 1, :text "Çıkarılabilir Anahtarlama Haznesi*"}
-                                   "xkcc126f-3c9d-489f-8784-0fc0dbc448f9" {:rotation [0 3.1449087792603736 0], :color [255 255 255], :scale [1 1 1], :roughness 1, :metallic 0, :type :text3D, :size 0.25, :position [-0.03429393470287323 -3.857837438583374 11.272409439086914], :depth 0.01, :visibility 1, :emissive-intensity 1, :text "(Sadece C310 modelinde mevcuttur*)"}}}]}}
+                                   "xkcc126f-3c9d-489f-8784-0fc0dbc448f9" {:rotation [0 3.1449087792603736 0], :color [255 255 255], :scale [1 1 1], :roughness 1, :metallic 0, :type :text3D, :size 0.25, :position [-0.03429393470287323 -3.857837438583374 11.272409439086914], :depth 0.01, :visibility 1, :emissive-intensity 1, :text "(Sadece C310 modelinde mevcuttur*)"}
+                                   "87z4ee76-bb27-4904-9d30-360a40d8ab00" {:type :glb
+                                                                           :asset-type :model
+                                                                           :path "https://firebasestorage.googleapis.com/v0/b/immersa-6d29f.appspot.com/o/models%2Fschaltbau%2FC320.glb?alt=media&token=2a2d7138-e5d8-4da1-bf4d-58ddedb192e5"
+                                                                           :position [2.0005428791046143 -15 0]
+                                                                           :visibility 1
+                                                                           :rotation [0 0 0]
+                                                                           :scale [0.01 0.01 0.01]}
+                                   "77z4xe76-bb27-4904-9d30-360a40d8ab00" {:type :glb
+                                                                           :asset-type :model
+                                                                           :path "https://firebasestorage.googleapis.com/v0/b/immersa-6d29f.appspot.com/o/models%2Fschaltbau%2FC310.glb?alt=media&token=af315c76-ea0b-4e8c-8931-48e6d9b17ba2"
+                                                                           :position [0.007200113032013178 -15 0]
+                                                                           :rotation [0 0 4.71238898038469]
+                                                                           :scale [0.01 0.01 0.01]}
+                                   "11z4xe26-bb27-4904-9d30-360a40d8ab00" {:type :glb
+                                                                           :asset-type :model
+                                                                           :path "https://firebasestorage.googleapis.com/v0/b/immersa-6d29f.appspot.com/o/models%2Fschaltbau%2FC300.glb?alt=media&token=37f3680a-07be-439c-b082-7fdba1d288c2"
+                                                                           :position [-1.892021656036377 -15 0]
+                                                                           :rotation [0 0 0]
+                                                                           :scale [0.01 0.01 0.01]}}}
+                           {:id "2233656e-5d43-4f2a-a15d-cd5b6617b7c6",
+                            :data {:camera {:delay 500
+                                            :duration 2
+                                            :position [0 1 5]
+                                            :rotation [0 -3.1382765280110037 0]}
+                                   :skybox {:background {:color [500 500 500]}}
+                                   "87z4ee76-bb27-4904-9d30-360a40d8ab00" {:type :glb
+                                                                           :asset-type :model
+                                                                           :duration 2.5
+                                                                           :path "https://firebasestorage.googleapis.com/v0/b/immersa-6d29f.appspot.com/o/models%2Fschaltbau%2FC320.glb?alt=media&token=2a2d7138-e5d8-4da1-bf4d-58ddedb192e5"
+                                                                           :position [2.0005428791046143 0.2 0]
+                                                                           :rotation [(* 2 (* 3.14 2)) (* 2 3.14) 0]
+                                                                           :scale [0.01 0.01 0.01]}
+                                   "77z4xe76-bb27-4904-9d30-360a40d8ab00" {:type :glb
+                                                                           :asset-type :model
+                                                                           :duration 2.5
+                                                                           :path "https://firebasestorage.googleapis.com/v0/b/immersa-6d29f.appspot.com/o/models%2Fschaltbau%2FC310.glb?alt=media&token=af315c76-ea0b-4e8c-8931-48e6d9b17ba2"
+                                                                           :position [0.007200113032013178 0.2 0]
+                                                                           :rotation [(* 2 (* 3.14 2)) (* 2 3.14) 4.71238898038469]
+                                                                           :scale [0.01 0.01 0.01]}
+                                   "11z4xe26-bb27-4904-9d30-360a40d8ab00" {:type :glb
+                                                                           :asset-type :model
+                                                                           :duration 2.5
+                                                                           :path "https://firebasestorage.googleapis.com/v0/b/immersa-6d29f.appspot.com/o/models%2Fschaltbau%2FC300.glb?alt=media&token=37f3680a-07be-439c-b082-7fdba1d288c2"
+                                                                           :position [-1.892021656036377 0.7 0]
+                                                                           :rotation [(* 2 (* 3.14 2)) (* 2 3.14) 0]
+                                                                           :scale [0.01 0.01 0.01]}}}]}}
    :present {:show-arrow-keys-text? true
              :show-pre-warm-text? false
              :background-color "rgb(0,0,0)"}})

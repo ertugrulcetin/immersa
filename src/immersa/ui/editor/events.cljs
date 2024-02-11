@@ -58,9 +58,9 @@
              :data {:value rgb}}}))
 
 #_(reg-event-db
-  ::update-scene-background-color-success
-  (fn [db [_ rgb]]
-    (assoc-in db [:editor :scene :background-color] rgb)))
+    ::update-scene-background-color-success
+    (fn [db [_ rgb]]
+      (assoc-in db [:editor :scene :background-color] rgb)))
 
 (reg-event-fx
   ::resize-scene
@@ -93,6 +93,15 @@
   ::set-selected-image-data
   (fn [db [_ data]]
     (assoc-in db [:editor :selected-mesh] data)))
+
+(reg-event-db
+  ::update-selected-mesh-rotation-axis
+  (fn [db [_ axis value]]
+    (let [index (case axis
+                  :x 0
+                  :y 1
+                  :z 2)]
+      (assoc-in db [:editor :selected-mesh :rotation index] value))))
 
 (reg-event-fx
   ::update-selected-mesh-slider-value

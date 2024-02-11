@@ -275,10 +275,7 @@
                                 scale
                                 update-materials]}]
   (let [model (api.core/clone (j/get-in api.core/db [:models path]))]
-    (api.core/add-node-to-db name model {:type :glb
-                                         :init-position (api.core/clone (j/get model :position))
-                                         :init-rotation (api.core/clone (j/get model :rotation))
-                                         :init-scaling (api.core/clone (j/get model :scaling))})
+    (api.core/add-node-to-db name model {:type :glb})
     ;; TODO this apply to all meshes in the glb,it is not per mesh! fix it
     (doseq [[name {:keys [albedo-color use-alpha-from-albedo?]}] update-materials]
       (let [mat (api.core/get-mat-by-name name)]
@@ -289,6 +286,7 @@
       position (j/assoc! :position position)
       rotation (j/assoc! :rotation rotation)
       scale (j/assoc! :scaling scale))
+    (j/assoc! model :initial-rotation (api.core/clone (j/get model :rotation)))
     (api.core/set-enabled model true)
     model))
 
