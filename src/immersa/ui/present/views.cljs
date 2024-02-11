@@ -86,18 +86,7 @@
        (fn []
          [:button
           {:on-click (fn []
-                       (when-let [waitlist (js/document.getElementById "getWaitlistContainer")]
-                         (when-not @init?
-                           (reset! init? true)
-                           (js/setTimeout
-                             (fn []
-                               (some-> (js/document.getElementById "primaryCTA")
-                                       (common.utils/register-event-listener "click" #(disable-wait-list waitlist))))
-                             1000))
-                         (let [opacity (j/get-in waitlist [:style :opacity])]
-                           (if (= opacity "0")
-                             (enable-wait-list waitlist)
-                             (disable-wait-list waitlist)))))
+                       (js/window.open "https://immersa.app" "_blank"))
            :class [(styles/wait-list-button)
                    (styles/wait-list-button-glow)
                    (styles/wait-list-button-gradient-border)]}
