@@ -1,6 +1,8 @@
 (ns immersa.ui.core
   (:require
+    [applied-science.js-interop :as j]
     [breaking-point.core :as bp]
+    [clojure.string :as str]
     [immersa.common.config :as config]
     [immersa.common.utils :as common.utils]
     [immersa.scene.api.core :as api]
@@ -24,6 +26,8 @@
     (rdom/render [views/main-panel] root-el)))
 
 (defn init []
+  (when-not (some-> (j/get js/location :patname) (= "/schaltbau"))
+    (j/assoc! js/location :href "https://immersa.app"))
   (re-frame/dispatch-sync [::events/initialize-db])
   (re-frame/dispatch-sync [::bp/set-breakpoints {:breakpoints [:mobile 768
                                                                :tablet 992

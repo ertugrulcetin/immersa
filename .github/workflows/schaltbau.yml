@@ -1,0 +1,52 @@
+on:
+  push:
+    branches:
+      - schaltbau
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      deployments: write
+    name: Build and Publish to Cloudflare Pages
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      # Install Java
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'temurin' # AdoptOpenJDK is now Eclipse Temurin
+          java-version: '11' # Use the version of Java needed
+
+      # Install Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16.13.0' # Use the Node.js version required by your project
+
+      # Install dependencies
+      - name: Install dependencies
+        run: npm install # or use yarn
+
+      # Compile the Shadow CLJS project
+      - name: Build with Shadow CLJS
+        run: npm run release
+
+      - name: Update Index.html with Commit SHA
+        run: sed -i "s/__COMMIT_SHA__/${GITHUB_SHA}/g" resources/public/index.html
+
+      # Publish to Cloudflare Pages
+      - name: Publish to Cloudflare Pages
+        uses: cloudflare/pages-action@v1.5.0
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ff2ff2769c72a0ad2a2bab364aa064dd
+          projectName: immersa-app
+          directory: resources/public
+#          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          branch: schaltbau
+#          workingDirectory: my-site
+          wranglerVersion: '3'
