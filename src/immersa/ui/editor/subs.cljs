@@ -17,6 +17,11 @@
         {:width height-based-width :height max-height}))))
 
 (reg-sub
+  ::editor
+  (fn [db]
+    (:editor db)))
+
+(reg-sub
   ::selected-mesh
   (fn [db]
     (-> db :editor :selected-mesh)))
@@ -127,3 +132,8 @@
   (fn [db [_ index]]
     (let [thumbnails (-> db :editor :slides :thumbnails)]
       (get thumbnails (-> db :editor :slides :all (get-in [index :id]))))))
+
+(reg-sub
+  ::gizmo-visible?
+  (fn [db [_ type]]
+    (-> db :editor :gizmo type)))

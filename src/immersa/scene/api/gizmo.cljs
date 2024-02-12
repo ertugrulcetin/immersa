@@ -149,6 +149,12 @@
                  (f)
                  (let [mesh (j/get-in api.core/db [:gizmo :selected-mesh])]
                    (some-> mesh (slide/update-slide-data :position (api.core/v3->v (j/get mesh :position)))))))
+    (j/call-in gizmo-manager [:gizmos :scaleGizmo :onDragObservable :add] f)
+    (j/call-in gizmo-manager [:gizmos :scaleGizmo :onDragEndObservable :add]
+               (fn []
+                 (f)
+                 (let [mesh (j/get-in api.core/db [:gizmo :selected-mesh])]
+                   (some-> mesh (slide/update-slide-data :scaling (api.core/v3->v (j/get mesh :scaling)))))))
     (create-rotation-gizmo-drag-observables gizmo-manager)))
 
 (defn init-gizmo-manager []
@@ -165,8 +171,10 @@
     (m/assoc! gizmo-manager
               :positionGizmoEnabled true
               :rotationGizmoEnabled true
+              :scaleGizmoEnabled true
               :gizmos.rotationGizmo.updateGizmoRotationToMatchAttachedMesh false
               :gizmos.positionGizmo.updateGizmoRotationToMatchAttachedMesh false
+              :gizmos.scaleGizmo.updateGizmoRotationToMatchAttachedMesh false
               :gizmos.positionGizmo.xGizmo.scaleRatio 1.5
               :gizmos.positionGizmo.yGizmo.scaleRatio 1.5
               :gizmos.positionGizmo.zGizmo.scaleRatio 1.5
@@ -178,6 +186,9 @@
               :gizmos.positionGizmo.zPlaneGizmo._gizmoMesh.position.x 0.05
               :gizmos.positionGizmo.zPlaneGizmo._gizmoMesh.position.y 0.05)
     (add-drag-observables gizmo-manager)
+    (j/assoc! gizmo-manager
+              :rotationGizmoEnabled false
+              :scaleGizmoEnabled false)
     (j/call-in gizmo-manager [:onAttachedToMeshObservable :add] #(if (j/get % :hit-box?)
                                                                    (api.core/attach-to-mesh (j/get % :parent))
                                                                    (on-attached-to-mesh %)))

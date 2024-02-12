@@ -10,6 +10,7 @@
     [immersa.ui.editor.components.scroll-area :refer [scroll-area]]
     [immersa.ui.editor.components.separator :refer [separator]]
     [immersa.ui.editor.components.slider :refer [slider]]
+    [immersa.ui.editor.components.switch :refer [switch]]
     [immersa.ui.editor.components.text :refer [text]]
     [immersa.ui.editor.components.textarea :refer [textarea]]
     [immersa.ui.editor.events :as events]
@@ -300,6 +301,39 @@
                                           :type :scaling
                                           :event ::events/update-selected-mesh
                                           :value @(subscribe [::subs/selected-mesh-scaling])}]
+                     [separator]
+                     [:div {:style {:display "flex"
+                                    :flex-direction "column"
+                                    ;; :align-items "center"
+                                    ;; :justify-content "center"
+                                    :gap "15px"}}
+                      [text "Arrow helpers"]
+                      [:div
+                       {:style {:display "flex"
+                                :flex-direction "rows"
+                                :align-items "center"
+                                :justify-content "space-between"}}
+                       [:div
+                        {:style {:display "flex"
+                                 :align-items "center"
+                                 :gap "5px"}}
+                        [text "Position"]
+                        [switch {:checked? @(subscribe [::subs/gizmo-visible? :position])
+                                 :on-change #(dispatch [::events/update-gizmo-visibility :position])}]]
+                       [:div
+                        {:style {:display "flex"
+                                 :align-items "center"
+                                 :gap "5px"}}
+                        [text "Rotation"]
+                        [switch {:checked? @(subscribe [::subs/gizmo-visible? :rotation])
+                                 :on-change #(dispatch [::events/update-gizmo-visibility :rotation])}]]
+                       [:div
+                        {:style {:display "flex"
+                                 :align-items "center"
+                                 :gap "5px"}}
+                        [text "Scale"]
+                        [switch {:checked? @(subscribe [::subs/gizmo-visible? :scale])
+                                 :on-change #(dispatch [::events/update-gizmo-visibility :scale])}]]]]
                      [separator]
                      [:div {:style {:display "flex"
                                     :justify-content "space-between"}}

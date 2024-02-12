@@ -169,3 +169,13 @@
     (let [slide-ids (->> db :editor :slides :all (map :id))
           thumbnails (-> db :editor :slides :thumbnails (merge thumbnails) (select-keys slide-ids))]
       (assoc-in db [:editor :slides :thumbnails] thumbnails))))
+
+(reg-event-fx
+  ::update-gizmo-visibility
+  (fn [{:keys [db]} [_ type]]
+    (let [gizmo (-> db :editor :gizmo type)
+          value (not gizmo)]
+      {:db (assoc-in db [:editor :gizmo type] value)
+       :scene {:type :update-gizmo-visibility
+               :data {:update type
+                      :value value}}})))

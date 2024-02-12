@@ -145,6 +145,12 @@
 (defmethod handle-ui-update :update-selected-mesh-text-depth-or-size [{{:keys [update value]} :data}]
   (update-text-mesh (hash-map update value)))
 
+(defmethod handle-ui-update :update-gizmo-visibility [{{:keys [update value]} :data}]
+  (case update
+    :position (j/assoc! (api.core/gizmo-manager) :positionGizmoEnabled value)
+    :rotation (j/assoc! (api.core/gizmo-manager) :rotationGizmoEnabled value)
+    :scale (j/assoc! (api.core/gizmo-manager) :scaleGizmoEnabled value)))
+
 (defmethod handle-ui-update :resize [_]
   (j/call (api.core/get-engine) :resize))
 
