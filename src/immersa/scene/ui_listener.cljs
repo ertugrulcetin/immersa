@@ -66,7 +66,8 @@
   (when-let [mesh (j/get-in api.core/db [:gizmo :selected-mesh])]
     (let [new-color (apply api.core/color-rgb value)]
       (j/assoc-in! mesh [:material :albedoColor] new-color)
-      (j/assoc-in! mesh [:material :emissiveColor] new-color))))
+      (j/assoc-in! mesh [:material :emissiveColor] new-color)
+      (slide/update-slide-data mesh :color value))))
 
 (defmethod handle-ui-update :update-selected-mesh-emissive-color [{{:keys [value]} :data}]
   (when-let [mesh (j/get-in api.core/db [:gizmo :selected-mesh])]
@@ -104,10 +105,10 @@
                       :text text}
                      data)
               opts (cond
-                     (= (:depth data) 0)
+                     (<= (:depth data) 0)
                      (assoc opts :depth 0.01)
 
-                     (= (:size data) 0)
+                     (<= (:size data) 0)
                      (assoc opts :size 0.1)
 
                      :else opts)
@@ -125,7 +126,6 @@
                                             (j/assoc-in! [:scaling :x] x)
                                             (j/assoc-in! [:scaling :y] y)
                                             (j/assoc-in! [:scaling :z] z))))]
-          (slide/update-slide-data mesh :text (:text opts))
           (when (:size data)
             (slide/update-slide-data mesh :scale [(:size opts)
                                                   (:size opts)
@@ -134,8 +134,8 @@
             (slide/update-slide-data mesh :scale [(j/get-in mesh [:scaling :x])
                                                   (j/get-in mesh [:scaling :y])
                                                   (:depth opts)]))
-          (slide/update-slide-data mesh :color (:color opts))
-          (when (:text opts)
+          (when (:text data)
+            (slide/update-slide-data mesh :text (:text opts))
             (j/call-in api.core/db [:gizmo :manager :attachToMesh] mesh)))))
     500))
 

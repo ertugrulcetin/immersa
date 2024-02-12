@@ -234,6 +234,12 @@
                      :border "2px solid transparent"
                      :border-radius "3px"}}]]]))
 
+(defn- get-selected-mesh-type-name []
+  (case @(subscribe [::subs/selected-mesh-type])
+    "text3D" "Text"
+    "glb" "3D Model"
+    "image" "Image"))
+
 (defn editor-panel []
   [:div (styles/editor-container)
    [header]
@@ -280,7 +286,7 @@
                                    :padding "22px"
                                    :position "relative"}}
                      [text {:size :xxl
-                            :weight :semi-bold} "3D Model"]
+                            :weight :semi-bold} (get-selected-mesh-type-name)]
                      [separator]
                      [pos-rot-scale-comp {:label "Position"
                                           :type :position
@@ -315,8 +321,7 @@
                                      :justify-content "center"
                                      :gap "16px"}}
                        [text "Size"]
-                       [input-number {:min "0.1"
-                                      :max "100"
+                       [input-number {:max "100"
                                       :value @(subscribe [::subs/selected-mesh-text-size])
                                       :on-change #(dispatch [::events/update-selected-mesh-text-depth-or-size :size %])}]]
                       [separator {:orientation "vertical"

@@ -124,8 +124,7 @@
   ::update-selected-mesh-text-depth-or-size
   (fn [{:keys [db]} [_ type value]]
     (let [selected-mesh (-> db :editor :selected-mesh)
-          scaling (:scaling selected-mesh)
-          [x y z] scaling
+          [x y z] (:scaling selected-mesh)
           scaling (case type
                     :size [value value z]
                     :depth [x y value])]

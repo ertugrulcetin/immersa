@@ -88,11 +88,6 @@
     (-> db :editor :selected-mesh :opacity (* 100) int)))
 
 (reg-sub
-  ::selected-mesh-type
-  (fn [db]
-    (-> db :editor :selected-mesh :type)))
-
-(reg-sub
   ::selected-mesh-text-content
   (fn [db]
     (-> db :editor :selected-mesh :text)))
@@ -106,6 +101,11 @@
   ::selected-mesh-text-depth
   (fn [db]
     (-> db :editor :selected-mesh :scaling last)))
+
+(reg-sub
+  ::selected-mesh-type
+  (fn [db]
+    (-> db :editor :selected-mesh :type)))
 
 (reg-sub
   ::slides-current-index

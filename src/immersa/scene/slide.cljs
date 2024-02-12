@@ -544,7 +544,6 @@
   )
 
 (defn duplicate-slide-data [[id params]]
-  (println params)
   (let [mesh (api.core/get-object-by-name id)
         index @current-slide-index
         exists? (boolean (get-in @all-slides [index :data id]))
