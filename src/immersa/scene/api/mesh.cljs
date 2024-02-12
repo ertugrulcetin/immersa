@@ -182,6 +182,20 @@
       mat (j/assoc! :material mat)
       (some? pickable?) (j/assoc! :isPickable pickable?))))
 
+(defn create-hit-box [name mesh]
+  (let [_ (j/call mesh :computeWorldMatrix true)
+        bounding-info (j/call mesh :getBoundingInfo)
+        extend-size (j/get-in bounding-info [:boundingBox :extendSize])
+        hit-box (j/call MeshBuilder :CreateBox (str name "-hit-box") #js {:width (* 2 (j/get extend-size :x))
+                                                                          :height (* 2 (j/get extend-size :y))
+                                                                          :depth (* 2 (j/get extend-size :z))})]
+    (j/assoc! hit-box
+              :parent mesh
+              :visibility 0
+              :hit-box? true)
+    (j/assoc-in! hit-box [:position :y] (j/get extend-size :y))
+    hit-box))
+
 ;; TODO dispose material when disposing the mesh!!!
 (defn text [name & {:keys [text
                            size
@@ -220,6 +234,7 @@
                      nil
                      earcut)
         mat (or (some-> nme api.material/get-nme-material) mat)]
+    (create-hit-box name mesh)
     (when hl-color
       (let [hl (api.core/highlight-layer (str name "-hl")
                                          :blur-vertical-size hl-blur

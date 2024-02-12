@@ -178,6 +178,8 @@
               :gizmos.positionGizmo.zPlaneGizmo._gizmoMesh.position.x 0.05
               :gizmos.positionGizmo.zPlaneGizmo._gizmoMesh.position.y 0.05)
     (add-drag-observables gizmo-manager)
-    (j/call-in gizmo-manager [:onAttachedToMeshObservable :add] #(on-attached-to-mesh %))
+    (j/call-in gizmo-manager [:onAttachedToMeshObservable :add] #(if (j/get % :hit-box?)
+                                                                   (api.core/attach-to-mesh (j/get % :parent))
+                                                                   (on-attached-to-mesh %)))
     (j/assoc-in! api.core/db [:gizmo :manager] gizmo-manager)
     gizmo-manager))

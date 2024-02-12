@@ -518,6 +518,9 @@
 (defn clear-selected-mesh []
   (j/call-in db [:gizmo :manager :attachToMesh] nil))
 
+(defn attach-to-mesh [mesh]
+  (j/call-in db [:gizmo :manager :attachToMesh] mesh))
+
 (comment
   (j/assoc! (get-object-by-name "33e4ee76-bb27-4904-9d30-360a40d8abc1") )
   (j/call-in db [:gizmo :manager :attachToMesh] (get-object-by-name "00f4ee76-bb27-4904-9d30-360a40d8abc1")))
