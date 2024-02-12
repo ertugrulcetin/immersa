@@ -32,10 +32,10 @@
                                                    :position [0 0.5 0]
                                                    :rotation [0 0 0]
                                                    :scale [1 1 1]}
-           "4007122c-65e4-4df1-bd1f-e26d2c292165" {:rotation [0 0 0], :color [0 0 0], :scale [1 1 1], :roughness 1, :metallic 0, :type :text3D, :size 0.7 :position [-8.88040542602539 -5.599999904632568 11.399999618530273], :depth 0.01, :delay 600, :visibility 0, :emissive-intensity 1, :text "• Konnektörler"}
-           "b9293064-66d5-41fc-b37f-e622a4ef3574" {:rotation [0 0 0], :color [0 0 0], :scale [1 1 1], :roughness 1, :metallic 0, :type :text3D, :size 0.7 :position [-6.650000095367432 -7.563302040100098 11.399999618530273], :depth 0.01, :delay 600, :visibility 0, :emissive-intensity 1, :text "• Ani hareket anahtarları"}
-           "c68648ee-a14f-4161-a7ac-d200195a5b73" {:rotation [0 0 0], :color [0 0 0], :scale [1 1 1], :roughness 1, :metallic 0, :type :text3D, :size 0.7 :position [6 -5.6 11.4], :depth 0.01, :delay 600, :visibility 0, :emissive-intensity 1, :text "• AC ve DC kontaktörler"}
-           "36009fae-b39f-4901-9283-bc1cdb737490" {:rotation [0 0 0], :color [0 0 0], :scale [1 1 1], :roughness 1, :metallic 0, :type :text3D, :size 0.7 :position [5.814161777496338 -7.800000190734863 11.399999618530273], :depth 0.01, :delay 600, :visibility 0, :emissive-intensity 1, :text "• Demiryolu bileşenleri"}}}
+           "4007122c-65e4-4df1-bd1f-e26d2c292165" {:rotation [0 0 0], :color [0 0 0], :scale [0.7 0.7 1], :roughness 1, :metallic 0, :type :text3D, :size 0.7 :position [-8.88040542602539 -5.599999904632568 11.399999618530273], :depth 0.01, :delay 600, :visibility 0, :emissive-intensity 1, :text "• Konnektörler"}
+           "b9293064-66d5-41fc-b37f-e622a4ef3574" {:rotation [0 0 0], :color [0 0 0], :scale [0.7 0.7 1], :roughness 1, :metallic 0, :type :text3D, :size 0.7 :position [-6.650000095367432 -7.563302040100098 11.399999618530273], :depth 0.01, :delay 600, :visibility 0, :emissive-intensity 1, :text "• Ani hareket anahtarları"}
+           "c68648ee-a14f-4161-a7ac-d200195a5b73" {:rotation [0 0 0], :color [0 0 0], :scale [0.7 0.7 1], :roughness 1, :metallic 0, :type :text3D, :size 0.7 :position [6 -5.6 11.4], :depth 0.01, :delay 600, :visibility 0, :emissive-intensity 1, :text "• AC ve DC kontaktörler"}
+           "36009fae-b39f-4901-9283-bc1cdb737490" {:rotation [0 0 0], :color [0 0 0], :scale [0.7 0.7 1], :roughness 1, :metallic 0, :type :text3D, :size 0.7 :position [5.814161777496338 -7.800000190734863 11.399999618530273], :depth 0.01, :delay 600, :visibility 0, :emissive-intensity 1, :text "• Demiryolu bileşenleri"}}}
    {:id "44e4ee76-bb27-4904-9d30-360a40d8abb1"
     :data {:camera {:position [0 0 -10]
                     :rotation [0 0 0]}
@@ -59,10 +59,10 @@
                                                    :position [-65 2 75]
                                                    :rotation [0 2.44 0]
                                                    :scale [0.001 0.001 0.001]}
-           "4007122c-65e4-4df1-bd1f-e26d2c292165" {:rotation [0 0 0], :color [0 0 0], :scale [1 1 1], :roughness 1, :metallic 0, :type :text3D, :size 0.7 :position [-8.88040542602539 -5.599999904632568 11.399999618530273], :depth 0.01, :delay 1250, :visibility 1, :emissive-intensity 1, :text "• Konnektörler"}
-           "b9293064-66d5-41fc-b37f-e622a4ef3574" {:rotation [0 0 0], :color [0 0 0], :scale [1 1 1], :roughness 1, :metallic 0, :type :text3D, :size 0.7 :position [-6.650000095367432 -7.563302040100098 11.399999618530273], :depth 0.01, :delay 1750, :visibility 1, :emissive-intensity 1, :text "• Ani hareket anahtarları"}
-           "c68648ee-a14f-4161-a7ac-d200195a5b73" {:rotation [0 0 0], :color [0 0 0], :scale [1 1 1], :roughness 1, :metallic 0, :type :text3D, :size 0.7 :position [6 -5.6 11.4], :depth 0.01, :delay 2250, :visibility 1, :emissive-intensity 1, :text "• AC ve DC kontaktörler"}
-           "36009fae-b39f-4901-9283-bc1cdb737490" {:rotation [0 0 0], :color [0 0 0], :scale [1 1 1], :roughness 1, :metallic 0, :type :text3D, :size 0.7 :position [5.814161777496338 -7.800000190734863 11.399999618530273], :depth 0.01, :delay 2750, :visibility 1, :emissive-intensity 1, :text "• Demiryolu bileşenleri"}
+           "4007122c-65e4-4df1-bd1f-e26d2c292165" {:rotation [0 0 0], :color [0 0 0], :scale [0.7 0.7 1], :roughness 1, :metallic 0, :type :text3D, :size 0.7 :position [-8.88040542602539 -5.599999904632568 11.399999618530273], :depth 0.01, :delay 1250, :visibility 1, :emissive-intensity 1, :text "• Konnektörler"}
+           "b9293064-66d5-41fc-b37f-e622a4ef3574" {:rotation [0 0 0], :color [0 0 0], :scale [0.7 0.7 1], :roughness 1, :metallic 0, :type :text3D, :size 0.7 :position [-6.650000095367432 -7.563302040100098 11.399999618530273], :depth 0.01, :delay 1750, :visibility 1, :emissive-intensity 1, :text "• Ani hareket anahtarları"}
+           "c68648ee-a14f-4161-a7ac-d200195a5b73" {:rotation [0 0 0], :color [0 0 0], :scale [0.7 0.7 1], :roughness 1, :metallic 0, :type :text3D, :size 0.7 :position [6 -5.6 11.4], :depth 0.01, :delay 2250, :visibility 1, :emissive-intensity 1, :text "• AC ve DC kontaktörler"}
+           "36009fae-b39f-4901-9283-bc1cdb737490" {:rotation [0 0 0], :color [0 0 0], :scale [0.7 0.7 1], :roughness 1, :metallic 0, :type :text3D, :size 0.7 :position [5.814161777496338 -7.800000190734863 11.399999618530273], :depth 0.01, :delay 2750, :visibility 1, :emissive-intensity 1, :text "• Demiryolu bileşenleri"}
            "22e09fae-b39f-4901-9283-bc1cdb7374bb" {:type :particle
                                                    :particle-type :cloud
                                                    :position [0 -0.5 0]
@@ -156,7 +156,7 @@
     :data {:camera {:position [-0.0011328124975828636 0 21.272332594691633],
                     :rotation [0.0021289062499999997 -1.7224036360377644 0]},
            :skybox {:background {:color [247 255 186]}}
-           "581c8ea9-262f-4d5d-ab63-7f6bf29d2705" {:rotation [0 4.560781667210461 0], :color [255 255 255], :scale [1 1 1], :roughness 1, :metallic 0, :type :text3D, :size 0.35, :position [-9.890000343322754 -1.9507310390472412 15.564252853393555], :depth 0.01, :visibility 1, :emissive-intensity 1, :text "• Elektrikli araçlar\n• Elektrikli gemiler / denizaltılar\n• İç lojistik için elektrikli araçlar\n• Pil şarj istasyonları\n• Pil test standları\n• Deniz şarj ve tahrik sistemleri"}
+           "581c8ea9-262f-4d5d-ab63-7f6bf29d2705" {:rotation [0 4.560781667210461 0], :color [255 255 255], :scale [0.35 0.35 1], :roughness 1, :metallic 0, :type :text3D, :size 0.35, :position [-9.890000343322754 -1.9507310390472412 15.564252853393555], :depth 0.01, :visibility 1, :emissive-intensity 1, :text "• Elektrikli araçlar\n• Elektrikli gemiler / denizaltılar\n• İç lojistik için elektrikli araçlar\n• Pil şarj istasyonları\n• Pil test standları\n• Deniz şarj ve tahrik sistemleri"}
            "22a4ee76-bb27-4904-9d30-360a40d8ab00" {:type :glb,
                                                    :asset-type :model,
                                                    :path "https://firebasestorage.googleapis.com/v0/b/immersa-6d29f.appspot.com/o/models%2Fschaltbau%2Fstation.glb?alt=media&token=f9a3cec6-fa24-409e-b7be-c3f33c78e508",
@@ -181,7 +181,7 @@
                                                    :position [3.592869281768799 -1.8574519157409668 10.833869934082031]
                                                    :rotation [0 7.1370003772552115 0]
                                                    :scale [1 1 1]}
-           "cab626c0-695a-44c4-a2fc-88484b5eb1dd" {:rotation [0 3.135921059200114 0], :color [255 255 255], :scale [1 1 1], :roughness 1, :metallic 0, :type :text3D, :size 0.3, :position [-3.6639790534973145 -2.1218996047973633 11.270173072814941], :depth 0.01, :visibility 1, :emissive-intensity 1, :text "• Güneş panelleri\n• Rüzgar türbinleri\n• izleme sistemleri\n• Yakıt hücreleri\n• Pil şarj istasyonları\n• Enerji dönüşümü\n• Pil yenileme\n• Sabit pil enerji depoları"}}}
+           "cab626c0-695a-44c4-a2fc-88484b5eb1dd" {:rotation [0 3.135921059200114 0], :color [255 255 255], :scale [0.35 0.35 1], :roughness 1, :metallic 0, :type :text3D, :size 0.3, :position [-3.6639790534973145 -2.1218996047973633 11.270173072814941], :depth 0.01, :visibility 1, :emissive-intensity 1, :text "• Güneş panelleri\n• Rüzgar türbinleri\n• izleme sistemleri\n• Yakıt hücreleri\n• Pil şarj istasyonları\n• Enerji dönüşümü\n• Pil yenileme\n• Sabit pil enerji depoları"}}}
    {:id "1266656e-5d43-4f2a-a15d-cd5b6617b7c6",
     :data {:camera {:position [-0.001132812497582604 -5.447031714567174e-16 21.272332594691633],
                     :rotation [0.0020943951023931952 -3.1382765280110037 0]},
@@ -192,45 +192,24 @@
                                                    :position [3.59 -1.86 22.05],
                                                    :rotation [0 7.1370003772552115 0],
                                                    :scale [1 1 1]},
-           "cab626c0-695a-44c4-a2fc-88484b5eb1dd" {:rotation [0 3.135921059200114 0],
-                                                   :color [255 255 255],
-                                                   :scale [1 1 1],
-                                                   :roughness 1,
-                                                   :metallic 0,
-                                                   :type :text3D,
-                                                   :size 0.3,
-                                                   :position [-10.143378257751465
-                                                              -2.1218996047973633
-                                                              11.270173072814941],
-                                                   :depth 0.01,
-                                                   :visibility 1,
-                                                   :emissive-intensity 1,
-                                                   :text "• Güneş panelleri
-                                                                      • Rüzgar türbinleri
-                                                                      • izleme sistemleri
-                                                                      • Yakıt hücreleri
-                                                                      • Pil şarj istasyonları
-                                                                      • Enerji dönüşümü
-                                                                      • Pil yenileme
-                                                                      • Sabit pil enerji depoları"}
            "00d4ss76-bb27-4904-9d30-360a40d8abc1" {:type :image, :asset-type :texture, :visibility 1, :path "https://firebasestorage.googleapis.com/v0/b/immersa-6d29f.appspot.com/o/models%2Fschaltbau%2Fc1.png?alt=media&token=faa6102a-e15e-430d-9203-8e1df538a094", :transparent? true, :position [-0.03429393470287323 1.6224138736724854 11.272409439086914], :rotation [0 3.141592653589793 0], :scale [4 4 4]}
-           "dfcc126f-3c9d-489f-8784-0fc0dbc448f9" {:rotation [0 3.1449087792603736 0], :color [255 255 255], :scale [1 1 1], :roughness 1, :metallic 0, :type :text3D, :size 0.4, :position [-0.03429393470287323 -1.5883097648620605 11.272409439086914], :depth 0.01, :visibility 1, :emissive-intensity 1, :text "Patentli Ark Sönümleme Teknolojisi"}}}
+           "dfcc126f-3c9d-489f-8784-0fc0dbc448f9" {:rotation [0 3.1449087792603736 0], :color [255 255 255], :scale [0.4 0.4 1], :roughness 1, :metallic 0, :type :text3D, :size 0.4, :position [-0.03429393470287323 -1.5883097648620605 11.272409439086914], :depth 0.01, :visibility 1, :emissive-intensity 1, :text "Patentli Ark Sönümleme Teknolojisi"}}}
    {:id "1166656e-5d43-4f2a-a15d-cd5b6617b7c6",
     :data {:camera {:position [-0.001132812497582604 -5.447031714567174e-16 21.272332594691633],
                     :rotation [0 -3.1382765280110037 0]},
            :skybox {:background {:color [255 255 255]}}
            "27o4ss76-bb27-4904-9d30-360a40d8abc1" {:type :image, :asset-type :texture, :visibility 1, :path "https://firebasestorage.googleapis.com/v0/b/immersa-6d29f.appspot.com/o/models%2Fschaltbau%2Fc2.png?alt=media&token=cab78695-3d3b-4fd0-9751-8eca41c64554", :transparent? true, :position [-0.03429393470287323 1.6224138736724854 11.272409439086914], :rotation [0 3.141592653589793 0], :scale [4 4 4]}
-           "dfcc126f-3c9d-489f-8784-0fc0dbc448f9" {:rotation [0 3.1449087792603736 0], :color [255 255 255], :scale [1 1 1], :roughness 1, :metallic 0, :type :text3D, :size 0.4, :position [-0.03429393470287323 -1.5883097648620605 11.272409439086914], :depth 0.01, :visibility 1, :emissive-intensity 1, :text "Patentli Ark Sönümleme Teknolojisi"}
-           "kfcc126f-3c9d-489f-8784-0fc0dbc448f9" {:rotation [0 3.1449087792603736 0], :color [255 255 255], :scale [1 1 1], :roughness 1, :metallic 0, :type :text3D, :size 0.4, :position [-0.03429393470287323 -2.3460140228271484 11.272409439086914], :depth 0.01, :visibility 1, :emissive-intensity 1, :text "Kaynak/Yapışma Direnci"}}}
+           "dfcc126f-3c9d-489f-8784-0fc0dbc448f9" {:rotation [0 3.1449087792603736 0], :color [255 255 255], :scale [0.4 0.4 1], :roughness 1, :metallic 0, :type :text3D, :size 0.4, :position [-0.03429393470287323 -1.5883097648620605 11.272409439086914], :depth 0.01, :visibility 1, :emissive-intensity 1, :text "Patentli Ark Sönümleme Teknolojisi"}
+           "kfcc126f-3c9d-489f-8784-0fc0dbc448f9" {:rotation [0 3.1449087792603736 0], :color [255 255 255], :scale [0.4 0.4 1], :roughness 1, :metallic 0, :type :text3D, :size 0.4, :position [-0.03429393470287323 -2.3460140228271484 11.272409439086914], :depth 0.01, :visibility 1, :emissive-intensity 1, :text "Kaynak/Yapışma Direnci"}}}
    {:id "0166656e-5d43-4f2a-a15d-cd5b6617b7c2",
     :data {:camera {:position [0 -5.447031714567174e-16 21.272332594691633],
                     :rotation [0 -3.1382765280110037 0]},
            :skybox {:background {:color [255 255 255]}}
            "97o4ss76-bb27-4904-9d30-360a40d8abc1" {:type :image, :asset-type :texture, :visibility 1, :path "https://firebasestorage.googleapis.com/v0/b/immersa-6d29f.appspot.com/o/models%2Fschaltbau%2Fc3.png?alt=media&token=94f10dfc-2952-4fe3-ad28-ba07bcaf24a2", :transparent? true, :position [-0.03429393470287323 1.6224138736724854 11.272409439086914], :rotation [0 3.141592653589793 0], :scale [4 4 4]}
-           "dfcc126f-3c9d-489f-8784-0fc0dbc448f9" {:rotation [0 3.1449087792603736 0], :color [255 255 255], :scale [1 1 1], :roughness 1, :metallic 0, :type :text3D, :size 0.4, :position [-0.03429393470287323 -1.5883097648620605 11.272409439086914], :depth 0.01, :visibility 1, :emissive-intensity 1, :text "Patentli Ark Sönümleme Teknolojisi"}
-           "kfcc126f-3c9d-489f-8784-0fc0dbc448f9" {:rotation [0 3.1449087792603736 0], :color [255 255 255], :scale [1 1 1], :roughness 1, :metallic 0, :type :text3D, :size 0.4, :position [-0.03429393470287323 -2.3460140228271484 11.272409439086914], :depth 0.01, :visibility 1, :emissive-intensity 1, :text "Kaynak/Yapışma Direnci"}
-           "zlcc126f-3c9d-489f-8784-0fc0dbc448f9" {:rotation [0 3.1449087792603736 0], :color [255 255 255], :scale [1 1 1], :roughness 1, :metallic 0, :type :text3D, :size 0.4, :position [-0.03429393470287323 -3.1403250694274902 11.272409439086914], :depth 0.01, :visibility 1, :emissive-intensity 1, :text "Çıkarılabilir Anahtarlama Haznesi*"}
-           "xkcc126f-3c9d-489f-8784-0fc0dbc448f9" {:rotation [0 3.1449087792603736 0], :color [255 255 255], :scale [1 1 1], :roughness 1, :metallic 0, :type :text3D, :size 0.25, :position [-0.03429393470287323 -3.857837438583374 11.272409439086914], :depth 0.01, :visibility 1, :emissive-intensity 1, :text "(Sadece C310 modelinde mevcuttur*)"}
+           "dfcc126f-3c9d-489f-8784-0fc0dbc448f9" {:rotation [0 3.1449087792603736 0], :color [255 255 255], :scale [0.4 0.4 1], :roughness 1, :metallic 0, :type :text3D, :size 0.4, :position [-0.03429393470287323 -1.5883097648620605 11.272409439086914], :depth 0.01, :visibility 1, :emissive-intensity 1, :text "Patentli Ark Sönümleme Teknolojisi"}
+           "kfcc126f-3c9d-489f-8784-0fc0dbc448f9" {:rotation [0 3.1449087792603736 0], :color [255 255 255], :scale [0.4 0.4 1], :roughness 1, :metallic 0, :type :text3D, :size 0.4, :position [-0.03429393470287323 -2.3460140228271484 11.272409439086914], :depth 0.01, :visibility 1, :emissive-intensity 1, :text "Kaynak/Yapışma Direnci"}
+           "zlcc126f-3c9d-489f-8784-0fc0dbc448f9" {:rotation [0 3.1449087792603736 0], :color [255 255 255], :scale [0.4 0.4 1], :roughness 1, :metallic 0, :type :text3D, :size 0.4, :position [-0.03429393470287323 -3.1403250694274902 11.272409439086914], :depth 0.01, :visibility 1, :emissive-intensity 1, :text "Çıkarılabilir Anahtarlama Haznesi*"}
+           "xkcc126f-3c9d-489f-8784-0fc0dbc448f9" {:rotation [0 3.1449087792603736 0], :color [255 255 255], :scale [0.3 0.3 1], :roughness 1, :metallic 0, :type :text3D, :size 0.25, :position [-0.03429393470287323 -3.857837438583374 11.272409439086914], :depth 0.01, :visibility 1, :emissive-intensity 1, :text "(Sadece C310 modelinde mevcuttur*)"}
            "87z4ee76-bb27-4904-9d30-360a40d8ab00" {:type :glb
                                                    :asset-type :model
                                                    :path "https://firebasestorage.googleapis.com/v0/b/immersa-6d29f.appspot.com/o/models%2Fschaltbau%2FC320.glb?alt=media&token=2a2d7138-e5d8-4da1-bf4d-58ddedb192e5"
@@ -288,7 +267,7 @@
                                                               -3.1387224800576603
                                                               -0.5246100874717244],
                                                    :color [0 0 0],
-                                                   :scale [1 1 1],
+                                                   :scale [0.2 0.2 1],
                                                    :roughness 1,
                                                    :metallic 0,
                                                    :type :text3D,
@@ -303,7 +282,7 @@
                                                               -3.14151043641562
                                                               0.37200395354472643],
                                                    :color [0 0 0],
-                                                   :scale [1 1 1],
+                                                   :scale [0.2 0.2 1],
                                                    :roughness 1,
                                                    :metallic 0,
                                                    :type :text3D,
@@ -318,7 +297,7 @@
                                                               -3.1387224800576603
                                                               -0.5246100874717244],
                                                    :color [0 0 0],
-                                                   :scale [1 1 1],
+                                                   :scale [0.2 0.2 1],
                                                    :roughness 1,
                                                    :metallic 0,
                                                    :type :text3D,
@@ -334,7 +313,7 @@
                                                               -3.141592653589793
                                                               0.3719296635999916],
                                                    :color [0 0 0],
-                                                   :scale [1 1 1],
+                                                   :scale [0.2 0.2 1],
                                                    :roughness 1,
                                                    :metallic 0,
                                                    :type :text3D,
@@ -349,7 +328,7 @@
                                                               -3.1413580127054153
                                                               0.20307907678926837],
                                                    :color [0 0 0],
-                                                   :scale [1 1 1],
+                                                   :scale [0.2 0.2 1],
                                                    :roughness 1,
                                                    :metallic 0,
                                                    :type :text3D,
@@ -378,7 +357,7 @@
                                                    :scale [0.01 0.01 0.01]},
            "34c88fa5-061f-41b6-95cc-d9661db397cf" {:rotation [-0.003316125578789226 3.141592653589793 1.5707963267948966],
                                                    :color [0 0 0],
-                                                   :scale [1 1 1],
+                                                   :scale [0.2 0.2 1],
                                                    :roughness 1,
                                                    :metallic 0,
                                                    :type :text3D,
@@ -391,7 +370,7 @@
                                                    :text "_________ 165,7 mm _________"},
            "f76c561f-f04a-47d0-a9bf-42ef23be6bd2" {:rotation [-0.003316125578789226 3.141592653589793 1.5707963267948966],
                                                    :color [0 0 0],
-                                                   :scale [1 1 1],
+                                                   :scale [0.2 0.2 1],
                                                    :roughness 1,
                                                    :metallic 0,
                                                    :type :text3D,
@@ -408,7 +387,7 @@
                     :rotation [6.661337221303573e-17 -3.1382765280147797 0]},
            "04c88fa5-061f-41b6-95cc-d9661db397cf" {:rotation [-0.003316125578789226 3.141592653589793 1.5707963267948966],
                                                    :color [0 0 0],
-                                                   :scale [1 1 1],
+                                                   :scale [0.2 0.2 1],
                                                    :roughness 1,
                                                    :metallic 0,
                                                    :type :text3D,
@@ -423,7 +402,7 @@
                                                               -3.1385731679548643
                                                               -0.4261954440952545],
                                                    :color [0 0 0],
-                                                   :scale [1 1 1],
+                                                   :scale [0.2 0.2 1],
                                                    :roughness 1,
                                                    :metallic 0,
                                                    :type :text3D,
@@ -457,7 +436,7 @@
            "42b6612b-4095-43ad-a707-d70b30674acb" {:delay 2000
                                                    :rotation [0 3.1407915916334312 0],
                                                    :color [0 0 0],
-                                                   :scale [1 1 1],
+                                                   :scale [0.2 0.2 1],
                                                    :roughness 1,
                                                    :metallic 0,
                                                    :type :text3D,
@@ -477,7 +456,7 @@
            "9a81018b-2726-4fbf-a4d7-d5ccfeda9e05" {:delay 2000
                                                    :rotation [0 3.1407915916334312 0],
                                                    :color [255 0 0],
-                                                   :scale [1 1 1],
+                                                   :scale [0.3 0.3 1],
                                                    :roughness 1,
                                                    :metallic 0,
                                                    :type :text3D,
@@ -508,13 +487,13 @@
                                                    :scale [0.4 0.4 0.4]}
 
            "7a81018b-2726-4fbf-a4d7-d5ccfeda9e05" {:delay 2000
-                                                   :rotation [0 3.1407915916334312 0], :color [255 0 0], :scale [1 1 1], :roughness 1, :metallic 0, :type :text3D, :size 0.25, :position [-5.8955979347229 1.2320771217346191 -4.999948501586914], :depth 0.01, :visibility 1, :emissive-intensity 1, :text "C300"}
+                                                   :rotation [0 3.1407915916334312 0], :color [255 0 0], :scale [0.3 0.3 1], :roughness 1, :metallic 0, :type :text3D, :size 0.25, :position [-5.8955979347229 1.2320771217346191 -4.999948501586914], :depth 0.01, :visibility 1, :emissive-intensity 1, :text "C300"}
            "8x81018b-2726-4fbf-a4d7-d5ccfeda9e05" {:delay 2000
-                                                   :rotation [0 3.1407915916334312 0], :color [255 0 0], :scale [1 1 1], :roughness 1, :metallic 0, :type :text3D, :size 0.25, :position [-1.0127184391021729 2.574812412261963 -4.999948501586914], :depth 0.01, :visibility 1, :emissive-intensity 1, :text "C310"}
+                                                   :rotation [0 3.1407915916334312 0], :color [255 0 0], :scale [0.3 0.3 1], :roughness 1, :metallic 0, :type :text3D, :size 0.25, :position [-1.0127184391021729 2.574812412261963 -4.999948501586914], :depth 0.01, :visibility 1, :emissive-intensity 1, :text "C310"}
            "003457fd-3ae0-4e07-9396-70ba660ccbc7" {:delay 2000
-                                                   :rotation [0 3.1407915916334312 0], :color [0 0 0], :scale [1 1 1], :roughness 1, :metallic 0, :type :text3D, :size 0.2, :position [-5.622723579406738 0.4926639199256897 -4.519429683685303], :depth 0.01, :visibility 1, :emissive-intensity 1, :text "Phoenix Contact MCV\n1,5/4-GF-3,5 Konnektör"}
+                                                   :rotation [0 3.1407915916334312 0], :color [0 0 0], :scale [0.2 0.2 1], :roughness 1, :metallic 0, :type :text3D, :size 0.2, :position [-5.622723579406738 0.4926639199256897 -4.519429683685303], :depth 0.01, :visibility 1, :emissive-intensity 1, :text "Phoenix Contact MCV\n1,5/4-GF-3,5 Konnektör"}
            "02b6612b-4095-43ad-a707-d70b30674acb" {:delay 2000
-                                                   :rotation [0 3.1407915916334312 0], :color [0 0 0], :scale [1 1 1], :roughness 1, :metallic 0, :type :text3D, :size 0.2, :position [-0.9920702576637268 1.996717929840088 -4.999948501586914], :depth 0.01, :visibility 1, :emissive-intensity 1, :text "Opsiyonel 2 adet yardımcı kontak S880 W1R6 k"}
+                                                   :rotation [0 3.1407915916334312 0], :color [0 0 0], :scale [0.2 0.2 1], :roughness 1, :metallic 0, :type :text3D, :size 0.2, :position [-0.9920702576637268 1.996717929840088 -4.999948501586914], :depth 0.01, :visibility 1, :emissive-intensity 1, :text "Opsiyonel 2 adet yardımcı kontak S880 W1R6 k"}
            "02f4ee76-bb27-4904-9d30-360a40d8abc1" {:delay 2000
                                                    :type :image,
                                                    :asset-type :texture,
@@ -595,7 +574,7 @@
            :camera {:delay 500, :duration 2, :position [0 1 5], :rotation [8.300780624074136E-4 -3.141145668655838 0]},
            "95d7ea64-7be5-45ec-bcf1-525333c04113" {:rotation [0 3.141592653589793 0],
                                                    :color [0 0 0],
-                                                   :scale [1 1 1],
+                                                   :scale [0.4 0.4 1],
                                                    :roughness 1,
                                                    :metallic 0,
                                                    :type :text3D,
@@ -626,7 +605,7 @@
            "db0880c2-4d94-40da-9066-1ddfd9f44a04" {:delay 2000
                                                    :rotation [0 3.141767186519361 0],
                                                    :color [0 0 0],
-                                                   :scale [1 1 1],
+                                                   :scale [0.3 0.3 1],
                                                    :roughness 1,
                                                    :metallic 0,
                                                    :type :text3D,
@@ -639,7 +618,7 @@
            "3f9580bc-6ca7-411e-ba14-59ca5c46cf68" {:delay 2000
                                                    :rotation [0 3.141767186519361 0],
                                                    :color [0 0 0],
-                                                   :scale [1 1 1],
+                                                   :scale [0.3 0.3 1],
                                                    :roughness 1,
                                                    :metallic 0,
                                                    :type :text3D,
@@ -653,7 +632,7 @@
            "04d9f1d0-54a0-4a20-ad88-f6df406ac08f" {:delay 2000
                                                    :rotation [0 3.141767186519361 0],
                                                    :color [0 0 0],
-                                                   :scale [1 1 1],
+                                                   :scale [0.3 0.3 1],
                                                    :roughness 1,
                                                    :metallic 0,
                                                    :type :text3D,
@@ -673,7 +652,7 @@
            "dcb559df-cec6-4108-ad92-2db11855df8b" {:delay 2000
                                                    :rotation [0 3.141767186519361 0],
                                                    :color [0 0 0],
-                                                   :scale [1 1 1],
+                                                   :scale [0.4 0.4 1],
                                                    :roughness 1,
                                                    :metallic 0,
                                                    :type :text3D,
@@ -693,7 +672,7 @@
            "6d64cb50-f840-4034-9498-16c5fe75b835" {:delay 2000
                                                    :rotation [0 3.141767186519361 0],
                                                    :color [0 0 0],
-                                                   :scale [1 1 1],
+                                                   :scale [0.4 0.4 1],
                                                    :roughness 1,
                                                    :metallic 0,
                                                    :type :text3D,
@@ -706,7 +685,7 @@
            "5ed2d630-acbc-4f29-9dd4-45fce2228887" {:delay 2000
                                                    :rotation [0 3.141767186519361 0],
                                                    :color [0 0 0],
-                                                   :scale [1 1 1],
+                                                   :scale [0.3 0.3 1],
                                                    :roughness 1,
                                                    :metallic 0,
                                                    :type :text3D,
@@ -723,7 +702,7 @@
            "ecd8d6f3-7140-42d0-9f04-0e1c4fdf76a9" {:delay 2000
                                                    :rotation [0 3.141767186519361 0],
                                                    :color [0 0 0],
-                                                   :scale [1 1 1],
+                                                   :scale [0.3 0.3 1],
                                                    :roughness 1,
                                                    :metallic 0,
                                                    :type :text3D,
@@ -736,7 +715,7 @@
            "5f963f9c-f67a-4f79-990b-3ffc183a217c" {:delay 2000
                                                    :rotation [0 3.141767186519361 0],
                                                    :color [0 0 0],
-                                                   :scale [1 1 1],
+                                                   :scale [0.3 0.3 1],
                                                    :roughness 1,
                                                    :metallic 0,
                                                    :type :text3D,
@@ -760,7 +739,7 @@
                                                    :scale [1 1 1]},
            "140edf72-4d92-4d1f-a824-e17545ca00f1" {:rotation [0 3.141592653589793 0],
                                                    :color [0 0 0],
-                                                   :scale [1 1 1],
+                                                   :scale [0.35 0.35 1],
                                                    :roughness 1,
                                                    :metallic 0,
                                                    :type :text3D,
@@ -772,7 +751,7 @@
                                                    :text "        Arda AVŞAR\nİş Geliştirme Müdürü"},
            "72ac1391-2cb7-4fc7-aeba-df6738070c6f" {:rotation [0 3.141592653589793 0],
                                                    :color [0 0 0],
-                                                   :scale [1 1 1],
+                                                   :scale [0.3 0.3 1],
                                                    :roughness 1,
                                                    :metallic 0,
                                                    :type :text3D,

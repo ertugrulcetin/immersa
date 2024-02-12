@@ -204,7 +204,6 @@
                            visibility
                            position
                            rotation
-                           scale
                            color
                            emissive-color
                            emissive-intensity
@@ -218,8 +217,8 @@
                            hl-blur
                            nme]
                     :or {size 1
+                         depth 0.01
                          resolution 8
-                         depth 0.2
                          mat (api.material/pbr-mat (str name "-mat"))
                          mat-type :pbr
                          hl-blur 1.0}
@@ -227,9 +226,9 @@
   (let [mesh (j/call MeshBuilder :CreateText name
                      text
                      font/droid
-                     #js {:size size
+                     #js {:size 1
                           :resolution resolution
-                          :depth depth
+                          :depth 0.01
                           :sideOrientation api.const/mesh-default-side}
                      nil
                      earcut)
@@ -257,9 +256,10 @@
       mat (j/assoc! :material mat)
       visibility (j/assoc! :visibility visibility)
       position (j/assoc! :position position)
-      rotation (j/assoc! :rotation rotation)
-      scale (j/assoc! :scaling scale))
-    (j/assoc! mesh :initial-rotation (api.core/clone (j/get mesh :rotation)))))
+      rotation (j/assoc! :rotation rotation))
+    (j/assoc! mesh
+              :initial-rotation (api.core/clone (j/get mesh :rotation))
+              :scaling (v3 size size (* 100 depth)))))
 
 (comment
 

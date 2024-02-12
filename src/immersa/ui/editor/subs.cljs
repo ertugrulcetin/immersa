@@ -100,12 +100,12 @@
 (reg-sub
   ::selected-mesh-text-size
   (fn [db]
-    (-> db :editor :selected-mesh :size)))
+    (-> db :editor :selected-mesh :scaling first)))
 
 (reg-sub
   ::selected-mesh-text-depth
   (fn [db]
-    (-> db :editor :selected-mesh :depth)))
+    (-> db :editor :selected-mesh :scaling last)))
 
 (reg-sub
   ::slides-current-index

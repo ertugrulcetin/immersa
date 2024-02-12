@@ -314,11 +314,11 @@
                                      :align-items "center"
                                      :justify-content "center"
                                      :gap "16px"}}
-                       [text "Depth"]
-                       [input-number {:min "0"
+                       [text "Size"]
+                       [input-number {:min "0.1"
                                       :max "100"
-                                      :value @(subscribe [::subs/selected-mesh-text-depth])
-                                      :on-change #(dispatch [::events/update-selected-mesh-text-depth-or-size :depth %])}]]
+                                      :value @(subscribe [::subs/selected-mesh-text-size])
+                                      :on-change #(dispatch [::events/update-selected-mesh-text-depth-or-size :size %])}]]
                       [separator {:orientation "vertical"
                                   :style {:height "25px"}}]
                       [:div {:style {:display "flex"
@@ -326,11 +326,11 @@
                                      :align-items "center"
                                      :justify-content "center"
                                      :gap "16px"}}
-                       [text "Size"]
-                       [input-number {:min "0"
-                                      :max "100"
-                                      :value @(subscribe [::subs/selected-mesh-text-size])
-                                      :on-change #(dispatch [::events/update-selected-mesh-text-depth-or-size :size %])}]]]
+                       [text "Depth"]
+                       [input-number {:min "0.01"
+                                      :max "100000"
+                                      :value @(subscribe [::subs/selected-mesh-text-depth])
+                                      :on-change #(dispatch [::events/update-selected-mesh-text-depth-or-size :depth %])}]]]
                      [separator]
                      [:div
                       {:style {:display "flex"

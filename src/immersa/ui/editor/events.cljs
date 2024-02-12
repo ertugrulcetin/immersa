@@ -124,14 +124,17 @@
   ::update-selected-mesh-text-depth-or-size
   (fn [{:keys [db]} [_ type value]]
     (let [selected-mesh (-> db :editor :selected-mesh)
-          selected-mesh (assoc selected-mesh type value)
-          updated-attr (type selected-mesh)]
-      (cond-> {:db (assoc-in db [:editor :selected-mesh] selected-mesh)}
+          scaling (:scaling selected-mesh)
+          [x y z] scaling
+          scaling (case type
+                    :size [value value z]
+                    :depth [x y value])]
+      (cond-> {:db (assoc-in db [:editor :selected-mesh :scaling] scaling)}
 
         (not (str/blank? value))
         (assoc :scene {:type :update-selected-mesh-text-depth-or-size
                        :data {:update type
-                              :value (parse-double updated-attr)}})))))
+                              :value (parse-double value)}})))))
 
 (reg-event-fx
   ::add-text-mesh
