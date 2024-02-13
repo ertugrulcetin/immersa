@@ -37,6 +37,7 @@
 (defn create-particle-system [name & {:keys [capacity
                                              gpu?
                                              position
+                                             rotation
                                              particle-texture
                                              emitter
                                              min-emit-box
@@ -88,6 +89,7 @@
       particle-texture (j/assoc! :particleTexture particle-texture)
       emitter (j/assoc! :emitter emitter)
       position (j/assoc! :position position)
+      rotation (j/assoc! :rotation rotation)
       min-emit-box (j/assoc! :minEmitBox min-emit-box)
       max-emit-box (j/assoc! :maxEmitBox max-emit-box)
       color1 (j/assoc! :color1 color1)
@@ -189,11 +191,14 @@
     ps))
 
 (defn clouds [name & {:keys [position
+                             rotation
                              scale]
-                      :or {position (v3 0 0 0)
+                      :or {position (v3)
+                           rotation (v3)
                            scale (v3 0.1)}}]
   (let [cloud-mesh (api.mesh/sphere (str name "-mesh")
                                     :position position
+                                    :rotation rotation
                                     :diameter 0.1
                                     :segments 16
                                     :scale scale
@@ -202,6 +207,7 @@
         before-render-fn (str name "-clouds-before-render")
         cloud-system (create-particle-system name
                                              :position position
+                                             :rotation rotation
                                              :capacity 750
                                              :particle-texture (api.core/texture "img/texture/clouds.png")
                                              :blend-mode api.const/particle-blend-mode-standard
