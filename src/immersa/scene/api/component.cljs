@@ -293,8 +293,11 @@
                             scale
                             radius
                             billboard-mode
+                            face-to-screen?
+                            double-side?
                             transparent?]
-                     :or {transparent? false}}]
+                     :or {transparent? false
+                          double-side? false}}]
   (let [texture (api.core/texture path)
         {:keys [width height]} (j/lookup (j/call texture :getSize))
         width (/ width height)
@@ -307,14 +310,44 @@
                                     :has-alpha? transparent?)))
         opts {:width width
               :height height
+              :face-to-screen? face-to-screen?
               :radius radius
               :position position
               :rotation rotation
               :visibility visibility
               :scale scale
               :billboard-mode billboard-mode
+              :double-side? double-side?
               :material mat
-              :type :image}]
-    (if (and radius (> radius 0))
-      (api.mesh/plane-rounded name opts)
-      (api.mesh/plane name opts))))
+              :type :image}
+        mesh (if (and radius (> radius 0))
+               (api.mesh/plane-rounded name opts)
+               (api.mesh/plane name opts))]
+    (m/cond-doto mesh
+      face-to-screen? (j/assoc! :billboardMode api.const/mesh-billboard-mode-all))
+    (j/assoc! mesh :initial-rotation (api.core/clone (j/get mesh :rotation)))))
+
+(comment
+  (js/console.log (api.core/get-object-by-name "98e4ee76-bb27-4904-9d30-360a40d8abc1"))
+  (j/assoc-in! (api.core/get-object-by-name "98e4ee76-bb27-4904-9d30-360a40d8abc1") [:position :z] 30)
+  (j/assoc-in! (api.core/get-object-by-name "98e4ee76-bb27-4904-9d30-360a40d8abc1") [:position :y] -12)
+
+  (api.core/get-object-by-name "33e4ee76-bb27-4904-9d30-360a40d8abc1")
+
+  (j/assoc! (api.core/get-object-by-name "33e4ee76-bb27-4904-9d30-360a40d8abc1") :renderingGroupId 1)
+
+  (api.core/look-at (api.core/get-object-by-name "98e4ee76-bb27-4904-9d30-360a40d8abc1")
+                    (j/get (immersa.scene.api.camera/active-camera) :position))
+
+  (j/call (api.core/get-object-by-name "98e4ee76-bb27-4904-9d30-360a40d8abc1")
+          :setParent (immersa.scene.api.camera/active-camera))
+
+  (j/call (api.core/get-object-by-name "98e4ee76-bb27-4904-9d30-360a40d8abc1")
+          :setParent nil)
+
+  (api.core/attach-to-mesh (api.core/get-object-by-name "98e4ee76-bb27-4904-9d30-360a40d8abc1"))
+
+  (image "img"
+         :transparent? true
+         :path "https://firebasestorage.googleapis.com/v0/b/immersa-6d29f.appspot.com/o/images%2Fschaltbau%2Flogo.png?alt=media&token=2afccb59-5489-4553-9a98-0425f0bac1db")
+  )

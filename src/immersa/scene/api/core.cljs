@@ -524,6 +524,9 @@
 (defn gizmo-manager []
   (j/get-in db [:gizmo :manager]))
 
+(defn look-at [obj target]
+  (j/call obj :lookAt target))
+
 (comment
   (j/assoc! (get-object-by-name "33e4ee76-bb27-4904-9d30-360a40d8abc1") )
   (j/call-in db [:gizmo :manager :attachToMesh] (get-object-by-name "00f4ee76-bb27-4904-9d30-360a40d8abc1")))

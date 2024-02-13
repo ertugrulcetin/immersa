@@ -612,6 +612,31 @@
         (swap! thumbnails assoc :last-time-thumbnail-updated (js/Date.now))))
     (recur)))
 
+(defn- add-listeners-for-present-mode [mode]
+  (when (= mode :present)
+    (api.camera/detach-control (api.camera/active-camera))
+    (let [slide-controls (js/document.getElementById "slide-controls")
+          prev-button (j/get-in slide-controls [:children 0])
+          next-button (j/get-in slide-controls [:children 2])]
+      (common.utils/register-event-listener prev-button "click"
+        (fn [e]
+          (when-not (j/get e :repeat)
+            (process-next-prev-command :prev command-ch slide-in-progress? current-running-anims))))
+      (common.utils/register-event-listener next-button "click"
+        (fn [e]
+          (when-not (j/get e :repeat)
+            (process-next-prev-command :next command-ch slide-in-progress? current-running-anims))))
+      (common.utils/register-event-listener js/window "keydown"
+        (fn [e]
+          (when-not (j/get e :repeat)
+            (cond
+              (or (= (.-keyCode e) 39)
+                  (= (.-keyCode e) 40))
+              (process-next-prev-command :next command-ch slide-in-progress? current-running-anims)
+              (or (= (.-keyCode e) 37)
+                  (= (.-keyCode e) 38))
+              (process-next-prev-command :prev command-ch slide-in-progress? current-running-anims))))))))
+
 (defn start-slide-show [{:keys [mode slides] :as opts}]
   (let [_ (init-slide-show-state)
         slides (reset! all-slides slides)
@@ -623,29 +648,7 @@
     (prepare-first-skybox slides)
     (capture-thumbnail-changes)
     (a/put! command-ch :next)
-    (when (= mode :present)
-      (api.camera/detach-control (api.camera/active-camera))
-      (let [slide-controls (js/document.getElementById "slide-controls")
-            prev-button (j/get-in slide-controls [:children 0])
-            next-button (j/get-in slide-controls [:children 2])]
-        (common.utils/register-event-listener prev-button "click"
-          (fn [e]
-            (when-not (j/get e :repeat)
-              (process-next-prev-command :prev command-ch slide-in-progress? current-running-anims))))
-        (common.utils/register-event-listener next-button "click"
-          (fn [e]
-            (when-not (j/get e :repeat)
-              (process-next-prev-command :next command-ch slide-in-progress? current-running-anims))))
-        (common.utils/register-event-listener js/window "keydown"
-          (fn [e]
-            (when-not (j/get e :repeat)
-              (cond
-                (or (= (.-keyCode e) 39)
-                    (= (.-keyCode e) 40))
-                (process-next-prev-command :next command-ch slide-in-progress? current-running-anims)
-                (or (= (.-keyCode e) 37)
-                    (= (.-keyCode e) 38))
-                (process-next-prev-command :prev command-ch slide-in-progress? current-running-anims)))))))
+    (add-listeners-for-present-mode mode)
     (js/setTimeout #(api.core/hide-loading-ui) 500)
     (go-loop [index -1]
       (let [command (a/<! command-ch)

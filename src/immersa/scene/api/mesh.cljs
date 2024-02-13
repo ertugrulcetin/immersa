@@ -100,11 +100,16 @@
                             visibility
                             scale
                             material
+                            double-side?
                             type]
-                     :or {type :plane}
+                     :or {type :plane
+                          double-side? false}
                      :as opts}]
   (let [p (j/call MeshBuilder :CreatePlane name #js {:width width
-                                                     :height height})]
+                                                     :height height
+                                                     :sideOrientation (if double-side?
+                                                                        api.const/mesh-double-side
+                                                                        api.const/mesh-default-side)})]
     (m/cond-doto p
       billboard-mode (j/assoc! :billboardMode billboard-mode)
       visibility (j/assoc! :visibility visibility)
