@@ -176,9 +176,11 @@
                                                    :rotation [0 -1.0783072643835807 0],
                                                    :scale [2.5 2.5 2.5]}
 
-           "b3c30400-0d17-4e81-bf82-7c7eb3ec9d0b" {:rotation [0 0 0], :color [255 0 0], :scale [1.2 1.2 1], :roughness 1, :metallic 0, :type :text3D, :size 1, :position [4.5215349197387695 6.875611782073975 45.599998474121094], :depth 0.01, :delay 1500, :visibility 1, :emissive-intensity 0.2, :text "Uygulamalar"}
+           "b3c30400-0d17-4e81-bf82-7c7eb3ec9d0b" {:face-to-screen? true
+                                                   :rotation [0 0 0], :color [255 0 0], :scale [1.2 1.2 1], :roughness 1, :metallic 0, :type :text3D, :size 1, :position [4.5215349197387695 6.875611782073975 45.599998474121094], :depth 0.01, :delay 1500, :visibility 1, :emissive-intensity 0.2, :text "Uygulamalar"}
 
-           "38d3c0a4-c9b5-417c-92d3-a21cb690bfae" {:rotation [0 0 0], :color [0 0 0], :scale [0.75 0.75 1], :roughness 1, :metallic 0, :type :text3D, :size 1, :position [6.602911949157715 -3.8055853843688965 45.599998474121094], :depth 0.01, :delay 1500, :visibility 1, :emissive-intensity 1, :text "Makine ve tesis mühendisliği\nTünel ve Madencilik\nPil test standları\nTest sistemleri\nTıbbi teknoloji\nBina kontrolü\nDC enerji ağı\n"}}}
+           "38d3c0a4-c9b5-417c-92d3-a21cb690bfae" {:face-to-screen? true
+                                                   :rotation [0 0 0], :color [0 0 0], :scale [0.75 0.75 1], :roughness 1, :metallic 0, :type :text3D, :size 1, :position [6.602911949157715 -3.8055853843688965 45.599998474121094], :depth 0.01, :delay 1500, :visibility 1, :emissive-intensity 1, :text "Makine ve tesis mühendisliği\nTünel ve Madencilik\nPil test standları\nTest sistemleri\nTıbbi teknoloji\nBina kontrolü\nDC enerji ağı\n"}}}
 
    {:id "99bc7d52-eecc-4c69-b020-4bb366ad4594",
     :data {:camera {:position [-0.0011328124975828636 0 21.272332594691633],

@@ -113,6 +113,11 @@
     (-> db :editor :selected-mesh :type)))
 
 (reg-sub
+  ::selected-mesh-face-to-screen?
+  (fn [db]
+    (-> db :editor :selected-mesh :face-to-screen?)))
+
+(reg-sub
   ::slides-current-index
   (fn [db]
     (-> db :editor :slides :current-index)))

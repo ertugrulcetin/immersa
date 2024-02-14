@@ -498,7 +498,7 @@
       pcs
       (fn [mesh]
         (api.core/add-node-to-db name mesh (assoc opts :type :pcs-text))
-        (api.core/add-prop-to-db name :pcs pcs)
+        (api.core/update-node-attr name :pcs pcs)
         (m/cond-doto mesh
           position (j/assoc! :position position)
           visibility (j/assoc! :visibility visibility))

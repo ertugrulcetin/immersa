@@ -224,11 +224,6 @@
 (defclass present-share-width []
   {:width "88px"})
 
-(defattrs pos-rot-scale-comp-container []
-  {:display :flex
-   :align-items :center
-   :gap "8px"})
-
 (defclass pos-rot-scale-comp-label []
   {:width "56px"
    :padding-right "5px"

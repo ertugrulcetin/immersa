@@ -179,3 +179,11 @@
        :scene {:type :update-gizmo-visibility
                :data {:update type
                       :value value}}})))
+
+(reg-event-fx
+  ::update-selected-mesh-face-to-screen?
+  (fn [{:keys [db]} _]
+    (let [face-to-screen? (-> db :editor :selected-mesh :face-to-screen? not)]
+      {:db (assoc-in db [:editor :selected-mesh :face-to-screen?] face-to-screen?)
+       :scene {:type :update-selected-mesh-face-to-screen?
+               :data {:value face-to-screen?}}})))

@@ -8,17 +8,20 @@
     [reagent.core :as r]
     [spade.core :refer [defclass defattrs]]))
 
-(defattrs input-wrapper []
+(defattrs input-wrapper [disabled?]
   {:position :relative}
   [:&:hover
-   [:label {:visibility :hidden}]])
+   (if disabled?
+     [:label {:cursor :not-allowed}]
+     [:label {:visibility :hidden}])])
 
-(defclass input-number-style []
+(defclass input-number-style [disabled?]
   {:font-size typography/s
    :font-weight typography/medium
    :color colors/text-primary
    :border (str "1px solid " colors/border2)
    :border-radius "5px"
+   :cursor (if disabled? :not-allowed :auto)
    :padding "0 0.4rem"
    :outline :none}
   [:&:hover
@@ -54,16 +57,16 @@
 
 (defn input-number [_]
   (let [error? (r/atom false)]
-    (fn [{:keys [min max step class style label on-change value]
+    (fn [{:keys [min max step class style label on-change value disabled?]
           :or {min "-Infinity"
                max "Infinity"
                step "0.1"}}]
-      [:div (input-wrapper)
-       [:input {:class [(input-number-style) class (when @error? "invalid")]
+      [:div (input-wrapper disabled?)
+       [:input {:class [(input-number-style disabled?) class (when @error? "invalid")]
                 :style (merge {:width "56px"
                                :height "24px"} style)
                 :value value
-                :disabled (nil? value)
+                :disabled (or (nil? value) disabled?)
                 :type "number"
                 :min min
                 :max max

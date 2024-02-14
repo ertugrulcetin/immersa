@@ -167,7 +167,7 @@
                                 :height rect-height
                                 :thickness thickness
                                 :background rect-background)]
-    (api.core/add-prop-to-db name :children [plane gui text rect])
+    (api.core/update-node-attr name :children [plane gui text rect])
     (api.gui/add-control gui rect)
     (api.gui/add-control rect text)
     plane))
@@ -211,8 +211,8 @@
                                      :blur-vertical-size 3
                                      :blur-horizontal-size 3)]
     (api.core/add-children tn sp clouds)
-    (api.core/add-prop-to-db name :type :earth)
-    (api.core/add-prop-to-db name :hl hl)
+    (api.core/update-node-attr name :type :earth)
+    (api.core/update-node-attr name :hl hl)
     (j/call hl :addMesh clouds (api.core/color 0.3 0.74 0.94))
     tn))
 

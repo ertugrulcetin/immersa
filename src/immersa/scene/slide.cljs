@@ -17,6 +17,7 @@
     [immersa.scene.api.mesh :as api.mesh]
     [immersa.scene.api.particle :as api.particle]
     [immersa.scene.materials-in-sphere :as mat.spheres]
+    [immersa.scene.ui-notifier :as ui.notifier]
     [immersa.ui.editor.events :as editor.events]
     [immersa.ui.present.events :as events]
     [re-frame.core :refer [dispatch dispatch-sync]]))
@@ -575,8 +576,7 @@
     (swap! all-slides (fn [slides]
                         (vec-insert slides (assoc (get slides index) :id uuid) (inc index))))
     (swap! current-slide-index inc)
-    (dispatch [::editor.events/sync-slides-info {:current-index @current-slide-index
-                                                 :slides @all-slides}])))
+    (ui.notifier/sync-slides-info @current-slide-index @all-slides)))
 
 (defn add-slide-data [obj params]
   (let [index @current-slide-index]

@@ -159,6 +159,15 @@
 (defn get-objects-by-type [type]
   (map (j/get :obj) (filter #(= (j/get % :type) type) (js/Object.values (j/get db :nodes)))))
 
+(defn update-node-attr [mesh-or-name & ks]
+  (doseq [[prop val] (partition 2 ks)
+          :let [mesh-or-name (if (string? mesh-or-name)
+                               mesh-or-name
+                               (j/get mesh-or-name :immersa-id))]]
+    (j/assoc-in! db [:nodes mesh-or-name prop] (if (keyword? val)
+                                                 (cljs.core/name val)
+                                                 val))))
+
 (defn dispose [& name-or-obj]
   (doseq [o name-or-obj]
     (when-let [obj (if (string? o)
@@ -186,12 +195,6 @@
   (j/assoc! obj :immersa-id name)
   (j/assoc-in! db [:nodes name] (clj->js (assoc opts :obj obj :name name)))
   obj)
-
-(defn add-prop-to-db [name & ks]
-  (doseq [[prop val] (partition 2 ks)]
-    (j/assoc-in! db [:nodes name prop] (if (keyword? val)
-                                         (cljs.core/name val)
-                                         val))))
 
 (defn get-pos [obj]
   (j/call obj :getAbsolutePosition))
@@ -331,7 +334,7 @@
       scale (j/assoc! :scaling scale))))
 
 (defn add-children [parent & children]
-  (add-prop-to-db (j/get parent :name) :children children)
+  (update-node-attr (j/get parent :name) :children children)
   (doseq [c children]
     (j/assoc! c :parent parent)))
 
@@ -528,5 +531,5 @@
   (j/call obj :lookAt target))
 
 (comment
-  (j/assoc! (get-object-by-name "33e4ee76-bb27-4904-9d30-360a40d8abc1") )
+  (j/assoc! (get-object-by-name "33e4ee76-bb27-4904-9d30-360a40d8abc1"))
   (j/call-in db [:gizmo :manager :attachToMesh] (get-object-by-name "00f4ee76-bb27-4904-9d30-360a40d8abc1")))

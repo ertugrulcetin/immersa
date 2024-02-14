@@ -2,10 +2,10 @@
   (:require
     ["@babylonjs/core/Gizmos/gizmoManager" :refer [GizmoManager]]
     [applied-science.js-interop :as j]
-    [immersa.common.utils :as common.utils]
     [immersa.scene.api.core :as api.core]
     [immersa.scene.macros :as m]
     [immersa.scene.slide :as slide]
+    [immersa.scene.ui-notifier :as ui.notifier]
     [immersa.scene.utils :as utils]
     [immersa.ui.editor.events :as events]
     [re-frame.core :refer [dispatch]]))
@@ -19,37 +19,6 @@
     (j/call child-meshes :forEach #(j/call hl :addMesh % outline-color)))
   (j/call hl :addMesh mesh outline-color))
 
-(defn- update-ui-by-selected-mesh-type [name type mesh]
-  (let [pos-rot-scale-name (assoc (utils/v3->v-data mesh [:position :rotation :scaling]) :name name)]
-    (case type
-      "text3D" (dispatch [::events/set-selected-text3D-data
-                          (merge
-                            pos-rot-scale-name
-                            {:type "text3D"
-                             :text (api.core/get-node-attr mesh :text)
-                             :depth (api.core/get-node-attr mesh :depth)
-                             :size (api.core/get-node-attr mesh :size)
-                             :opacity (j/get mesh :visibility)
-                             :color (-> (j/get-in mesh [:material :albedoColor]) api.core/color->v)
-                             :emissive-color (some-> (j/get-in mesh [:material :emissiveColor]) api.core/color->v)
-                             :emissive-intensity (j/get-in mesh [:material :emissiveIntensity])
-                             :alpha (j/get-in mesh [:material :alpha])
-                             :metallic (j/get-in mesh [:material :metallic])
-                             :roughness (j/get-in mesh [:material :roughness])})])
-      "glb" (dispatch [::events/set-selected-glb-data (merge pos-rot-scale-name {:type "glb"})])
-      "image" (dispatch [::events/set-selected-image-data (merge pos-rot-scale-name {:type "image"})]))))
-
-(defn- notify-ui-selected-mesh [mesh]
-  (let [name (j/get mesh :immersa-id)
-        type (api.core/get-object-type-by-name name)]
-    (update-ui-by-selected-mesh-type name type mesh)))
-
-(defn- notify-ui-selected-mesh-rotation-axis [axis value]
-  (dispatch [::events/update-selected-mesh-rotation-axis axis (-> value
-                                                                  api.core/to-deg
-                                                                  common.utils/number->fixed
-                                                                  str)]))
-
 (def bb-types #{"text3D" "image"})
 
 (defn- on-attached-to-mesh [mesh]
@@ -60,7 +29,7 @@
     (if (bb-types (api.core/get-object-type-by-name (j/get mesh :immersa-id)))
       (j/assoc! mesh :showBoundingBox true)
       (render-outline-selected-mesh mesh))
-    (notify-ui-selected-mesh mesh))
+    (ui.notifier/notify-ui-selected-mesh mesh))
   (when-not mesh
     (dispatch [::events/clear-selected-mesh])))
 
@@ -101,21 +70,21 @@
               accumulated-rotation-axis (+ (j/get mesh :accumulated-rotation) rotation-change)]
           (j/assoc! mesh :accumulated-rotation accumulated-rotation-axis)
           (j/assoc! mesh last-rotation-kw current-rotation-axis)
-          (notify-ui-selected-mesh-rotation-axis axis (+ (j/get-in mesh [:initial-rotation axis])
-                                                         (j/get mesh :accumulated-rotation))))))))
+          (ui.notifier/notify-ui-selected-mesh-rotation-axis axis (+ (j/get-in mesh [:initial-rotation axis])
+                                                                     (j/get mesh :accumulated-rotation))))))))
 
 (defn create-rotation-gizmo-on-drag-end [axis]
   (fn []
     (when-let [mesh (api.core/selected-mesh)]
       (j/assoc-in! mesh [:rotation axis] (+ (j/get-in mesh [:initial-rotation axis]) (j/get mesh :accumulated-rotation)))
       #_(let [[axis1 axis2] (case axis
-                            :x [:y :z]
-                            :y [:x :z]
-                            :z [:x :y])]
-        (j/assoc-in! mesh [:rotation axis1] (j/get-in mesh [:initial-rotation axis1]))
-        (j/assoc-in! mesh [:rotation axis2] (j/get-in mesh [:initial-rotation axis2])))
+                              :x [:y :z]
+                              :y [:x :z]
+                              :z [:x :y])]
+          (j/assoc-in! mesh [:rotation axis1] (j/get-in mesh [:initial-rotation axis1]))
+          (j/assoc-in! mesh [:rotation axis2] (j/get-in mesh [:initial-rotation axis2])))
       (j/assoc-in! mesh [:initial-rotation axis] (j/get-in mesh [:rotation axis]))
-      (notify-ui-selected-mesh mesh)
+      (ui.notifier/notify-ui-selected-mesh mesh)
       (slide/update-slide-data mesh :rotation (api.core/v3->v (j/get mesh :rotation))))))
 
 (defn- create-rotation-gizmo-drag-observables [gizmo-manager]
@@ -142,7 +111,7 @@
 
 (defn- add-drag-observables [gizmo-manager]
   (let [f (fn []
-            (some-> (j/get-in api.core/db [:gizmo :selected-mesh]) notify-ui-selected-mesh))]
+            (some-> (j/get-in api.core/db [:gizmo :selected-mesh]) ui.notifier/notify-ui-selected-mesh))]
     (j/call-in gizmo-manager [:gizmos :positionGizmo :onDragObservable :add] f)
     (j/call-in gizmo-manager [:gizmos :positionGizmo :onDragEndObservable :add]
                (fn []

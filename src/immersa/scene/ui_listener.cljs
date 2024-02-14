@@ -9,6 +9,7 @@
     [immersa.scene.api.core :as api.core :refer [v3]]
     [immersa.scene.api.mesh :as api.mesh]
     [immersa.scene.slide :as slide]
+    [immersa.scene.ui-notifier :as ui.notifier]
     [immersa.ui.editor.events :as editor.events]
     [re-frame.core :refer [dispatch]])
   (:require-macros
@@ -50,8 +51,7 @@
     (j/assoc! skybox-material :primaryColor new-color)
     (j/assoc! ground-material :primaryColor new-color)
     (slide/update-slide-data :skybox [:background :color] value)
-    (dispatch [::editor.events/sync-slides-info {:current-index @slide/current-slide-index
-                                                 :slides @slide/all-slides}])))
+    (ui.notifier/sync-slides-info @slide/current-slide-index @slide/all-slides)))
 
 (defmethod handle-ui-update :update-selected-mesh-slider-value [{{:keys [update value]} :data}]
   (when-let [mesh (j/get-in api.core/db [:gizmo :selected-mesh])]
@@ -92,6 +92,7 @@
         (let [material (api.core/clone (j/get mesh :material))
               position (api.core/clone (j/get mesh :position))
               rotation (api.core/clone (j/get mesh :rotation))
+              scale (api.core/clone (j/get mesh :scaling))
               depth (api.core/get-node-attr mesh :depth)
               size (api.core/get-node-attr mesh :size)
               text (api.core/get-node-attr mesh :text)
@@ -102,6 +103,7 @@
                       :size size
                       :position position
                       :rotation rotation
+                      :scale scale
                       :text text}
                      data)
               opts (cond
@@ -117,15 +119,9 @@
                      (:size data) (-> mesh
                                       (j/assoc-in! [:scaling :x] (:size data))
                                       (j/assoc-in! [:scaling :y] (:size data)))
-                     (:text data) (let [x (j/get-in mesh [:scaling :x])
-                                        y (j/get-in mesh [:scaling :y])
-                                        z (j/get-in mesh [:scaling :z])]
+                     (:text data) (do
                                     (api.core/dispose name)
-                                    (api.mesh/text name opts)
-                                    (some-> (api.mesh/text name opts)
-                                            (j/assoc-in! [:scaling :x] x)
-                                            (j/assoc-in! [:scaling :y] y)
-                                            (j/assoc-in! [:scaling :z] z))))]
+                                    (api.mesh/text name opts)))]
           (when (:size data)
             (slide/update-slide-data mesh :scale [(:size opts)
                                                   (:size opts)
@@ -144,6 +140,19 @@
 
 (defmethod handle-ui-update :update-selected-mesh-text-depth-or-size [{{:keys [update value]} :data}]
   (update-text-mesh (hash-map update value)))
+
+(defmethod handle-ui-update :update-selected-mesh-face-to-screen? [{{:keys [value]} :data}]
+  (when-let [mesh (api.core/selected-mesh)]
+    (if value
+      (let [rotation [0 0 0]]
+        (slide/update-slide-data mesh :rotation rotation)
+        (j/assoc! mesh
+                  :rotation (api.core/v->v3 rotation)
+                  :billboardMode api.const/mesh-billboard-mode-all))
+      (j/assoc! mesh :billboardMode api.const/mesh-billboard-mode-none))
+    (slide/update-slide-data mesh :face-to-screen? value)
+    (api.core/update-node-attr mesh :face-to-screen? value)
+    (ui.notifier/notify-ui-selected-mesh mesh)))
 
 (defmethod handle-ui-update :update-gizmo-visibility [{{:keys [update value]} :data}]
   (case update
@@ -169,6 +178,7 @@
         new-pos (j/call (j/get camera :position) :add scaled-forward)
         params {:type :text3D
                 :text "Text"
+                :face-to-screen? true
                 :position new-pos
                 :scale (v3 1)
                 :visibility 1.0

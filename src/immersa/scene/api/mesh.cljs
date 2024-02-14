@@ -203,12 +203,13 @@
 
 ;; TODO dispose material when disposing the mesh!!!
 (defn text [name & {:keys [text
-                           size
                            resolution
                            depth
+                           size
                            visibility
                            position
                            rotation
+                           scale
                            color
                            emissive-color
                            emissive-intensity
@@ -237,14 +238,17 @@
                           :sideOrientation api.const/mesh-default-side}
                      nil
                      earcut)
-        mat (or (some-> nme api.material/get-nme-material) mat)]
+        mat (or (some-> nme api.material/get-nme-material) mat)
+        scale (or scale (v3 size size (* 100 depth)))
+        opts (assoc opts :type :text3D
+                    :scale scale)]
     (create-hit-box name mesh)
     (when hl-color
       (let [hl (api.core/highlight-layer (str name "-hl")
                                          :blur-vertical-size hl-blur
                                          :blur-horizontal-size hl-blur)]
         (j/call hl :addMesh mesh hl-color)))
-    (api.core/add-node-to-db name mesh (assoc opts :type :text3D))
+    (api.core/add-node-to-db name mesh opts)
     (when (= mat-type :pbr)
       (cond-> mat
         true (j/assoc! :reflectivityColor (api.const/color-black))
@@ -264,7 +268,7 @@
       rotation (j/assoc! :rotation rotation))
     (j/assoc! mesh
               :initial-rotation (api.core/clone (j/get mesh :rotation))
-              :scaling (v3 size size (* 100 depth)))))
+              :scaling scale)))
 
 (comment
 
