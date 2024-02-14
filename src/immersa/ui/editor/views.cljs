@@ -86,8 +86,10 @@
      [:span (styles/title-label) "My 3D Presentation"]
      [:div (styles/private-badge)
       [icon/lock {:size 12}]
-      [text {:size :s
-             :weight :light} "Beta"]]]]])
+      [tooltip
+       {:trigger [text {:size :s
+                        :weight :light} "Beta"]
+        :content "Immersa is currently in beta"}]]]]])
 
 (defn presentation-component [{:keys [icon class disabled? color text-weight on-click]
                                :or {disabled? false}
