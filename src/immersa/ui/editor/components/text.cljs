@@ -9,6 +9,7 @@
   ([{:keys [size weight color class style]
      :or {color colors/text-primary}} text]
    (let [font-size (case size
+                     :xxs typography/xxs
                      :xs typography/xs
                      :s typography/s
                      :m typography/m

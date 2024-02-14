@@ -187,7 +187,7 @@
                 :metallic 0.0
                 :depth 0.01
                 :size 1.0
-                :color (api.const/color-white)}
+                :color (api.const/color-black)}
         mesh (api.mesh/text (str (random-uuid)) params)
         direction (-> (j/get mesh :position)
                       (j/call :subtract (j/get camera :position))

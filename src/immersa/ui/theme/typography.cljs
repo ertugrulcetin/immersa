@@ -16,7 +16,8 @@
                  "\"Helvetica Neue\""
                  "sans-serif"]))
 
-(def xs "10px")
+(def xxs "10px")
+(def xs "11px")
 (def s "12px")
 (def m "13px")
 (def l "14px")

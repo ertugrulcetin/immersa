@@ -180,6 +180,11 @@
                :data {:update type
                       :value value}}})))
 
+(reg-event-db
+  ::notify-gizmo-state
+  (fn [db [_ type enabled?]]
+    (assoc-in db [:editor :gizmo type] enabled?)))
+
 (reg-event-fx
   ::update-selected-mesh-face-to-screen?
   (fn [{:keys [db]} _]

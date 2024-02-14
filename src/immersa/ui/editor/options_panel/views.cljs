@@ -2,7 +2,7 @@
   (:require
     ["react-color" :refer [SketchPicker]]
     [applied-science.js-interop :as j]
-    [immersa.ui.editor.components.button :refer [button]]
+    [immersa.ui.editor.components.button :refer [button shortcut-button]]
     [immersa.ui.editor.components.input :refer [input-number]]
     [immersa.ui.editor.components.scroll-area :refer [scroll-area]]
     [immersa.ui.editor.components.separator :refer [separator]]
@@ -10,6 +10,7 @@
     [immersa.ui.editor.components.switch :refer [switch]]
     [immersa.ui.editor.components.text :refer [text]]
     [immersa.ui.editor.components.textarea :refer [textarea]]
+    [immersa.ui.editor.components.tooltip :refer [tooltip]]
     [immersa.ui.editor.events :as events]
     [immersa.ui.editor.options-panel.styles :as styles]
     [immersa.ui.editor.subs :as subs]
@@ -80,11 +81,22 @@
                        :event ::events/update-selected-mesh
                        :value @(subscribe [::subs/selected-mesh-scaling])}])
 
-(defn- arrow-helpers []
+(defn- arrow-helpers [type]
   [:div {:style {:display "flex"
                  :flex-direction "column"
                  :gap "15px"}}
-   [text "Arrow helpers"]
+
+   [:div {:style {:display "flex"
+                  :flex-direction "row"
+                  :align-items "center"
+                  :gap "2px"}}
+    [text "Arrow helpers"]
+    [tooltip
+     {:trigger [icon/info {:size 12
+                           :weight :fill
+                           :color colors/button-bg}]
+      :content (str "Arrow helpers are used to update the " type " position, rotation, and scale visually.")}]]
+
    [:div
     {:style {:display "flex"
              :flex-direction "rows"
@@ -95,22 +107,37 @@
               :align-items "center"
               :gap "5px"}}
      [text "Position"]
-     [switch {:checked? @(subscribe [::subs/gizmo-visible? :position])
-              :on-change #(dispatch [::events/update-gizmo-visibility :position])}]]
+     [tooltip
+      {:trigger [switch {:checked? @(subscribe [::subs/gizmo-visible? :position])
+                         :on-change #(dispatch [::events/update-gizmo-visibility :position])}]
+       :content (if @(subscribe [::subs/gizmo-visible? :position])
+                  "Hide position helper"
+                  "Show position helper")
+       :shortcuts "1"}]]
     [:div
      {:style {:display "flex"
               :align-items "center"
               :gap "5px"}}
      [text "Rotation"]
-     [switch {:checked? @(subscribe [::subs/gizmo-visible? :rotation])
-              :on-change #(dispatch [::events/update-gizmo-visibility :rotation])}]]
+     [tooltip
+      {:trigger [switch {:checked? @(subscribe [::subs/gizmo-visible? :rotation])
+                         :on-change #(dispatch [::events/update-gizmo-visibility :rotation])}]
+       :content (if @(subscribe [::subs/gizmo-visible? :rotation])
+                  "Hide rotation helper"
+                  "Show rotation helper")
+       :shortcuts "2"}]]
     [:div
      {:style {:display "flex"
               :align-items "center"
               :gap "5px"}}
      [text "Scale"]
-     [switch {:checked? @(subscribe [::subs/gizmo-visible? :scale])
-              :on-change #(dispatch [::events/update-gizmo-visibility :scale])}]]]])
+     [tooltip
+      {:trigger [switch {:checked? @(subscribe [::subs/gizmo-visible? :scale])
+                         :on-change #(dispatch [::events/update-gizmo-visibility :scale])}]
+       :content (if @(subscribe [::subs/gizmo-visible? :scale])
+                  "Hide scale helper"
+                  "Show scale helper")
+       :shortcuts "3"}]]]])
 
 (defn- text-content []
   [:div {:style {:display "flex"
@@ -198,53 +225,64 @@
     [slider {:value @(subscribe [::subs/selected-mesh-metallic])
              :on-change #(dispatch [::events/update-selected-mesh-slider-value :metallic %])}]]])
 
-(defn- face-to-screen []
+(defn- face-to-screen [type]
   [:div {:style {:display "flex"
                  :flex-direction "row"
                  :justify-content "space-between"
                  :gap "8px"}}
-   [text "Face to screen"]
+   [:div {:style {:display "flex"
+                  :flex-direction "row"
+                  :align-items "center"
+                  :gap "2px"}}
+    [text "Face to screen"]
+    [tooltip
+     {:trigger [icon/info {:size 12
+                           :weight :fill
+                           :color colors/button-bg}]
+      :content (str "Enabling face to screen will make the " type " always face the screen.")}]]
    [switch {:checked? @(subscribe [::subs/selected-mesh-face-to-screen?])
             :on-change #(dispatch [::events/update-selected-mesh-face-to-screen?])}]])
 
 (defn- text-3d-options []
-  [:div {:style {:display "flex"
-                 :flex-direction "column"
-                 :gap "12px"
-                 :padding "22px"
-                 :position "relative"}}
-   [text {:size :xxl
-          :weight :semi-bold} "Text"]
-   [separator]
-   [position]
-   [rotation {:disabled? @(subscribe [::subs/selected-mesh-face-to-screen?])}]
-   [separator]
-   [arrow-helpers]
-   [separator]
-   [text-content]
-   [separator]
-   [size-and-depth]
-   [separator]
-   [material-options]
-   [separator]
-   [face-to-screen]])
+  (let [type "text"]
+    [:div {:style {:display "flex"
+                   :flex-direction "column"
+                   :gap "12px"
+                   :padding "22px"
+                   :position "relative"}}
+     [text {:size :xxl
+            :weight :semi-bold} "Text"]
+     [separator]
+     [position]
+     [rotation {:disabled? @(subscribe [::subs/selected-mesh-face-to-screen?])}]
+     [separator]
+     [arrow-helpers type]
+     [separator]
+     [text-content]
+     [separator]
+     [size-and-depth]
+     [separator]
+     [material-options]
+     [separator]
+     [face-to-screen type]]))
 
 (defn- image-options []
-  [:div {:style {:display "flex"
-                 :flex-direction "column"
-                 :gap "12px"
-                 :padding "22px"
-                 :position "relative"}}
-   [text {:size :xxl
-          :weight :semi-bold} "Image"]
-   [separator]
-   [position]
-   [rotation]
-   [scale]
-   [separator]
-   [arrow-helpers]
-   [separator]
-   [face-to-screen]])
+  (let [type "image"]
+    [:div {:style {:display "flex"
+                   :flex-direction "column"
+                   :gap "12px"
+                   :padding "22px"
+                   :position "relative"}}
+     [text {:size :xxl
+            :weight :semi-bold} "Image"]
+     [separator]
+     [position]
+     [rotation]
+     [scale]
+     [separator]
+     [arrow-helpers type]
+     [separator]
+     [face-to-screen type]]))
 
 (defn- glb-options []
   [:div {:style {:display "flex"
@@ -259,7 +297,7 @@
    [rotation]
    [scale]
    [separator]
-   [arrow-helpers]])
+   [arrow-helpers "model"]])
 
 (defn- selected-mesh-options []
   (case @(subscribe [::subs/selected-mesh-type])

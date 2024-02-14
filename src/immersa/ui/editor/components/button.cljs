@@ -40,6 +40,13 @@
   [:&:hover {:background colors/hover-bg}]
   [:&:active {:background colors/active-bg}])
 
+(defclass shortcut-button-style [symbol?]
+  {:min-width "20px"
+   :height "20px"
+   :padding-right "3px"
+   :padding-left "3px"
+   :font-size (if symbol? typography/s typography/xs)})
+
 (defattrs button-text []
   {:user-select :none})
 
@@ -61,3 +68,8 @@
    (when icon-left icon-left)
    (when text [:span (button-text) text])
    (when icon-right icon-right)])
+
+(defn shortcut-button [text]
+  (let [symbol? (not (re-matches #"[A-Za-z0-9]+" text))]
+    [button {:text text
+             :class (shortcut-button-style symbol?)}]))

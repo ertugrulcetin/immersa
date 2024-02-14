@@ -27,7 +27,10 @@
                              :metallic (j/get-in mesh [:material :metallic])
                              :roughness (j/get-in mesh [:material :roughness])})])
       "glb" (dispatch [::events/set-selected-glb-data (merge pos-rot-scale-name {:type "glb"})])
-      "image" (dispatch [::events/set-selected-image-data (merge pos-rot-scale-name {:type "image"})]))))
+      "image" (dispatch [::events/set-selected-image-data
+                         (merge pos-rot-scale-name
+                                {:type "image"
+                                 :face-to-screen? (api.core/get-node-attr mesh :face-to-screen?)})]))))
 
 (defn notify-ui-selected-mesh [mesh]
   (let [name (j/get mesh :immersa-id)
@@ -43,3 +46,6 @@
 (defn sync-slides-info [current-index slides]
   (dispatch [::editor.events/sync-slides-info {:current-index current-index
                                                :slides slides}]))
+
+(defn notify-gizmo-state [type enabled?]
+  (dispatch [::editor.events/notify-gizmo-state type enabled?]))

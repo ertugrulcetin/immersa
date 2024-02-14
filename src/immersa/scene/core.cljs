@@ -67,15 +67,19 @@
                           (wasd key))
                      (j/assoc-in! api.core/db [:keyboard key] false)
 
-                     (= key "escape")
+                     (and (= key "escape")
+                          (= (j/get info :type) api.const/keyboard-type-key-down))
                      (api.core/clear-selected-mesh)
 
-                     (and (= key "f") (j/get-in api.core/db [:gizmo :selected-mesh]))
+                     (and (= key "f")
+                          (= (j/get info :type) api.const/keyboard-type-key-down)
+                          (j/get-in api.core/db [:gizmo :selected-mesh]))
                      (api.anim/run-camera-focus-anim (j/get-in api.core/db [:gizmo :selected-mesh]))
                      #_(j/call (api.camera/active-camera)
                                :setTarget (api.core/clone (j/get-in api.core/db [:gizmo :selected-mesh :position])))
 
                      (and (= key "c")
+                          (= (j/get info :type) api.const/keyboard-type-key-down)
                           (j/get-in info [:event :metaKey])
                           (api.core/selected-mesh))
                      ;; TODO  move this to data structure so browser does not have to ask for permission
@@ -85,6 +89,7 @@
                          common.utils/copy-to-clipboard)
 
                      (and (= key "v")
+                          (= (j/get info :type) api.const/keyboard-type-key-up)
                           (j/get-in info [:event :metaKey]))
                      (-> (j/call-in js/navigator [:clipboard :readText])
                          (j/call :then (fn [text]
@@ -96,7 +101,8 @@
                                                (js/console.warn e))))))
                          (j/call :catch (fn []
                                           (js/console.error "Clipboard failed."))))
-                     (and (= key "backspace")
+                     (and (= (j/get info :type) api.const/keyboard-type-key-down)
+                          (= key "backspace")
                           (api.core/selected-mesh))
                      (let [obj (api.core/selected-mesh)
                            id (api.core/get-object-name obj)
@@ -104,7 +110,30 @@
                        (api.core/clear-selected-mesh)
                        (sp/setval [sp/ATOM current-index :data id] sp/NONE slide/all-slides)
                        (sp/setval [sp/ATOM id] sp/NONE slide/prev-slide)
-                       (api.core/set-enabled obj false)))
+                       (api.core/set-enabled obj false))
+
+                     (and (= (j/get info :type) api.const/keyboard-type-key-down)
+                          (= key "t"))
+                     (ui-listener/handle-ui-update {:type :add-text-mesh})
+
+                     (and (= (j/get info :type) api.const/keyboard-type-key-down)
+                          (= key "n"))
+                     (ui-listener/handle-ui-update {:type :add-slide})
+
+                     (and (= (j/get info :type) api.const/keyboard-type-key-down)
+                          (= key "1")
+                          (api.core/selected-mesh))
+                     (api.gizmo/toggle-gizmo :position)
+
+                     (and (= (j/get info :type) api.const/keyboard-type-key-down)
+                          (= key "2")
+                          (api.core/selected-mesh))
+                     (api.gizmo/toggle-gizmo :rotation)
+
+                     (and (= (j/get info :type) api.const/keyboard-type-key-down)
+                          (= key "3")
+                          (api.core/selected-mesh))
+                     (api.gizmo/toggle-gizmo :scale))
                    (api.camera/switch-camera-if-needed scene))))))
 
 (defn- read-pixels [engine]

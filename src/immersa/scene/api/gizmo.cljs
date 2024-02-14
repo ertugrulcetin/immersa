@@ -126,6 +126,15 @@
                    (some-> mesh (slide/update-slide-data :scaling (api.core/v3->v (j/get mesh :scaling)))))))
     (create-rotation-gizmo-drag-observables gizmo-manager)))
 
+(defn toggle-gizmo [type]
+  (let [gizmo (case type
+                :position :positionGizmoEnabled
+                :rotation :rotationGizmoEnabled
+                :scale :scaleGizmoEnabled)
+        enabled? (not (j/get-in api.core/db [:gizmo :manager gizmo]))]
+    (j/assoc-in! api.core/db [:gizmo :manager gizmo] enabled?)
+    (ui.notifier/notify-gizmo-state type enabled?)))
+
 (defn init-gizmo-manager []
   (let [gizmo-manager (GizmoManager. (api.core/get-scene))]
     (set! hl (api.core/highlight-layer "outline-highlight-layer"

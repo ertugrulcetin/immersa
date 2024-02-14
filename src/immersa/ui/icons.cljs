@@ -12,6 +12,7 @@
     ["@phosphor-icons/react/dist/csr/Cube" :refer [Cube]]
     ["@phosphor-icons/react/dist/csr/DotsThreeVertical" :refer [DotsThreeVertical]]
     ["@phosphor-icons/react/dist/csr/Image" :refer [Image]]
+    ["@phosphor-icons/react/dist/csr/Info" :refer [Info]]
     ["@phosphor-icons/react/dist/csr/Lightbulb" :refer [Lightbulb]]
     ["@phosphor-icons/react/dist/csr/List" :refer [List]]
     ["@phosphor-icons/react/dist/csr/LockSimple" :refer [LockSimple]]
@@ -46,3 +47,4 @@
 (def chats-circle (r/adapt-react-class ChatsCircle))
 (def student (r/adapt-react-class Student))
 (def camera (r/adapt-react-class Camera))
+(def info (r/adapt-react-class Info))

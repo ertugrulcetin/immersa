@@ -13,6 +13,7 @@
     [immersa.ui.editor.components.switch :refer [switch]]
     [immersa.ui.editor.components.text :refer [text]]
     [immersa.ui.editor.components.textarea :refer [textarea]]
+    [immersa.ui.editor.components.tooltip :refer [tooltip]]
     [immersa.ui.editor.events :as events]
     [immersa.ui.editor.options-panel.views :refer [options-panel]]
     [immersa.ui.editor.styles :as styles]
@@ -103,9 +104,12 @@
 (defn- header-center-panel []
   [:div (styles/header-center-panel)
 
-   [presentation-component {:icon icon/text
-                            :text "Text"
-                            :on-click #(dispatch [::events/add-text-mesh])}]
+   [tooltip
+    {:trigger [presentation-component {:icon icon/text
+                                       :text "Text"
+                                       :on-click #(dispatch [::events/add-text-mesh])}]
+     :content "Add text"
+     :shortcuts "T"}]
    #_[dropdown
       [presentation-component {:icon icon/text
                                :text "Text"}]
@@ -207,11 +211,14 @@
       {:style {:display "flex"
                :align-items "center"
                :padding "8px 16px 0 16px"}}
-      [button {:text "Add slide"
-               :on-click #(dispatch [::events/add-slide])
-               :class (styles/add-slide-button)
-               :icon-left [icon/plus {:size 18
-                                      :color colors/text-primary}]}]]
+      [tooltip
+       {:trigger [button {:text "Add slide"
+                          :on-click #(dispatch [::events/add-slide])
+                          :class (styles/add-slide-button)
+                          :icon-left [icon/plus {:size 18
+                                                 :color colors/text-primary}]}]
+        :content "Add a new slide"
+        :shortcuts "N"}]]
 
      [scroll-area
       {:class (styles/slides-scroll-area)
