@@ -14,7 +14,10 @@
    :background-color colors/border3
    :box-shadow (str colors/button-box-shadow " 0px 1px 2px")}
   ["&[data-state='checked']"
-   {:background-color colors/button-bg}])
+   {:background-color colors/button-bg}]
+  ["&[data-disabled]"
+   {:cursor :not-allowed
+    :opacity 0.5}])
 
 (defclass switch-thumb []
   {:display :block
@@ -29,10 +32,11 @@
   ["&[data-state='checked']"
    {:transform "translateX(19px)"}])
 
-(defn switch [{:keys [checked? on-change]}]
+(defn switch [{:keys [checked? on-change disabled?]}]
   [:> Switch/Root
    {:class (switch-root)
     :checked checked?
-    :on-checked-change on-change}
+    :on-checked-change on-change
+    :disabled disabled?}
    [:> Switch/Thumb
     {:class (switch-thumb)}]])

@@ -4,7 +4,7 @@
   [{:id "14e4ee76-bb27-4904-9d30-360a40d8abb7"
     :data {:camera {:position [0 0 -10]
                     :rotation [0 0 0]}
-           :skybox {:background {:color [1000 1000 1000]}}
+           :skybox {:background {:color [5000 5000 5000]}}
            "wave" {:type :wave}
            "33e4ee76-bb27-4904-9d30-360a40d8abc1" {:type :image
                                                    :asset-type :texture

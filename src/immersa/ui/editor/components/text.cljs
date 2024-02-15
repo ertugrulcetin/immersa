@@ -1,12 +1,16 @@
 (ns immersa.ui.editor.components.text
   (:require
     [immersa.ui.theme.colors :as colors]
-    [immersa.ui.theme.typography :as typography]))
+    [immersa.ui.theme.typography :as typography]
+    [spade.core :refer [defclass defattrs]]))
+
+(defclass text-disabled []
+  {:opacity 0.5})
 
 (defn text
   ([text*]
    (text {} text*))
-  ([{:keys [size weight color class style]
+  ([{:keys [size weight color class style disabled?]
      :or {color colors/text-primary}} text]
    (let [font-size (case size
                      :xxs typography/xxs
@@ -30,5 +34,5 @@
                       :font-weight font-weight
                       :color color
                       :user-select "none"} style)
-       :class [(when class class)]}
+       :class [(when class class) (when disabled? (text-disabled))]}
       text])))

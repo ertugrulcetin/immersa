@@ -81,6 +81,60 @@
                        :event ::events/update-selected-mesh
                        :value @(subscribe [::subs/selected-mesh-scaling])}])
 
+(defn- arrow-helper-position []
+  (let [checked? @(subscribe [::subs/gizmo-visible? :position])
+        trigger [switch {:checked? checked?
+                         :on-change #(dispatch [::events/update-gizmo-visibility :position])}]]
+    [:div
+     {:style {:display "flex"
+              :align-items "center"
+              :gap "5px"}}
+     [text "Position"]
+     [tooltip
+      {:trigger trigger
+       :content (if checked?
+                  "Hide position helper"
+                  "Show position helper")
+       :shortcuts "1"}]]))
+
+(defn- arrow-helper-rotation []
+  (let [checked? @(subscribe [::subs/gizmo-visible? :rotation])
+        disabled? @(subscribe [::subs/selected-mesh-face-to-screen?])
+        trigger [switch {:checked? checked?
+                         :on-change #(dispatch [::events/update-gizmo-visibility :rotation])
+                         :disabled? disabled?}]]
+    [:div
+     {:style {:display "flex"
+              :align-items "center"
+              :gap "5px"}}
+     [text {:disabled? disabled?} "Rotation"]
+     (if disabled?
+       [tooltip
+        {:trigger trigger
+         :content "Disable face to screen to use rotation helper."}]
+       [tooltip
+        {:trigger trigger
+         :content (if checked?
+                    "Hide rotation helper"
+                    "Show rotation helper")
+         :shortcuts "2"}])]))
+
+(defn- arrow-helper-scale []
+  (let [checked? @(subscribe [::subs/gizmo-visible? :scale])
+        trigger [switch {:checked? checked?
+                         :on-change #(dispatch [::events/update-gizmo-visibility :scale])}]]
+    [:div
+     {:style {:display "flex"
+              :align-items "center"
+              :gap "5px"}}
+     [text "Scale"]
+     [tooltip
+      {:trigger trigger
+       :content (if checked?
+                  "Hide scale helper"
+                  "Show scale helper")
+       :shortcuts "3"}]]))
+
 (defn- arrow-helpers [type]
   [:div {:style {:display "flex"
                  :flex-direction "column"
@@ -98,52 +152,15 @@
       :content (str "Arrow helpers are used to update the " type " position, rotation, and scale visually.")}]]
 
    [:div
-    {:style (if (= type "text")
-              {:display "flex"
-               :flex-direction "rows"
-               :align-items "center"
-               :gap "12px"}
-              {:display "flex"
-               :flex-direction "rows"
-               :align-items "center"
-               :justify-content "space-between"})}
-    [:div
-     {:style {:display "flex"
-              :align-items "center"
-              :gap "5px"}}
-     [text "Position"]
-     [tooltip
-      {:trigger [switch {:checked? @(subscribe [::subs/gizmo-visible? :position])
-                         :on-change #(dispatch [::events/update-gizmo-visibility :position])}]
-       :content (if @(subscribe [::subs/gizmo-visible? :position])
-                  "Hide position helper"
-                  "Show position helper")
-       :shortcuts "1"}]]
-    [:div
-     {:style {:display "flex"
-              :align-items "center"
-              :gap "5px"}}
-     [text "Rotation"]
-     [tooltip
-      {:trigger [switch {:checked? @(subscribe [::subs/gizmo-visible? :rotation])
-                         :on-change #(dispatch [::events/update-gizmo-visibility :rotation])}]
-       :content (if @(subscribe [::subs/gizmo-visible? :rotation])
-                  "Hide rotation helper"
-                  "Show rotation helper")
-       :shortcuts "2"}]]
+    {:style {:display "flex"
+             :flex-direction "rows"
+             :align-items "center"
+             :justify-content "flex-start"
+             :gap "16px"}}
+    [arrow-helper-position]
+    [arrow-helper-rotation]
     (when-not (= type "text")
-      [:div
-       {:style {:display "flex"
-                :align-items "center"
-                :gap "5px"}}
-       [text "Scale"]
-       [tooltip
-        {:trigger [switch {:checked? @(subscribe [::subs/gizmo-visible? :scale])
-                           :on-change #(dispatch [::events/update-gizmo-visibility :scale])}]
-         :content (if @(subscribe [::subs/gizmo-visible? :scale])
-                    "Hide scale helper"
-                    "Show scale helper")
-         :shortcuts "3"}]])]])
+      [arrow-helper-scale])]])
 
 (defn- text-content []
   [:div {:style {:display "flex"
@@ -184,16 +201,16 @@
 
 (defn- opacity []
   [:div {:style {:display "flex"
-                  :flex-direction "column"
-                  :gap "8px"}}
-    [:div {:style {:display "flex"
-                   :flex-direction "row"
-                   :justify-content "space-between"}}
-     [text "Opacity"]
-     [text {:weight :light} (str @(subscribe [::subs/selected-mesh-opacity]) "%")]]
-    [slider {:min 0.001
-             :value @(subscribe [::subs/selected-mesh-opacity])
-             :on-change #(dispatch [::events/update-selected-mesh-slider-value :opacity %])}]])
+                 :flex-direction "column"
+                 :gap "8px"}}
+   [:div {:style {:display "flex"
+                  :flex-direction "row"
+                  :justify-content "space-between"}}
+    [text "Opacity"]
+    [text {:weight :light} (str @(subscribe [::subs/selected-mesh-opacity]) "%")]]
+   [slider {:min 0.001
+            :value @(subscribe [::subs/selected-mesh-opacity])
+            :on-change #(dispatch [::events/update-selected-mesh-slider-value :opacity %])}]])
 
 (defn- material-options []
   [:div

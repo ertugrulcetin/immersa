@@ -35,6 +35,9 @@
 (defclass text-content []
   {:line-height "1.5"})
 
+(defclass trigger-wrapper []
+  {:display :flex})
+
 (defclass tooltip-content []
   {:z-index "9999"
    :max-width "200px"
@@ -42,7 +45,7 @@
    :padding "10px 15px"
    :font-size "15px"
    :line-height "1"
-   :color "black"
+   :color :black
    :background-color "white"
    :box-shadow "hsl(206 22% 7% / 35%) 0px 10px 38px -10px, hsl(206 22% 7% / 20%) 0px 10px 20px -15px"
    :user-select :none
@@ -69,7 +72,8 @@
     [:> Tooltip/Provider {:delay-duration delay}
      [:> Tooltip/Root {:class (tooltip-root)}
       [:> Tooltip/Trigger {:as-child true}
-       [:div trigger]]
+       [:div {:class (trigger-wrapper)}
+        trigger]]
       [:> Tooltip/Portal
        [:> Tooltip/Content {:class (tooltip-content) :sideOffset 5}
         [:div {:style {:display "flex"
