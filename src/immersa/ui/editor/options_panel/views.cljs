@@ -345,10 +345,12 @@
    [pos-rot-scale-comp {:label "Position"
                         :type :position
                         :event ::events/update-camera
+                        :disabled? @(subscribe [::subs/camera-locked?])
                         :value @(subscribe [::subs/camera-position])}]
    [pos-rot-scale-comp {:label "Rotation"
                         :type :rotation
                         :event ::events/update-camera
+                        :disabled? @(subscribe [::subs/camera-locked?])
                         :value @(subscribe [::subs/camera-rotation])}]
    [:div
     {:style {:display "flex"
