@@ -366,7 +366,7 @@
       {:trigger [icon/info {:size 12
                             :weight :fill
                             :color colors/button-bg}]
-       :content (if true
+       :content (if @(subscribe [::subs/camera-locked?])
                   [:<>
                    [tooltip-text {:text "The view displayed on the canvas is from the camera's perspective."}]
                    [tooltip-text {:text "Locking the camera disables movement control."}]

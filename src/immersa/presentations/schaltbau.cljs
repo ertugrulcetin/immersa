@@ -3,7 +3,8 @@
 (def slides
   [{:id "14e4ee76-bb27-4904-9d30-360a40d8abb7"
     :data {:camera {:position [0 0 -10]
-                    :rotation [0 0 0]}
+                    :rotation [0 0 0]
+                    :locked? true}
            :skybox {:background {:color [5000 5000 5000]}}
            "wave" {:type :wave}
            "33e4ee76-bb27-4904-9d30-360a40d8abc1" {:type :image
@@ -16,7 +17,8 @@
                                                    :scale [1 1 1]}}}
    {:id "23e4ee76-bb27-4904-9d30-360a40d8abb1"
     :data {:camera {:position [0 0 -10]
-                    :rotation [0 0 0]}
+                    :rotation [0 0 0]
+                    :locked? true}
            :skybox {:background {:color [1000 1000 1000]}}
            "wave" {:type :wave}
            "22e09fae-b39f-4901-9283-bc1cdb7374bb" {:type :particle
@@ -108,7 +110,8 @@
                                                    :emissive-intensity 1,
                                                    :text "• Ani hareket anahtarları"},
            :camera {:position [0 0 -10],
-                    :rotation [0 0 0]},
+                    :rotation [0 0 0]
+                    :locked? false},
            "22e09fae-b39f-4901-9283-bc1cdb7374bb" {:type :particle,
                                                    :particle-type :cloud,
                                                    :position [-8.327676773071289 4.1 11.399999618530273]
