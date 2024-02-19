@@ -609,24 +609,20 @@
   (get-slide-data :camera :locked?))
 
 (defn update-thumbnail []
-  (let [base64 (j/call-in api.core/db [:canvas :toDataURL] "image/webp" 0.2)
-        index @current-slide-index
-        id (get-in @all-slides [index :id])]
-    (sp/setval [sp/ATOM :thumbnails id] base64 thumbnails)
-    (dispatch [::editor.events/sync-thumbnails (:thumbnails @thumbnails)])))
+  (let [{:keys [last-time-slide-updated last-time-thumbnail-updated]} @thumbnails]
+    (when (> last-time-slide-updated last-time-thumbnail-updated)
+      (let [base64 (j/call-in api.core/db [:canvas :toDataURL] "image/webp" 0.2)
+            index @current-slide-index
+            id (get-in @all-slides [index :id])]
+        (sp/setval [sp/ATOM :thumbnails id] base64 thumbnails)
+        (dispatch [::editor.events/sync-thumbnails (:thumbnails @thumbnails)]))
+      (swap! thumbnails assoc :last-time-thumbnail-updated (js/Date.now)))))
 
 (defn- capture-thumbnail-changes []
   (add-watch all-slides :slide-update
              (fn [_ _ old-val new-val]
                (when-not (= old-val new-val)
-                 (swap! thumbnails assoc :last-time-slide-updated (js/Date.now)))))
-  (go-loop []
-    (<! (a/timeout 500))
-    (let [{:keys [last-time-slide-updated last-time-thumbnail-updated]} @thumbnails]
-      (when (> last-time-slide-updated last-time-thumbnail-updated)
-        (update-thumbnail)
-        (swap! thumbnails assoc :last-time-thumbnail-updated (js/Date.now))))
-    (recur)))
+                 (swap! thumbnails assoc :last-time-slide-updated (js/Date.now))))))
 
 (defn- add-listeners-for-present-mode [mode]
   (when (= mode :present)

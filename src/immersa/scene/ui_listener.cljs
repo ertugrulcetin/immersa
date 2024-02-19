@@ -169,6 +169,9 @@
 (defmethod handle-ui-update :add-slide [_]
   (slide/add-slide))
 
+(defmethod handle-ui-update :create-slide-thumbnail [_]
+  (slide/update-thumbnail))
+
 (defmethod handle-ui-update :toggle-camera-lock [{{:keys [value]} :data}]
   (slide/update-slide-data :camera :locked? value)
   (api.camera/toggle-camera-lock value))

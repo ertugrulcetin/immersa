@@ -34,7 +34,9 @@
      :reagent-render (fn []
                        [:canvas
                         {:id "renderCanvas"
-                         :on-blur #(reset! state :blur)
+                         :on-blur #(do
+                                     (reset! state :blur)
+                                     (dispatch [::events/update-thumbnail]))
                          :on-focus #(reset! state :focus)
                          :class (styles/canvas)}])}))
 

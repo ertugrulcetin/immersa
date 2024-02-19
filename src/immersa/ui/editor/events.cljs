@@ -215,3 +215,8 @@
   ::clear-context-menu-position
   (fn [db]
     (dissoc-in db [:editor :context-menu :position])))
+
+(reg-event-fx
+  ::update-thumbnail
+  (fn []
+    {:scene {:type :create-slide-thumbnail}}))
