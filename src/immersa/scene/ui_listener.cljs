@@ -169,12 +169,16 @@
 (defmethod handle-ui-update :add-slide [_]
   (slide/add-slide))
 
+(defmethod handle-ui-update :delete-slide [_]
+  (slide/delete-slide))
+
 (defmethod handle-ui-update :create-slide-thumbnail [_]
   (slide/update-thumbnail))
 
 (defmethod handle-ui-update :toggle-camera-lock [{{:keys [value]} :data}]
   (slide/update-slide-data :camera :locked? value)
-  (api.camera/toggle-camera-lock value))
+  (api.camera/toggle-camera-lock value)
+  (ui.notifier/notify-camera-lock-state value))
 
 (defmethod handle-ui-update :add-text-mesh [_]
   (let [camera (api.camera/active-camera)

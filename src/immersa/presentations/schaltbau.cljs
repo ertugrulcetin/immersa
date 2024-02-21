@@ -4,6 +4,8 @@
   [{:id "14e4ee76-bb27-4904-9d30-360a40d8abb7"
     :data {:camera {:position [0 0 -10]
                     :rotation [0 0 0]
+                    :initial-position [0 0 -10]
+                    :initial-rotation [0 0 0]
                     :locked? true}
            :skybox {:background {:color [5000 5000 5000]}}
            "wave" {:type :wave}

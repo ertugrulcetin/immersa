@@ -42,8 +42,11 @@
 (defn dropdown-separator []
   [:> DropdownMenu/Separator {:class (seprator-style)}])
 
-(defn dropdown-item [elem]
-  [:> DropdownMenu/Item {:class (menu-item)} elem])
+(defn dropdown-item [{:keys [item on-click]}]
+  [:> DropdownMenu/Item
+   {:class (menu-item)
+    :on-click on-click}
+   item])
 
 (defn dropdown [{:keys [trigger children style]}]
   [:> DropdownMenu/Root

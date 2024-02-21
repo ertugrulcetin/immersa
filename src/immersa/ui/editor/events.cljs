@@ -156,6 +156,11 @@
   (fn []
     {:scene {:type :add-slide}}))
 
+(reg-event-fx
+  ::apply-shortcut
+  (fn [_ [_ type]]
+    {:shortcut type}))
+
 (reg-event-db
   ::sync-slides-info
   (fn [db [_ {:keys [current-index slides]}]]
@@ -202,8 +207,7 @@
   ::toggle-camera-lock
   (fn [{:keys [db]} _]
     (let [locked? (-> db :editor :camera :locked? not)]
-      {:db (assoc-in db [:editor :camera :locked?] locked?)
-       :scene {:type :toggle-camera-lock
+      {:scene {:type :toggle-camera-lock
                :data {:value locked?}}})))
 
 (reg-event-db

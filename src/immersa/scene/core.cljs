@@ -5,11 +5,10 @@
     [applied-science.js-interop :as j]
     [cljs.core.async :as a]
     [cljs.core.async :as a :refer [go-loop <!]]
-    [cljs.reader :as reader]
     [clojure.string :as str]
-    [com.rpl.specter :as sp]
     [goog.functions :as functions]
     [immersa.common.firebase :as firebase]
+    [immersa.common.shortcut :as shortcut]
     [immersa.common.utils :as common.utils]
     [immersa.scene.api.animation :as api.anim]
     [immersa.scene.api.camera :as api.camera]
@@ -67,89 +66,16 @@
                    (when (and (= api.const/pointer-type-double-tap (j/get info :type))
                               (= click-type :left-click?)
                               (api.core/selected-mesh))
-                     (api.anim/run-camera-focus-anim (api.core/selected-mesh)))
+                     (api.anim/run-camera-focus-anim (api.core/selected-mesh) (slide/camera-locked?)))
 
                    (api.camera/switch-camera-if-needed (slide/camera-locked?)))))
     (j/call-in scene [:onKeyboardObservable :add]
                (fn [info]
-                 (let [key (str/lower-case (j/get-in info [:event :key]))]
-                   (cond
-                     (and (= (j/get info :type) api.const/keyboard-type-key-down)
-                          (wasd key))
-                     (j/assoc-in! api.core/db [:keyboard key] true)
-
-                     (and (= (j/get info :type) api.const/keyboard-type-key-up)
-                          (wasd key))
-                     (j/assoc-in! api.core/db [:keyboard key] false)
-
-                     (and (= key "escape")
-                          (= (j/get info :type) api.const/keyboard-type-key-down)
-                          (api.core/selected-mesh))
-                     (api.core/clear-selected-mesh)
-
-                     (and (= key "f")
-                          (= (j/get info :type) api.const/keyboard-type-key-down)
-                          (api.core/selected-mesh))
-                     (api.anim/run-camera-focus-anim (api.core/selected-mesh))
-
-                     (and (= key "c")
-                          (= (j/get info :type) api.const/keyboard-type-key-down)
-                          (j/get-in info [:event :metaKey])
-                          (api.core/selected-mesh))
-                     ;; TODO  move this to data structure so browser does not have to ask for permission
-                     (-> (api.core/selected-mesh)
-                         api.core/get-object-name
-                         (#(vector % (get-in @slide/all-slides [@slide/current-slide-index :data %])))
-                         common.utils/copy-to-clipboard)
-
-                     (and (= key "v")
-                          (= (j/get info :type) api.const/keyboard-type-key-up)
-                          (j/get-in info [:event :metaKey]))
-                     (-> (j/call-in js/navigator [:clipboard :readText])
-                         (j/call :then (fn [text]
-                                         (when-not (str/blank? text)
-                                           (try
-                                             (slide/duplicate-slide-data (reader/read-string text))
-                                             (catch js/Error e
-                                               (js/console.warn "Clipboard data is not in EDN format.")
-                                               (js/console.warn e))))))
-                         (j/call :catch (fn []
-                                          (js/console.error "Clipboard failed."))))
-                     (and (= (j/get info :type) api.const/keyboard-type-key-down)
-                          (= key "backspace")
-                          (api.core/selected-mesh))
-                     (let [obj (api.core/selected-mesh)
-                           id (api.core/get-object-name obj)
-                           current-index @slide/current-slide-index]
-                       (api.core/clear-selected-mesh)
-                       (sp/setval [sp/ATOM current-index :data id] sp/NONE slide/all-slides)
-                       (sp/setval [sp/ATOM id] sp/NONE slide/prev-slide)
-                       (api.core/set-enabled obj false))
-
-                     (and (= (j/get info :type) api.const/keyboard-type-key-down)
-                          (= key "t"))
-                     (ui-listener/handle-ui-update {:type :add-text-mesh})
-
-                     (and (= (j/get info :type) api.const/keyboard-type-key-down)
-                          (= key "n"))
-                     (ui-listener/handle-ui-update {:type :add-slide})
-
-                     (and (= (j/get info :type) api.const/keyboard-type-key-down)
-                          (= key "1")
-                          (api.core/selected-mesh))
-                     (api.gizmo/toggle-gizmo :position)
-
-                     (and (= (j/get info :type) api.const/keyboard-type-key-down)
-                          (= key "2")
-                          (api.core/selected-mesh))
-                     (api.gizmo/toggle-gizmo :rotation)
-
-                     (and (= (j/get info :type) api.const/keyboard-type-key-down)
-                          (= key "3")
-                          (api.core/selected-mesh)
-                          (not= (api.core/selected-mesh-type) "text3D"))
-                     (api.gizmo/toggle-gizmo :scale))
-                   (api.camera/switch-camera-if-needed (slide/camera-locked?)))))))
+                 (when-not (j/get-in info [:event :repeat])
+                   (let [key (str/lower-case (j/get-in info [:event :key]))]
+                     (j/assoc-in! api.core/db [:keyboard key] (= (j/get info :type) api.const/keyboard-type-key-down))
+                     (shortcut/process info key)
+                     (api.camera/switch-camera-if-needed (slide/camera-locked?))))))))
 
 (defn- read-pixels [engine]
   (let [p (a/promise-chan)

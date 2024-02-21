@@ -54,7 +54,7 @@
    :cursor :default
    :position :relative
    :top "-0.03em"
-   :font-size (if symbol? ".8em" ".7em")
+   :font-size (if symbol? ".65em" ".62em")
    :min-width "1.75em"
    :line-height "1.7em"
    :padding-left "0.5em"

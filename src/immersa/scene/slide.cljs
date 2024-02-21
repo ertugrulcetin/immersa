@@ -553,35 +553,72 @@
   (let [mesh (api.core/get-object-by-name id)
         index @current-slide-index
         exists? (boolean (get-in @all-slides [index :data id]))
-        id (if exists? (str (random-uuid)) id)]
-    (when (and mesh (not exists?) (> (:visibility params) 0))
-      (j/assoc! mesh :visibility (:visibility params))
-      (api.core/set-enabled mesh true))
-    (when exists?
-      (let [params (->> params
-                        (parse-pos-rot-scale :position)
-                        (parse-pos-rot-scale :rotation)
-                        (parse-pos-rot-scale :scale)
-                        (parse-colors :color))]
-        (case (:type params)
-          :text3D (api.mesh/text id params)
-          :image (api.component/image id params)
-          :glb (api.mesh/glb->mesh id params))))
+        id (if exists? (str (random-uuid)) id)
+        _ (when (and mesh (not exists?) (> (:visibility params) 0))
+            (j/assoc! mesh :visibility (:visibility params))
+            (api.core/set-enabled mesh true))
+        mesh (if exists?
+               (let [params (->> params
+                                 (parse-pos-rot-scale :position)
+                                 (parse-pos-rot-scale :rotation)
+                                 (parse-pos-rot-scale :scale)
+                                 (parse-colors :color))]
+                 (case (:type params)
+                   :text3D (api.mesh/text id params)
+                   :image (api.component/image id params)
+                   :glb (api.mesh/glb->mesh id params)))
+               mesh)]
     (sp/setval [sp/ATOM index :data id] params all-slides)
-    (sp/setval [sp/ATOM id] params prev-slide)))
+    (sp/setval [sp/ATOM id] params prev-slide)
+    mesh))
 
 (defn vec-insert [lst elem index]
   (let [[l r] (split-at index lst)]
     (vec (concat l [elem] r))))
 
+(defn update-thumbnail []
+  (let [{:keys [last-time-slide-updated last-time-thumbnail-updated]} @thumbnails]
+    (when (> last-time-slide-updated last-time-thumbnail-updated)
+      (let [base64 (j/call-in api.core/db [:canvas :toDataURL] "image/webp" 0.2)
+            index @current-slide-index
+            id (get-in @all-slides [index :id])]
+        (sp/setval [sp/ATOM :thumbnails id] base64 thumbnails)
+        (dispatch [::editor.events/sync-thumbnails (:thumbnails @thumbnails)]))
+      (swap! thumbnails assoc :last-time-thumbnail-updated (js/Date.now)))))
+
+(defn get-slide-data [obj k]
+  (let [index @current-slide-index
+        object-id (if (keyword? obj) obj (api.core/get-object-name obj))
+        path (if (vector? k)
+               (apply sp/comp-paths k)
+               k)]
+    (get-in @all-slides [index :data object-id path])))
+
 (defn add-slide []
   (let [index @current-slide-index
-        uuid (str (random-uuid))]
+        uuid (str (random-uuid))
+        position (get-slide-data :camera :position)
+        rotation (get-slide-data :camera :rotation)]
     (api.core/clear-selected-mesh)
     (swap! all-slides (fn [slides]
-                        (vec-insert slides (assoc (get slides index) :id uuid) (inc index))))
+                        (let [duplicated-slide (-> (get slides index)
+                                                   (assoc :initial-position position)
+                                                   (assoc :initial-rotation rotation))]
+                          (vec-insert slides (assoc duplicated-slide :id uuid) (inc index)))))
     (swap! current-slide-index inc)
     (ui.notifier/sync-slides-info @current-slide-index @all-slides)))
+
+(defn delete-slide []
+  (when (> (count @all-slides) 1)
+    (let [index @current-slide-index]
+      (api.core/clear-selected-mesh)
+      (if (= index 0)
+        (go-to-slide 0)
+        (go-to-slide (dec @current-slide-index)))
+      (sp/setval* [sp/ATOM index] sp/NONE all-slides)
+      (when-not (= index 0)
+        (swap! current-slide-index dec))
+      (ui.notifier/sync-slides-info @current-slide-index @all-slides))))
 
 (defn add-slide-data [obj params]
   (let [index @current-slide-index]
@@ -597,26 +634,8 @@
     (sp/setval [sp/ATOM index :data object-id path] v all-slides)
     (sp/setval [sp/ATOM object-id path] v prev-slide)))
 
-(defn get-slide-data [obj k]
-  (let [index @current-slide-index
-        object-id (if (keyword? obj) obj (api.core/get-object-name obj))
-        path (if (vector? k)
-               (apply sp/comp-paths k)
-               k)]
-    (get-in @all-slides [index :data object-id path])))
-
 (defn camera-locked? []
   (get-slide-data :camera :locked?))
-
-(defn update-thumbnail []
-  (let [{:keys [last-time-slide-updated last-time-thumbnail-updated]} @thumbnails]
-    (when (> last-time-slide-updated last-time-thumbnail-updated)
-      (let [base64 (j/call-in api.core/db [:canvas :toDataURL] "image/webp" 0.2)
-            index @current-slide-index
-            id (get-in @all-slides [index :id])]
-        (sp/setval [sp/ATOM :thumbnails id] base64 thumbnails)
-        (dispatch [::editor.events/sync-thumbnails (:thumbnails @thumbnails)]))
-      (swap! thumbnails assoc :last-time-thumbnail-updated (js/Date.now)))))
 
 (defn- capture-thumbnail-changes []
   (add-watch all-slides :slide-update
