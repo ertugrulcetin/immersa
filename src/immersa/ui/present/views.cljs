@@ -6,9 +6,11 @@
     [immersa.scene.core :as scene.core]
     [immersa.ui.editor.subs :as editor.subs]
     [immersa.ui.icons :as icon]
+    [immersa.ui.loading-screen :refer [loading-screen]]
     [immersa.ui.present.events :as events]
     [immersa.ui.present.styles :as styles]
     [immersa.ui.present.subs :as subs]
+    [immersa.ui.subs :as main.subs]
     [re-frame.core :refer [dispatch subscribe]]
     [reagent.core :as r]))
 
@@ -18,9 +20,13 @@
                                                    {:mode :present
                                                     :slides @(subscribe [::editor.subs/slides-all])})
      :reagent-render (fn []
-                       [:canvas
-                        {:id "renderCanvas"
-                         :class (styles/canvas)}])}))
+                       [:<>
+                        [:canvas
+                         {:id "renderCanvas"
+                          :style {:display (if @(subscribe [::main.subs/loading-screen?]) "none" "block")}
+                          :class (styles/canvas)}]
+                        (when @(subscribe [::main.subs/loading-screen?])
+                          [loading-screen])])}))
 
 (defn- canvas-container []
   (let [{:keys [width height]} @(subscribe [::subs/calculated-canvas-dimensions])]
@@ -32,7 +38,7 @@
         :class (styles/canvas-container)}
        (when @(subscribe [::subs/show-arrow-keys-text?])
          [:div (styles/arrow-keys-text)
-          [:h1 "Use arrow keys to navigate"]
+          [:h2 "Use arrow keys to navigate"]
           [:div
            [icon/arrow-left {:size 32
                              :color "white"
@@ -42,7 +48,7 @@
                               :weight "bold"}]]])
        (when @(subscribe [::subs/show-pre-warm-text?])
          [:div (styles/arrow-keys-text)
-          [:h1 "Pre-warming scene..."]])
+          [:h2 "Pre-warming scene..."]])
        [canvas]])))
 
 (defn- progress-bar-line []

@@ -429,7 +429,7 @@
     p))
 
 (defn hide-loading-ui []
-  (j/call (get-engine) :hideLoadingUI))
+  #_(j/call (get-engine) :hideLoadingUI))
 
 (defn pcs [name & {:keys [point-size]
                    :or {point-size 1}

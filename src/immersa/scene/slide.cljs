@@ -19,6 +19,7 @@
     [immersa.scene.materials-in-sphere :as mat.spheres]
     [immersa.scene.ui-notifier :as ui.notifier]
     [immersa.ui.editor.events :as editor.events]
+    [immersa.ui.events :as main.events]
     [immersa.ui.present.events :as events]
     [re-frame.core :refer [dispatch dispatch-sync]]))
 
@@ -686,7 +687,7 @@
     (capture-thumbnail-changes)
     (a/put! command-ch :next)
     (add-listeners-for-present-mode mode)
-    (js/setTimeout #(api.core/hide-loading-ui) 500)
+    (js/setTimeout #(dispatch [::main.events/hide-loading-screen]) 500)
     (go-loop [index -1]
       (let [command (a/<! command-ch)
             current-index (case command

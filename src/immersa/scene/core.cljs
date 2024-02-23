@@ -1,5 +1,6 @@
 (ns immersa.scene.core
   (:require
+    ["@babylonjs/core/Loading/loadingScreen" :refer [DefaultLoadingScreen]]
     ["@babylonjs/core/Meshes/Compression/dracoCompression" :refer [DracoCompression]]
     ["@babylonjs/core/Rendering/boundingBoxRenderer"]
     [applied-science.js-interop :as j]
@@ -24,6 +25,7 @@
     [immersa.scene.ui-listener :as ui-listener]
     [immersa.scene.utils :as utils]
     [immersa.ui.editor.events :as editor.events]
+    [immersa.ui.events :as main.events]
     [immersa.ui.present.events :as events]
     [re-frame.core :refer [dispatch]]))
 
@@ -179,9 +181,15 @@
     (let [engine (api.core/create-engine canvas)
           scene (api.core/create-scene engine)
           _ (update-draco-url)
-          _ (api.core/create-assets-manager :on-finish #(do
-                                                          (dispatch [::events/set-show-arrow-keys-text? false])
-                                                          (dispatch [::events/set-show-pre-warm-text? true])))
+          _ (j/assoc-in! DefaultLoadingScreen [:prototype :displayLoadingUI] #(dispatch [::main.events/show-loading-screen]))
+          am (api.core/create-assets-manager :on-finish #(do
+                                                           (dispatch [::events/set-show-arrow-keys-text? false])
+                                                           (dispatch [::events/set-show-pre-warm-text? true])))
+          _ (j/call-in am [:onProgressObservable :add]
+                       (fn [event]
+                         (let [reaming (j/get event :remainingCount)
+                               total (j/get event :totalCount)]
+                           (dispatch [::main.events/set-loading-progress (* 100 (/ (- total reaming) total))]))))
           _ (firebase/init-app)
           _ (api.core/init-p5)
           free-camera (api.camera/create-free-camera "free-camera" :position (v3 0 0 -10))

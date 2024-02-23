@@ -15,6 +15,8 @@
     [immersa.ui.editor.styles :as styles]
     [immersa.ui.editor.subs :as subs]
     [immersa.ui.icons :as icon]
+    [immersa.ui.loading-screen :refer [loading-screen]]
+    [immersa.ui.subs :as main.subs]
     [immersa.ui.theme.colors :as colors]
     [re-frame.core :refer [dispatch subscribe]]
     [reagent.core :as r]))
@@ -26,13 +28,17 @@
                                                     :slides @(subscribe [::subs/slides-all])
                                                     :thumbnails @(subscribe [::subs/slides-thumbnails])})
      :reagent-render (fn []
-                       [:canvas
-                        {:id "renderCanvas"
-                         :on-blur #(do
-                                     (reset! state :blur)
-                                     (dispatch [::events/update-thumbnail]))
-                         :on-focus #(reset! state :focus)
-                         :class (styles/canvas)}])}))
+                       [:<>
+                        [:canvas
+                         {:id "renderCanvas"
+                          :style {:display (if @(subscribe [::main.subs/loading-screen?]) "none" "block")}
+                          :on-blur #(do
+                                      (reset! state :blur)
+                                      (dispatch [::events/update-thumbnail]))
+                          :on-focus #(reset! state :focus)
+                          :class (styles/canvas)}]
+                        (when @(subscribe [::main.subs/loading-screen?])
+                          [loading-screen])])}))
 
 (defn- canvas-container []
   (let [state (r/atom :blur)]
