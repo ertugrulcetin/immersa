@@ -1,0 +1,161 @@
+(ns immersa.ui.editor.slide-panel.views
+  (:require
+    ["@dnd-kit/core" :refer [DndContext
+                             closestCenter
+                             KeyboardSensor
+                             PointerSensor
+                             TouchSensor
+                             useSensor
+                             useSensors]]
+    ["@dnd-kit/sortable" :refer [arrayMove
+                                 SortableContext
+                                 sortableKeyboardCoordinates
+                                 verticalListSortingStrategy
+                                 rectSortingStrategy
+                                 verticalListSortingStrategy
+                                 useSortable]]
+    ["@dnd-kit/utilities" :refer [CSS]]
+    ["react" :as react]
+    [applied-science.js-interop :as j]
+    [immersa.ui.editor.components.button :refer [button]]
+    [immersa.ui.editor.components.scroll-area :refer [scroll-area]]
+    [immersa.ui.editor.components.tooltip :refer [tooltip]]
+    [immersa.ui.editor.events :as events]
+    [immersa.ui.editor.styles :as styles]
+    [immersa.ui.editor.subs :as subs]
+    [immersa.ui.icons :as icon]
+    [immersa.ui.theme.colors :as colors]
+    [immersa.ui.theme.typography :as typography]
+    [re-frame.core :refer [dispatch subscribe]]
+    [reagent.core :as r]))
+
+(def dnd-context (r/adapt-react-class DndContext))
+(def sortable-context (r/adapt-react-class SortableContext))
+
+(defn- to-clj-map [hash-map]
+  (js->clj hash-map :keywordize-keys true))
+
+(defn- slide [props]
+  (let [{:keys [attributes
+                listeners
+                setNodeRef
+                transform
+                transition]} (to-clj-map (useSortable (clj->js {:id (:id props)})))
+        index (.indexOf (:items props) (:id props))
+        current-index @(subscribe [::subs/slides-current-index])
+        thumbnail @(subscribe [::subs/slide-thumbnail index])
+        camera-unlocked? (not @(subscribe [::subs/camera-locked?]))
+        selected? (= index current-index)
+        transform-js (clj->js transform)
+        transform-js (when-not (nil? transform-js)
+                       (j/assoc! transform-js :x 0))]
+    [:div
+     (merge {:id (:id props)
+             :ref setNodeRef
+             :style {:display "flex"
+                     :align-items "flex-start"
+                     :padding-left "8px"
+                     :padding-bottom "8px"
+                     :user-select "none"
+                     :transform (j/call-in CSS [:Transform :toString] transform-js)
+                     :transition transition}
+             :on-click #(dispatch [::events/go-to-slide index])}
+            attributes
+            listeners)
+     [:div
+      {:style {:display "flex"
+               :flex-direction "column"
+               :justify-content "space-between"
+               :height "42px"}}
+      [:span {:style {:width "22px"
+                      :color (cond
+                               (and camera-unlocked? selected?)
+                               colors/unlocked-camera
+
+                               selected?
+                               colors/button-outline-border
+
+                               :else colors/text-primary)
+                      :font-size typography/s
+                      :font-weight (if selected?
+                                     typography/medium
+                                     typography/regular)}} (inc index)]
+      (when (and camera-unlocked? selected?)
+        [tooltip
+         {:trigger [icon/unlock {:size 12
+                                 :color colors/unlocked-camera}]
+          :content "Camera unlocked"}])]
+     [:div
+      {:style {:width "123px"
+               :height "70px"
+               :border-radius "5px"
+               :border (cond
+                         (and camera-unlocked? selected?)
+                         (str "2px solid " colors/unlocked-camera)
+
+                         selected?
+                         (str "2px solid " colors/button-outline-border)
+
+                         :else (str "2px solid " colors/border2))}}
+      [:img {:src thumbnail
+             :style {:width "100%"
+                     :height "100%"
+                     :box-sizing "border-box"
+                     :border "2px solid transparent"
+                     :border-radius "3px"}}]]]))
+
+(defn- sortable-slides-list [slides]
+  (let [[items setItems] (react/useState (clj->js (mapv :id slides)))
+        sensors (useSensors
+                  (useSensor PointerSensor (clj->js {:activationConstraint {:distance 0.01}}))
+                  (useSensor KeyboardSensor (to-clj-map {:coordinateGetter sortableKeyboardCoordinates})))
+        handleDragEnd (fn [event]
+                        (let [{:keys [active over]} (to-clj-map event)]
+                          (let [oldIndex (.indexOf items (:id active))
+                                newIndex (.indexOf items (:id over))]
+                            (dispatch [::events/re-order-slides oldIndex newIndex])
+                            (setItems (clj->js (arrayMove (clj->js items) oldIndex newIndex))))))]
+    [:div
+     [dnd-context {:sensors sensors
+                   :collisionDetection closestCenter
+                   :onDragEnd handleDragEnd}
+      [sortable-context {:items items
+                         :strategy rectSortingStrategy}
+       [:div {:style {:display :flex
+                      :flex-wrap :wrap}}
+        (map
+          (fn [id]
+            [:f> slide
+             {:key id
+              :id id
+              :items items}])
+          items)]]]]))
+
+(defn slides-panel []
+  [:div (styles/side-bar)
+   [:div
+    {:style {:display "flex"
+             :align-items "center"
+             :padding "8px 16px 0 16px"}}
+    [tooltip
+     {:trigger [button {:text "Add slide"
+                        :on-click #(dispatch [::events/add-slide])
+                        :class (styles/add-slide-button)
+                        :icon-left [icon/plus {:size 18
+                                               :color colors/text-primary}]}]
+      :content "Add a new slide"
+      :shortcuts "N"}]]
+   [scroll-area
+    {:class (styles/slides-scroll-area)
+     :children [:div {:tabIndex "0"
+                      :on-key-down (fn [e]
+                                     (when-not (j/get e :repeat)
+                                       (when (or (= "ArrowDown" (j/get e :code))
+                                                 (= "ArrowRight" (j/get e :code)))
+                                         (dispatch [::events/go-to-slide :next]))
+                                       (when (or (= "ArrowUp" (j/get e :code))
+                                                 (= "ArrowLeft" (j/get e :code)))
+                                         (dispatch [::events/go-to-slide :prev]))))
+                      :style {:padding-top "8px"
+                              :outline "none"}}
+                [:f> sortable-slides-list (map-indexed #(assoc %2 :index %1) @(subscribe [::subs/slides-all]))]]}]])

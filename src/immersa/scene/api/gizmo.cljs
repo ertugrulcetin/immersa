@@ -152,7 +152,6 @@
               :scaleGizmoEnabled true
               :gizmos.rotationGizmo.updateGizmoRotationToMatchAttachedMesh false
               :gizmos.positionGizmo.updateGizmoRotationToMatchAttachedMesh false
-              :gizmos.scaleGizmo.updateGizmoRotationToMatchAttachedMesh false
               :gizmos.positionGizmo.xGizmo.scaleRatio 1.5
               :gizmos.positionGizmo.yGizmo.scaleRatio 1.5
               :gizmos.positionGizmo.zGizmo.scaleRatio 1.5

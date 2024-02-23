@@ -7,21 +7,15 @@
     [immersa.ui.editor.components.button :refer [button]]
     [immersa.ui.editor.components.context-menu :refer [context-menu]]
     [immersa.ui.editor.components.dropdown :refer [dropdown dropdown-item dropdown-separator dropdown-context-menu]]
-    [immersa.ui.editor.components.input :refer [input-number]]
-    [immersa.ui.editor.components.scroll-area :refer [scroll-area]]
-    [immersa.ui.editor.components.separator :refer [separator]]
-    [immersa.ui.editor.components.slider :refer [slider]]
-    [immersa.ui.editor.components.switch :refer [switch]]
     [immersa.ui.editor.components.text :refer [text]]
-    [immersa.ui.editor.components.textarea :refer [textarea]]
     [immersa.ui.editor.components.tooltip :refer [tooltip]]
     [immersa.ui.editor.events :as events]
     [immersa.ui.editor.options-panel.views :refer [options-panel]]
+    [immersa.ui.editor.slide-panel.views :refer [slides-panel]]
     [immersa.ui.editor.styles :as styles]
     [immersa.ui.editor.subs :as subs]
     [immersa.ui.icons :as icon]
     [immersa.ui.theme.colors :as colors]
-    [immersa.ui.theme.typography :as typography]
     [re-frame.core :refer [dispatch subscribe]]
     [reagent.core :as r]))
 
@@ -136,8 +130,8 @@
                             :class (styles/presentation-component-cube)
                             :disabled? true}]
    #_[presentation-component {:icon icon/camera
-                            :text "Camera"
-                            :disabled? true}]
+                              :text "Camera"
+                              :disabled? true}]
    [presentation-component {:icon icon/student
                             :text "Tutorial"
                             :disabled? true}]
@@ -176,94 +170,11 @@
    [header-center-panel]
    [header-right-panel]])
 
-(defn- slide [index]
-  (let [current-index @(subscribe [::subs/slides-current-index])
-        thumbnail @(subscribe [::subs/slide-thumbnail index])
-        camera-unlocked? (not @(subscribe [::subs/camera-locked?]))
-        selected? (= index current-index)]
-    [:div
-     {:style {:display "flex"
-              :align-items "flex-start"
-              :padding-left "8px"
-              :padding-bottom "8px"
-              :user-select "none"}
-      :on-click #(dispatch [::events/go-to-slide index])}
-     [:div
-      {:style {:display "flex"
-               :flex-direction "column"
-               :justify-content "space-between"
-               :height "42px"}}
-      [:span {:style {:width "22px"
-                      :color (cond
-                               (and camera-unlocked? selected?)
-                               colors/unlocked-camera
-
-                               selected?
-                               colors/button-outline-border
-
-                               :else colors/text-primary)
-                      :font-size typography/s
-                      :font-weight (if selected?
-                                     typography/medium
-                                     typography/regular)}} (inc index)]
-      (when (and camera-unlocked? selected?)
-        [tooltip
-         {:trigger [icon/unlock {:size 12
-                                 :color colors/unlocked-camera}]
-          :content "Camera unlocked"}])]
-     [:div
-      {:style {:width "123px"
-               :height "70px"
-               :border-radius "5px"
-               :border (cond
-                         (and camera-unlocked? selected?)
-                         (str "2px solid " colors/unlocked-camera)
-
-                         selected?
-                         (str "2px solid " colors/button-outline-border)
-
-                         :else (str "2px solid " colors/border2))}}
-      [:img {:src thumbnail
-             :style {:width "100%"
-                     :height "100%"
-                     :box-sizing "border-box"
-                     :border "2px solid transparent"
-                     :border-radius "3px"}}]]]))
-
 (defn editor-panel []
   [:div (styles/editor-container)
    [header]
    [:div (styles/content-container)
-    [:div (styles/side-bar)
-     [:div
-      {:style {:display "flex"
-               :align-items "center"
-               :padding "8px 16px 0 16px"}}
-      [tooltip
-       {:trigger [button {:text "Add slide"
-                          :on-click #(dispatch [::events/add-slide])
-                          :class (styles/add-slide-button)
-                          :icon-left [icon/plus {:size 18
-                                                 :color colors/text-primary}]}]
-        :content "Add a new slide"
-        :shortcuts "N"}]]
-
-     [scroll-area
-      {:class (styles/slides-scroll-area)
-       :children [:div {:tabIndex "0"
-                        :on-key-down (fn [e]
-                                       (when-not (j/get e :repeat)
-                                         (when (or (= "ArrowDown" (j/get e :code))
-                                                   (= "ArrowRight" (j/get e :code)))
-                                           (dispatch [::events/go-to-slide :next]))
-                                         (when (or (= "ArrowUp" (j/get e :code))
-                                                   (= "ArrowLeft" (j/get e :code)))
-                                           (dispatch [::events/go-to-slide :prev]))))
-                        :style {:padding-top "8px"
-                                :outline "none"}}
-                  (for [{:keys [id index]} (map-indexed #(assoc %2 :index %1) @(subscribe [::subs/slides-all]))]
-                    ^{:key id}
-                    [slide index])]}]]
+    [slides-panel]
     [canvas-wrapper]
     [options-panel]
     [context-menu]]])

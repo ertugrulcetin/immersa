@@ -163,6 +163,12 @@
     {:scene {:type :add-slide}}))
 
 (reg-event-fx
+  ::re-order-slides
+  (fn [_ [_ old-index new-index]]
+    {:scene {:type :re-order-slides
+             :data {:value [old-index new-index]}}}))
+
+(reg-event-fx
   ::apply-shortcut
   (fn [_ [_ type]]
     {:shortcut type}))
