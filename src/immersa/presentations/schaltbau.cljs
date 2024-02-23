@@ -8,7 +8,7 @@
                     :initial-rotation [0 0 0]
                     :locked? true}
            :skybox {:background {:color [255 255 255]
-                                 :brightness 0.1}}
+                                 :brightness 1}}
            "wave" {:type :wave}
            "33e4ee76-bb27-4904-9d30-360a40d8abc1" {:type :image
                                                    :asset-type :texture
@@ -24,7 +24,8 @@
                     :initial-position [0 0 -10]
                     :initial-rotation [0 0 0]
                     :locked? true}
-           :skybox {:background {:color [1000 1000 1000]}}
+           :skybox {:background {:color [255 255 255]
+                                 :brightness 1}}
            "wave" {:type :wave}
            "22e09fae-b39f-4901-9283-bc1cdb7374bb" {:type :particle
                                                    :particle-type :cloud
@@ -58,7 +59,8 @@
                                                    :visibility 1,
                                                    :emissive-intensity 1,
                                                    :text "• Demiryolu bileşenleri"},
-           :skybox {:background {:color [1000 1000 1000]}},
+           :skybox {:background {:color [255 255 255]
+                                 :brightness 1}},
            "08e09fae-b39f-4901-9283-bc1cdb737490" {:rotation [0 0 0],
                                                    :color [0 0 0],
                                                    :scale [0.5 0.5 1],
@@ -152,7 +154,8 @@
                     :rotation [0 0 0]
                     :initial-position [0 1.7 -10]
                     :initial-rotation [0 0 0]}
-           :skybox {:background {:color [1000 1000 1000]}}
+           :skybox {:background {:color [255 255 255]
+                                 :brightness 1}}
            "33e4ee76-bb27-4904-9d30-360a40d8abc1" {:type :image, :asset-type :texture, :visibility 1, :path "https://firebasestorage.googleapis.com/v0/b/immersa-6d29f.appspot.com/o/images%2Fschaltbau%2Flogo.png?alt=media&token=2afccb59-5489-4553-9a98-0425f0bac1db", :transparent? true, :position [-6.5 5.5 0], :rotation [0 0 0], :scale [0.4 0.4 0.4]}
            "935411e3-9606-4d4a-b711-802981da8a9f" {:rotation [0 2.220446049250313e-16 0], :color [255 0 0], :scale [0.55 0.55 1], :roughness 1, :metallic 0, :type :text3D, :size 1, :position [4.031128406524658 2.8888237476348877 0], :depth 0.01, :visibility 1, :emissive-intensity 0.2, :text "Uygulamalar"}
            "ba6506d5-ab90-42f4-b620-37d8ac2c763f" {:rotation [0 0 0], :color [0 0 0], :scale [0.3 0.3 1], :roughness 1, :metallic 0, :type :text3D, :size 1, :position [4.127493381500244 -0.607505202293396 0], :depth 0.01, :delay 750, :visibility 1, :emissive-intensity 1, :text "Elektrikli banliyö trenleri\nDizel banliyö trenleri\nHafif raylı sistemler\nYüksek hızlı trenler\nŞehir içi trenler\nMetro trenleri"}
@@ -170,7 +173,8 @@
                     :rotation [0 0 0]
                     :initial-position [-0.0011328124975828636 1.7000000000000006 21.272332594691633]
                     :initial-rotation [0 0 0]}
-           :skybox {:background {:color [1000 1000 1000]}},
+           :skybox {:background {:color [255 255 255]
+                                 :brightness 1}},
            "33e4ee76-bb27-4904-9d30-360a40d8abc1" {:type :image, :asset-type :texture, :visibility 1, :path "https://firebasestorage.googleapis.com/v0/b/immersa-6d29f.appspot.com/o/images%2Fschaltbau%2Flogo.png?alt=media&token=2afccb59-5489-4553-9a98-0425f0bac1db", :transparent? true, :position [-6.65 5.58 31.49], :rotation [0 0 0], :scale [0.41 0.41 0.41]},
            "55k4ee76-bb27-4904-9d30-360a40d8ab00" {:type :glb,
                                                    :asset-type :model,
@@ -201,7 +205,8 @@
                     :rotation [0.0021289062499999997 -1.7224036360377644 0]
                     :initial-position [-0.0011328124975828636 0 21.272332594691633]
                     :initial-rotation [0.0021289062499999997 -1.7224036360377644 0]},
-           :skybox {:background {:color [1000 1000 1000]}}
+           :skybox {:background {:color [255 255 255]
+                                 :brightness 1}}
            "ec26caf8-e113-41bc-8d2b-9c45b82f2563" {:type :image, :asset-type :texture, :visibility 1, :path "https://firebasestorage.googleapis.com/v0/b/immersa-6d29f.appspot.com/o/images%2Fschaltbau%2Flogo.png?alt=media&token=2afccb59-5489-4553-9a98-0425f0bac1db", :transparent? true, :position [-8.055896759033203 3.3693952560424805 14.266735076904297], :rotation [0 4.537856055185257 0], :scale [0.4 0.4 0.4]}
 
            "44678079-0918-4682-875c-42272f715e74" {:rotation [0 4.560781667210461 0], :color [255 0 0], :scale [0.5 0.5 1.0000000265500801], :roughness 1, :metallic 0, :type :text3D, :size 0.35, :position [-9.890000343322754 1.6646840572357178 14.097939491271973], :depth 0.01, :visibility 1, :emissive-intensity 0.2, :text "Uygulamalar"}
@@ -226,7 +231,8 @@
                     :rotation [0.0020943951023931952 -3.144908779168582 0]
                     :initial-position [-0.0011328124975828636 0 21.272332594691633]
                     :initial-rotation [0.0020943951023931952 -3.144908779168582 0]}
-           :skybox {:background {:color [1000 1000 1000]}}
+           :skybox {:background {:color [255 255 255]
+                                 :brightness 1}}
            "a2aa2438-f6d0-4fdd-8946-b80789f1bdac" {:type :image, :asset-type :texture, :visibility 1, :path "https://firebasestorage.googleapis.com/v0/b/immersa-6d29f.appspot.com/o/images%2Fschaltbau%2Flogo.png?alt=media&token=2afccb59-5489-4553-9a98-0425f0bac1db", :transparent? true, :position [4.542327404022217 2.6158838272094727 14.266735076904297], :rotation [0 3.141592653589793 0], :scale [0.3 0.3 0.3]}
            "95z3ee76-bb27-4904-9d30-360a40d8ab44" {:type :glb,
                                                    :duration 2.0
@@ -243,7 +249,8 @@
                     :rotation [0 -3.1382765280110037 0]
                     :initial-position [-0.001132812497582604 -5.447031714567174e-16 21.272332594691633]
                     :initial-rotation [0 -3.1382765280110037 0]}
-           :skybox {:background {:color [1000 1000 1000]}},
+           :skybox {:background {:color [255 255 255]
+                                 :brightness 1}},
            "a2aa2438-f6d0-4fdd-8946-b80789f1bdac" {:type :image, :asset-type :texture, :visibility 1, :path "https://firebasestorage.googleapis.com/v0/b/immersa-6d29f.appspot.com/o/images%2Fschaltbau%2Flogo.png?alt=media&token=2afccb59-5489-4553-9a98-0425f0bac1db", :transparent? true, :position [4.542327404022217 2.6158838272094727 14.266735076904297], :rotation [0 3.141592653589793 0], :scale [0.3 0.3 0.3]}
            "95z3ee76-bb27-4904-9d30-360a40d8ab44" {:type :glb,
                                                    :asset-type :model,
@@ -258,7 +265,8 @@
                     :rotation [0 -3.1382765280110037 0]
                     :initial-position [-0.001132812497582604 -5.447031714567174e-16 21.272332594691633]
                     :initial-rotation [0 -3.1382765280110037 0]}
-           :skybox {:background {:color [1000 1000 1000]}}
+           :skybox {:background {:color [255 255 255]
+                                 :brightness 1}}
            "a2aa2438-f6d0-4fdd-8946-b80789f1bdac" {:type :image, :asset-type :texture, :visibility 1, :path "https://firebasestorage.googleapis.com/v0/b/immersa-6d29f.appspot.com/o/images%2Fschaltbau%2Flogo.png?alt=media&token=2afccb59-5489-4553-9a98-0425f0bac1db", :transparent? true, :position [4.542327404022217 2.6158838272094727 14.266735076904297], :rotation [0 3.141592653589793 0], :scale [0.3 0.3 0.3]}
            "27o4ss76-bb27-4904-9d30-360a40d8abc1" {:type :image, :asset-type :texture, :visibility 1, :path "https://firebasestorage.googleapis.com/v0/b/immersa-6d29f.appspot.com/o/models%2Fschaltbau%2Fc2.png?alt=media&token=cab78695-3d3b-4fd0-9751-8eca41c64554", :transparent? true, :position [-0.03429393470287323 1.6224138736724854 11.272409439086914], :rotation [0 3.141592653589793 0], :scale [4 4 4]}
            "dfcc126f-3c9d-489f-8784-0fc0dbc448f9" {:rotation [0 3.1449087792603736 0], :color [0 0 0], :scale [0.3 0.3 1], :roughness 1, :metallic 0, :type :text3D, :size 0.4, :position [-0.03429393470287323 -1.5883097648620605 11.272409439086914], :depth 0.01, :visibility 1, :emissive-intensity 1, :text "Patentli Ark Sönümleme Teknolojisi"}
@@ -268,7 +276,8 @@
                     :rotation [0 -3.1382765280110037 0]
                     :initial-position [0 -5.447031714567174e-16 21.272332594691633]
                     :initial-rotation [0 -3.1382765280110037 0]}
-           :skybox {:background {:color [1000 1000 1000]}}
+           :skybox {:background {:color [255 255 255]
+                                 :brightness 1}}
            "a2aa2438-f6d0-4fdd-8946-b80789f1bdac" {:type :image, :asset-type :texture, :visibility 1, :path "https://firebasestorage.googleapis.com/v0/b/immersa-6d29f.appspot.com/o/images%2Fschaltbau%2Flogo.png?alt=media&token=2afccb59-5489-4553-9a98-0425f0bac1db", :transparent? true, :position [4.542327404022217 2.6158838272094727 14.266735076904297], :rotation [0 3.141592653589793 0], :scale [0.3 0.3 0.3]}
            "97o4ss76-bb27-4904-9d30-360a40d8abc1" {:type :image, :asset-type :texture, :visibility 1, :path "https://firebasestorage.googleapis.com/v0/b/immersa-6d29f.appspot.com/o/models%2Fschaltbau%2Fc3.png?alt=media&token=94f10dfc-2952-4fe3-ad28-ba07bcaf24a2", :transparent? true, :position [-0.03429393470287323 1.6224138736724854 11.272409439086914], :rotation [0 3.141592653589793 0], :scale [4 4 4]}
            "dfcc126f-3c9d-489f-8784-0fc0dbc448f9" {:rotation [0 3.1449087792603736 0], :color [0 0 0], :scale [0.3 0.3 1], :roughness 1, :metallic 0, :type :text3D, :size 0.4, :position [-0.03429393470287323 -1.5883097648620605 11.272409439086914], :depth 0.01, :visibility 1, :emissive-intensity 1, :text "Patentli Ark Sönümleme Teknolojisi"}
@@ -300,7 +309,8 @@
                     :rotation [6.661337221303573e-17 -3.1382765280147797 0]
                     :initial-position [4.3021142204224816e-16 1.0000000000000007 5]
                     :initial-rotation [6.661337221303573e-17 -3.1382765280147797 0]}
-           :skybox {:background {:color [1000 1000 1000]}},
+           :skybox {:background {:color [255 255 255]
+                                 :brightness 1}},
            "846d6605-ee15-44eb-8901-cff38407ff9b" {:type :image
                                                    :delay 2000
                                                    :asset-type :texture, :visibility 1, :path "https://firebasestorage.googleapis.com/v0/b/immersa-6d29f.appspot.com/o/images%2Fschaltbau%2Flogo.png?alt=media&token=2afccb59-5489-4553-9a98-0425f0bac1db", :transparent? true, :position [5.291231632232666 4.146515846252441 -3.330603837966919], :rotation [0 3.141592653589793 0], :scale [0.4 0.4 0.4]}
@@ -380,7 +390,8 @@
                                                    :visibility 1,
                                                    :emissive-intensity 1,
                                                    :text "__ 89 mm __"},
-           :skybox {:background {:color [1000 1000 1000]}},
+           :skybox {:background {:color [255 255 255]
+                                 :brightness 1}},
            "3af8b0ba-83f5-41c8-afcd-a3021924f78e" {:rotation [-0.0013962634015954637
                                                               -3.141592653589793
                                                               0.3719296635999916],
@@ -497,7 +508,8 @@
                                                               -2.975876331798779
                                                               -1.5788827136752608],
                                                    :scale [0.01 0.01 -0.01]},
-           :skybox {:background {:color [1000 1000 1000]}}
+           :skybox {:background {:color [255 255 255]
+                                 :brightness 1}}
            "846d6605-ee15-44eb-8901-cff38407ff9b" {:type :image
                                                    :asset-type :texture, :visibility 1, :path "https://firebasestorage.googleapis.com/v0/b/immersa-6d29f.appspot.com/o/images%2Fschaltbau%2Flogo.png?alt=media&token=2afccb59-5489-4553-9a98-0425f0bac1db", :transparent? true, :position [5.291231632232666 4.146515846252441 -3.330603837966919], :rotation [0 3.141592653589793 0], :scale [0.4 0.4 0.4]}
            "11z4xe26-bb27-4904-9d30-360a40d8ab00" {:type :glb,
@@ -610,7 +622,8 @@
                                                    :position [0.1120314747095108 0.9130205512046814 2.5710933208465576],
                                                    :delay 2000,
                                                    :visibility 1},
-           :skybox {:background {:color [1000 1000 1000]}},
+           :skybox {:background {:color [255 255 255]
+                                 :brightness 1}},
            "846d6605-ee15-44eb-8901-cff38407ff9b" {:type :image
                                                    :asset-type :texture, :visibility 1, :path "https://firebasestorage.googleapis.com/v0/b/immersa-6d29f.appspot.com/o/images%2Fschaltbau%2Flogo.png?alt=media&token=2afccb59-5489-4553-9a98-0425f0bac1db", :transparent? true, :position [5.291231632232666 4.146515846252441 -3.330603837966919], :rotation [0 3.141592653589793 0], :scale [0.4 0.4 0.4]}
            "2f2a67f5-5c51-4fc9-9083-3ab6c1243429" {:path "https://firebasestorage.googleapis.com/v0/b/immersa-6d29f.appspot.com/o/images%2Fschaltbau%2Fright-arrow.png?alt=media&token=473da82f-5c61-4b4b-aafb-68500d389d30",
@@ -720,7 +733,8 @@
                                                    :visibility 1,
                                                    :emissive-intensity 1,
                                                    :text "1000 А"},
-           :skybox {:background {:color [1000 1000 1000]}},
+           :skybox {:background {:color [255 255 255]
+                                 :brightness 1}},
            "04d9f1d0-54a0-4a20-ad88-f6df406ac08f" {:delay 2000
                                                    :rotation [0 3.141767186519361 0],
                                                    :color [0 0 0],
@@ -824,7 +838,8 @@
                     :rotation [-0.001867187431616649 -3.1409754660685074 0]
                     :initial-position [0 0 50]
                     :initial-rotation [-0.001867187431616649 -3.1409754660685074 0]}
-           :skybox {:background {:color [1000 1000 1000]}},
+           :skybox {:background {:color [255 255 255]
+                                 :brightness 1}},
            "wave" {:type :wave},
            "33e4ee76-bb27-4904-9d30-360a40d8abc1" {:type :image,
                                                    :asset-type :texture,
