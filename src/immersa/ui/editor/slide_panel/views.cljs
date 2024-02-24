@@ -17,7 +17,9 @@
     ["@dnd-kit/utilities" :refer [CSS]]
     ["react" :as react]
     [applied-science.js-interop :as j]
+    [immersa.common.shortcut :as shortcut]
     [immersa.ui.editor.components.button :refer [button]]
+    [immersa.ui.editor.components.context-menu :refer [context-menu context-menu-item]]
     [immersa.ui.editor.components.scroll-area :refer [scroll-area]]
     [immersa.ui.editor.components.tooltip :refer [tooltip]]
     [immersa.ui.editor.events :as events]
@@ -49,62 +51,70 @@
         transform-js (clj->js transform)
         transform-js (when-not (nil? transform-js)
                        (j/assoc! transform-js :x 0))]
-    [:div
-     (merge {:id (:id props)
-             :ref setNodeRef
-             :style {:display "flex"
-                     :align-items "flex-start"
-                     :padding-left "8px"
-                     :padding-bottom "8px"
-                     :user-select "none"
-                     :outline "none"
-                     :z-index (if (= (:id props) @(:dragging-slide-id props)) 9 0)
-                     :transform (j/call-in CSS [:Transform :toString] transform-js)
-                     :transition transition}
-             :on-click #(dispatch [::events/go-to-slide index])}
-            attributes
-            listeners)
-     [:div
-      {:style {:display "flex"
-               :flex-direction "column"
-               :justify-content "space-between"
-               :height "42px"}}
-      [:span {:style {:width "22px"
-                      :color (cond
-                               (and camera-unlocked? selected?)
-                               colors/unlocked-camera
+    [context-menu
+     {:children [:<>
+                 [context-menu-item {:label "Add slide"
+                                     :shortcut (shortcut/get-shortcut-key-labels :add-slide)
+                                     :on-select #(shortcut/call-shortcut-action :add-slide)}]
+                 [context-menu-item {:label "Delete slide"
+                                     :shortcut (shortcut/get-shortcut-key-labels :delete-slide)
+                                     :on-select #(shortcut/call-shortcut-action :delete-slide)}]]
+      :trigger [:div
+                (merge {:id (:id props)
+                        :ref setNodeRef
+                        :style {:display "flex"
+                                :align-items "flex-start"
+                                :padding-left "8px"
+                                :padding-bottom "8px"
+                                :user-select "none"
+                                :outline "none"
+                                :z-index (if (= (:id props) @(:dragging-slide-id props)) 9 0)
+                                :transform (j/call-in CSS [:Transform :toString] transform-js)
+                                :transition transition}
+                        :on-click #(dispatch [::events/go-to-slide index])}
+                       attributes
+                       listeners)
+                [:div
+                 {:style {:display "flex"
+                          :flex-direction "column"
+                          :justify-content "space-between"
+                          :height "42px"}}
+                 [:span {:style {:width "22px"
+                                 :color (cond
+                                          (and camera-unlocked? selected?)
+                                          colors/unlocked-camera
 
-                               selected?
-                               colors/button-outline-border
+                                          selected?
+                                          colors/button-outline-border
 
-                               :else colors/text-primary)
-                      :font-size typography/s
-                      :font-weight (if selected?
-                                     typography/medium
-                                     typography/regular)}} (inc index)]
-      (when (and camera-unlocked? selected?)
-        [tooltip
-         {:trigger [icon/unlock {:size 12
-                                 :color colors/unlocked-camera}]
-          :content "Camera unlocked"}])]
-     [:div
-      {:style {:width "123px"
-               :height "70px"
-               :border-radius "5px"
-               :border (cond
-                         (and camera-unlocked? selected?)
-                         (str "2px solid " colors/unlocked-camera)
+                                          :else colors/text-primary)
+                                 :font-size typography/s
+                                 :font-weight (if selected?
+                                                typography/medium
+                                                typography/regular)}} (inc index)]
+                 (when (and camera-unlocked? selected?)
+                   [tooltip
+                    {:trigger [icon/unlock {:size 12
+                                            :color colors/unlocked-camera}]
+                     :content "Camera unlocked"}])]
+                [:div
+                 {:style {:width "123px"
+                          :height "70px"
+                          :border-radius "5px"
+                          :border (cond
+                                    (and camera-unlocked? selected?)
+                                    (str "2px solid " colors/unlocked-camera)
 
-                         selected?
-                         (str "2px solid " colors/button-outline-border)
+                                    selected?
+                                    (str "2px solid " colors/button-outline-border)
 
-                         :else (str "2px solid " colors/border2))}}
-      [:img {:src thumbnail
-             :style {:width "100%"
-                     :height "100%"
-                     :box-sizing "border-box"
-                     :border "2px solid transparent"
-                     :border-radius "3px"}}]]]))
+                                    :else (str "2px solid " colors/border2))}}
+                 [:img {:src thumbnail
+                        :style {:width "100%"
+                                :height "100%"
+                                :box-sizing "border-box"
+                                :border "2px solid transparent"
+                                :border-radius "3px"}}]]]}]))
 
 (defn- sortable-slides-list [_]
   (let [dragging-slide-id (r/atom nil)]

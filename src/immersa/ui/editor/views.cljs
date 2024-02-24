@@ -5,7 +5,7 @@
     [goog.functions :as functions]
     [immersa.scene.core :as scene.core]
     [immersa.ui.editor.components.button :refer [button]]
-    [immersa.ui.editor.components.context-menu :refer [context-menu]]
+    [immersa.ui.editor.components.canvas-context-menu :refer [canvas-context-menu]]
     [immersa.ui.editor.components.dropdown :refer [dropdown dropdown-item dropdown-separator dropdown-context-menu]]
     [immersa.ui.editor.components.text :refer [text]]
     [immersa.ui.editor.components.tooltip :refer [tooltip]]
@@ -183,7 +183,7 @@
     [slides-panel]
     [canvas-wrapper]
     [options-panel]
-    [context-menu]]])
+    [canvas-context-menu]]])
 
 (comment
   @(subscribe [::subs/editor]))
