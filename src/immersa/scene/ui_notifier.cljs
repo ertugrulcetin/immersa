@@ -19,6 +19,7 @@
                              :depth (api.core/get-node-attr mesh :depth)
                              :size (api.core/get-node-attr mesh :size)
                              :face-to-screen? (api.core/get-node-attr mesh :face-to-screen?)
+                             :linked-type (j/get mesh :linked-type)
                              :opacity (j/get mesh :visibility)
                              :color (-> (j/get-in mesh [:material :albedoColor]) api.core/color->v)
                              :emissive-color (some-> (j/get-in mesh [:material :emissiveColor]) api.core/color->v)
@@ -26,10 +27,12 @@
                              :alpha (j/get-in mesh [:material :alpha])
                              :metallic (j/get-in mesh [:material :metallic])
                              :roughness (j/get-in mesh [:material :roughness])})])
-      "glb" (dispatch [::events/set-selected-glb-data (merge pos-rot-scale-name {:type "glb"})])
+      "glb" (dispatch [::events/set-selected-glb-data (merge pos-rot-scale-name {:type "glb"
+                                                                                 :linked-type (j/get mesh :linked-type)})])
       "image" (dispatch [::events/set-selected-image-data
                          (merge pos-rot-scale-name
                                 {:type "image"
+                                 :linked-type (j/get mesh :linked-type)
                                  :opacity (j/get mesh :visibility)
                                  :face-to-screen? (api.core/get-node-attr mesh :face-to-screen?)})]))))
 

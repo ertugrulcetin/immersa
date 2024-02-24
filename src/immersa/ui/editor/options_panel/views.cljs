@@ -272,6 +272,56 @@
    [switch {:checked? @(subscribe [::subs/selected-mesh-face-to-screen?])
             :on-change #(dispatch [::events/update-selected-mesh-face-to-screen?])}]])
 
+(defn- linked-type->text [type]
+  (case type
+    :prev-linked "(Linked: Prev)"
+    :next-linked "(Linked: Next)"
+    :both-linked "(Linked: Prev & Next)"
+    "(Unlinked)"))
+
+(defn animation-info-text [text*]
+  [:div {:style {:display "flex"
+                 :flex-direction "column"
+                 :gap "8px"}}
+   [text {:size :xs
+          :weight :light
+          :style {:line-height "1.3"}} text*]
+   [text {:size :xs
+          :weight :light
+          :style {:line-height "1.3"}}
+    (str "Animations will automatically run, changing based on the "
+         "position, rotation, and scale of the object.")]])
+
+(defn- linked-type->tooltip-text [type]
+  (case type
+    :prev-linked [animation-info-text "Selected object is used in the previous slide."]
+    :next-linked [animation-info-text "Selected object is used in the next slide."]
+    :both-linked [animation-info-text "Selected object is used in both previous and next slides."]
+    "Selected object is not used in any slide."))
+
+(defn- linked-text []
+  (let [linked-type @(subscribe [::subs/selected-mesh-linked-type])]
+    [:div {:style {:display "flex"
+                   :flex-direction "row"
+                   :align-items "center"
+                   :gap "4px"}}
+     [text {:size :xs} (linked-type->text linked-type)]
+     [tooltip
+      {:trigger [icon/info {:size 12
+                            :weight :fill
+                            :color colors/button-bg}]
+       :content (linked-type->tooltip-text linked-type)}]]))
+
+(defn- selected-object-type-text [type]
+  [:div {:style {:display "flex"
+                 :flex-direction "row"
+                 :align-items "center"
+                 :justify-content "space-between"
+                 :gap "8px"}}
+   [text {:size :xxl
+          :weight :semi-bold} type]
+   [linked-text]])
+
 (defn- text-3d-options []
   (let [type "text"]
     [:div {:style {:display "flex"
@@ -279,8 +329,7 @@
                    :gap "12px"
                    :padding "22px"
                    :position "relative"}}
-     [text {:size :xxl
-            :weight :semi-bold} "Text"]
+     [selected-object-type-text "Text"]
      [separator]
      [position]
      [rotation {:disabled? @(subscribe [::subs/selected-mesh-face-to-screen?])}]
@@ -302,8 +351,7 @@
                    :gap "12px"
                    :padding "22px"
                    :position "relative"}}
-     [text {:size :xxl
-            :weight :semi-bold} "Image"]
+     [selected-object-type-text "Image"]
      [separator]
      [position]
      [rotation]
@@ -321,8 +369,7 @@
                  :gap "12px"
                  :padding "22px"
                  :position "relative"}}
-   [text {:size :xxl
-          :weight :semi-bold} "3D Model"]
+   [selected-object-type-text "3D Model"]
    [separator]
    [position]
    [rotation]

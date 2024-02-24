@@ -575,6 +575,14 @@
                (conj path k))]
     (get-in @all-slides path)))
 
+(defn get-slide-data-by-index [index obj k]
+  (let [object-id (if (keyword? obj) obj (api.core/get-object-name obj))
+        path [index :data object-id]
+        path (if (vector? k)
+               (into path k)
+               (conj path k))]
+    (get-in @all-slides path)))
+
 (defn add-slide []
   (let [index @current-slide-index
         uuid (str (random-uuid))

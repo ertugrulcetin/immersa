@@ -143,7 +143,7 @@
     (dispatch [::editor.events/set-camera (utils/v3->v-data free-camera [:position :rotation])])))
 
 (defn- update-bounding-box-renderer [scene]
-  (j/assoc! (j/call scene :getBoundingBoxRenderer) :showBackLines false))
+  (j/assoc! (api.core/get-bb-renderer) :showBackLines false))
 
 (defn when-scene-ready [engine scene mode slides thumbnails]
   (api.core/clear-scene-color (api.const/color-white))

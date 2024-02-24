@@ -64,6 +64,9 @@
 (defn get-scene []
   (j/get db :scene))
 
+(defn get-bb-renderer []
+  (j/call (get-scene) :getBoundingBoxRenderer))
+
 (defn get-elapsed-time []
   (j/get db :elapsed-time))
 

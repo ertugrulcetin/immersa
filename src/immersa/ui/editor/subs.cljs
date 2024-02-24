@@ -63,6 +63,11 @@
     (has-initial? db :initial-scale)))
 
 (reg-sub
+  ::selected-mesh-linked-type
+  (fn [db]
+    (-> db :editor :selected-mesh :linked-type)))
+
+(reg-sub
   ::camera
   (fn [db]
     (-> db :editor :camera)))

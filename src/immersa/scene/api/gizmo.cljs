@@ -12,12 +12,36 @@
 
 (def hl)
 
-(def outline-color (api.core/color 0.3 0.74 0.94))
+(def outline-color-linked (api.core/color 0.3 1.0 0.5))
+(def outline-color-unlinked (api.core/color 1.0 0.2 0.3))
 
-(defn- render-outline-selected-mesh [mesh]
-  (when-let [child-meshes (j/call mesh :getChildMeshes)]
-    (j/call child-meshes :forEach #(j/call hl :addMesh % outline-color)))
-  (j/call hl :addMesh mesh outline-color))
+(defn- get-linked-type [mesh]
+  (let [prev-index (dec @slide/current-slide-index)
+        next-index (inc @slide/current-slide-index)
+        slides-count (count @slide/all-slides)]
+    (if (or (< prev-index 0)
+            (>= next-index slides-count))
+      :unlinked
+      (cond
+        (and (slide/get-slide-data-by-index prev-index mesh :type)
+             (slide/get-slide-data-by-index next-index mesh :type))
+        :both-linked
+
+        (slide/get-slide-data-by-index prev-index mesh :type)
+        :prev-linked
+
+        (slide/get-slide-data-by-index next-index mesh :type)
+        :next-linked
+
+        :else :unlinked))))
+
+(defn- render-outline-selected-mesh [mesh linked-type]
+  (let [color (if (= linked-type :unlinked)
+                outline-color-unlinked
+                outline-color-linked)]
+    (when-let [child-meshes (j/call mesh :getChildMeshes)]
+      (j/call child-meshes :forEach #(j/call hl :addMesh % color)))
+    (j/call hl :addMesh mesh color)))
 
 (def bb-types #{"text3D" "image"})
 
@@ -26,10 +50,15 @@
   (some-> (api.core/selected-mesh) (j/assoc! :showBoundingBox false))
   (j/assoc-in! api.core/db [:gizmo :selected-mesh] mesh)
   (when mesh
-    (if (bb-types (api.core/get-object-type-by-name (j/get mesh :immersa-id)))
-      (j/assoc! mesh :showBoundingBox true)
-      (render-outline-selected-mesh mesh))
-    (ui.notifier/notify-ui-selected-mesh mesh))
+    (let [linked-type (get-linked-type mesh)]
+      (if (bb-types (api.core/get-object-type-by-name (j/get mesh :immersa-id)))
+        (do
+          (if (= linked-type :unlinked)
+            (j/assoc-in! (api.core/get-bb-renderer) [:frontColor] outline-color-unlinked)
+            (j/assoc-in! (api.core/get-bb-renderer) [:frontColor] outline-color-linked))
+          (j/assoc! mesh :showBoundingBox true))
+        (render-outline-selected-mesh mesh linked-type))
+      (ui.notifier/notify-ui-selected-mesh (j/assoc! mesh :linked-type linked-type))))
   (when-not mesh
     (dispatch [::events/clear-selected-mesh])))
 
