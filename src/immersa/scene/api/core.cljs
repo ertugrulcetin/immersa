@@ -53,6 +53,9 @@
 (defn get-engine []
   (j/get db :engine))
 
+(defn resize []
+  (j/call (get-engine) :resize))
+
 (defn create-scene [engine]
   (let [s (Scene. engine)]
     (j/assoc! db :scene s)

@@ -172,7 +172,7 @@
     :scale (j/assoc! (api.core/gizmo-manager) :scaleGizmoEnabled value)))
 
 (defmethod handle-ui-update :resize [_]
-  (j/call (api.core/get-engine) :resize))
+  (api.core/resize))
 
 (defmethod handle-ui-update :go-to-slide [{{:keys [index]} :data}]
   (api.core/clear-selected-mesh)

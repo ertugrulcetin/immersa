@@ -23,10 +23,7 @@
                        [:<>
                         [:canvas
                          {:id "renderCanvas"
-                          :style {:display (if @(subscribe [::main.subs/loading-screen?]) "none" "block")}
-                          :class (styles/canvas)}]
-                        (when @(subscribe [::main.subs/loading-screen?])
-                          [loading-screen])])}))
+                          :class (styles/canvas)}]])}))
 
 (defn- canvas-container []
   (let [{:keys [width height]} @(subscribe [::subs/calculated-canvas-dimensions])]
@@ -49,7 +46,9 @@
        (when @(subscribe [::subs/show-pre-warm-text?])
          [:div (styles/arrow-keys-text)
           [:h2 "Pre-warming scene..."]])
-       [canvas]])))
+       [canvas]
+       (when @(subscribe [::main.subs/loading-screen?])
+         [loading-screen height])])))
 
 (defn- progress-bar-line []
   [:div

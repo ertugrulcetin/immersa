@@ -683,6 +683,10 @@
                  :slide-in-progress? slide-in-progress?
                  :current-running-anims current-running-anims}))))))))
 
+(defn- hide-loading-screen []
+  (dispatch [::main.events/hide-loading-screen])
+  (api.core/resize))
+
 (defn start-slide-show [{:keys [mode slides] :as opts}]
   (let [_ (init-slide-show-state)
         slides (reset! all-slides slides)
@@ -695,7 +699,7 @@
     (capture-thumbnail-changes)
     (a/put! command-ch :next)
     (add-listeners-for-present-mode mode)
-    (js/setTimeout #(dispatch [::main.events/hide-loading-screen]) 500)
+    (js/setTimeout hide-loading-screen 500)
     (go-loop [index -1]
       (let [command (a/<! command-ch)
             current-index (case command

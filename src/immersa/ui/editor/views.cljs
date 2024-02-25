@@ -28,17 +28,13 @@
                                                     :slides @(subscribe [::subs/slides-all])
                                                     :thumbnails @(subscribe [::subs/slides-thumbnails])})
      :reagent-render (fn []
-                       [:<>
-                        [:canvas
-                         {:id "renderCanvas"
-                          :style {:display (if @(subscribe [::main.subs/loading-screen?]) "none" "block")}
-                          :on-blur #(do
-                                      (reset! state :blur)
-                                      (dispatch [::events/update-thumbnail]))
-                          :on-focus #(reset! state :focus)
-                          :class (styles/canvas)}]
-                        (when @(subscribe [::main.subs/loading-screen?])
-                          [loading-screen])])}))
+                       [:canvas
+                        {:id "renderCanvas"
+                         :on-blur #(do
+                                     (reset! state :blur)
+                                     (dispatch [::events/update-thumbnail]))
+                         :on-focus #(reset! state :focus)
+                         :class (styles/canvas)}])}))
 
 (defn- canvas-container []
   (let [state (r/atom :blur)]
@@ -51,7 +47,9 @@
             :style {:width (str width "px")
                     :height (str height "px")}
             :class (styles/canvas-container @state camera-unlocked?)}
-           [canvas state]])))))
+           [canvas state]
+           (when @(subscribe [::main.subs/loading-screen?])
+             [loading-screen height])])))))
 
 (defn- canvas-wrapper []
   (let [ref (r/atom nil)

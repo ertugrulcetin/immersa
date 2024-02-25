@@ -4,9 +4,12 @@
     [immersa.ui.subs :as subs]
     [re-frame.core :refer [subscribe]]))
 
-(defn loading-screen []
-  [:div {:style {:width "100%"
-                 :height "100%"
+(defn loading-screen [height]
+  [:div {:style {:position "absolute"
+                 :top "0"
+                 :left "0"
+                 :width "100%"
+                 :height (str height "px")
                  :background-color "black"
                  :z-index "9999"}}
    [:div {:style {:position "relative"
