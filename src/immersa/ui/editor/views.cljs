@@ -1,5 +1,6 @@
 (ns immersa.ui.editor.views
   (:require
+    ["@clerk/clerk-react" :refer [useUser]]
     ["react-color" :refer [SketchPicker]]
     [applied-science.js-interop :as j]
     [goog.functions :as functions]
@@ -175,13 +176,18 @@
    [header-right-panel]])
 
 (defn editor-panel []
-  [:div (styles/editor-container)
-   [header]
-   [:div (styles/content-container)
-    [slides-panel]
-    [canvas-wrapper]
-    [options-panel]
-    [canvas-context-menu]]])
+  (let [user (j/lookup (useUser))]
+    (r/create-class
+      {:component-will-mount (fn []
+                               (js/console.log user))
+       :reagent-render (fn []
+                         [:div (styles/editor-container)
+                          [header]
+                          [:div (styles/content-container)
+                           [slides-panel]
+                           [canvas-wrapper]
+                           [options-panel]
+                           [canvas-context-menu]]])})))
 
 (comment
   @(subscribe [::subs/editor]))
