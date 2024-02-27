@@ -287,7 +287,7 @@
                 :on-complete
                 (fn [meshes root-mesh]
                   (j/call root-mesh :computeWorldMatrix true)
-                    (let [total-min (atom (v3 js/Number.POSITIVE_INFINITY))
+                  (let [total-min (atom (v3 js/Number.POSITIVE_INFINITY))
                         total-max (atom (v3 js/Number.NEGATIVE_INFINITY))
                         _ (j/call meshes :forEach
                                   (fn [mesh]
