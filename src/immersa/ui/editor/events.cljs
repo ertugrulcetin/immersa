@@ -154,6 +154,12 @@
              :data {:value url}}}))
 
 (reg-event-fx
+  ::add-model
+  (fn [_ [_ url]]
+    {:scene {:type :add-model
+             :data {:value url}}}))
+
+(reg-event-fx
   ::go-to-slide
   (fn [_ [_ index]]
     {:scene {:type :go-to-slide
@@ -271,3 +277,8 @@
   ::add-uploaded-image
   (fn [db [_ image]]
     (update-in db [:user :images] (fnil conj []) image)))
+
+(reg-event-db
+  ::add-uploaded-model
+  (fn [db [_ model]]
+    (update-in db [:user :models] (fnil conj []) model)))

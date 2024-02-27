@@ -165,7 +165,7 @@
     (ui.notifier/notify-gizmo-state type enabled?)))
 
 (defn init-gizmo-manager []
-  (let [gizmo-manager (GizmoManager. (api.core/get-scene) 4)]
+  (let [gizmo-manager (GizmoManager. (api.core/get-scene) 3)]
     (set! hl (api.core/highlight-layer "outline-highlight-layer"
                                        :stroke? true
                                        :main-texture-ratio 1
@@ -205,5 +205,3 @@
                                                                    (on-attached-to-mesh %)))
     (j/assoc-in! api.core/db [:gizmo :manager] gizmo-manager)
     gizmo-manager))
-
-;; (api.core/dispose "ground")

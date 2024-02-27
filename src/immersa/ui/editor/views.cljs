@@ -128,7 +128,6 @@
         type-label (if (= type :image)
                      "image"
                      "model")]
-    (println "type-label: " type-label)
     (fn []
       [:<>
        [alert-dialog
@@ -166,7 +165,7 @@
                             (firebase/upload-file
                               {:user-id user-id
                                :file file
-                               :type :image
+                               :type type
                                :task-state task
                                :on-progress (fn [percentage]
                                               (reset! progress* percentage))
@@ -179,20 +178,33 @@
                           (set! (-> this .-target .-value) ""))))}]])))
 
 (defn- invisible-img-file-input []
-  [invisible-file-input
-   {:type :image
-    :user-id @(subscribe [::main.subs/user-id])
-    :max-size 5
-    :title "Uploading image"
-    :on-complete (fn [file url]
-                   (dispatch [::events/add-image url])
-                   (dispatch [::events/add-uploaded-image {:name (j/get file :name)
-                                                           :url url}]))}])
+  (when-let [user-id @(subscribe [::main.subs/user-id])]
+    [invisible-file-input
+     {:type :image
+      :user-id user-id
+      :max-size 5
+      :title "Uploading image"
+      :on-complete (fn [file url]
+                     (dispatch [::events/add-image url])
+                     (dispatch [::events/add-uploaded-image {:name (j/get file :name)
+                                                             :url url}]))}]))
+
+(defn- invisible-model-file-input []
+  (when-let [user-id @(subscribe [::main.subs/user-id])]
+    [invisible-file-input
+     {:type :model
+      :user-id user-id
+      :max-size 10
+      :title "Uploading 3D model"
+      :on-complete (fn [file url]
+                     (dispatch [::events/add-model url])
+                     (dispatch [::events/add-uploaded-model {:name (j/get file :name)
+                                                             :url url}]))}]))
 
 (defn- image-component []
   (let [images @(subscribe [::subs/uploaded-images])]
     [dropdown
-     {:style (when (<= (count images) 5)
+     {:style (when (<= (count images) 4)
                {:height (str (* 30 (inc (count images))) "px")})
       :trigger [presentation-component {:icon icon/image
                                         :text "Image"}]
@@ -223,6 +235,41 @@
                        :trigger tr}]
                      tr))]}]))
 
+(defn- model-component []
+  (let [models @(subscribe [::subs/uploaded-models])]
+    [dropdown
+     {:style (when (<= (count models) 4)
+               {:height (str (* 30 (inc (count models))) "px")})
+      :trigger [presentation-component {:icon icon/cube
+                                        :text "3D Model"
+                                        :class (styles/presentation-component-cube)}]
+      :children [:<>
+                 [dropdown-item
+                  {:item [:div {:style {:display "flex"
+                                        :align-items "center"
+                                        :justify-content "space-between"
+                                        :width "100%"}}
+                          [text {:size :l} "Upload 3D model (.glb)"]
+                          [icon/upload {:size 16}]]
+                   :on-select #(some-> (js/document.getElementById "model-file-input") .click)}]
+                 [dropdown-separator]
+                 (for [{:keys [name url]} models
+                       :let [tr ^{:key url}
+                             [dropdown-item
+                              {:item [text {:size :l
+                                            :weight :light
+                                            :style {:white-space "nowrap"
+                                                    :overflow "hidden"
+                                                    :text-overflow "ellipsis"
+                                                    :width "175px"}} name]
+                               :on-select #(dispatch [::events/add-model url])}]]]
+                   (if (> (count name) 21)
+                     ^{:key url}
+                     [tooltip
+                      {:content name
+                       :trigger tr}]
+                     tr))]}]))
+
 (defn- header-center-panel []
   [:div (styles/header-center-panel)
 
@@ -232,12 +279,10 @@
                                        :on-click #(dispatch [::events/add-text-mesh])}]
      :content "Add text"
      :shortcuts "T"}]
-   [image-component]
    [invisible-img-file-input]
-   [presentation-component {:icon icon/cube
-                            :text "3D Model"
-                            :class (styles/presentation-component-cube)
-                            :disabled? true}]
+   [invisible-model-file-input]
+   [image-component]
+   [model-component]
    #_[presentation-component {:icon icon/camera
                               :text "Camera"
                               :disabled? true}]
@@ -294,9 +339,14 @@
                 (crisp-chat/set-user-email email)
                 (when-not (str/blank? full-name)
                   (crisp-chat/set-user-name full-name))
-                (firebase/get-last-uploaded-images
-                  {:user-id user-id
+                (firebase/get-last-uploaded-files
+                  {:type :image
+                   :user-id user-id
                    :on-complete #(dispatch [::events/add-uploaded-image %])})
+                (firebase/get-last-uploaded-files
+                  {:type :model
+                   :user-id user-id
+                   :on-complete #(dispatch [::events/add-uploaded-model %])})
                 (dispatch [::events/init-user
                            {:id user-id
                             :full-name full-name

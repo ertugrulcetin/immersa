@@ -1,5 +1,6 @@
 (ns immersa.scene.ui-listener
   (:require
+    ["@babylonjs/core/Maths/math" :refer [Vector3]]
     [applied-science.js-interop :as j]
     [com.rpl.specter :as sp]
     [goog.functions :as functions]
@@ -210,11 +211,14 @@
   (api.camera/toggle-camera-lock value)
   (ui.notifier/notify-camera-lock-state value))
 
-(defmethod handle-ui-update :add-text-mesh [_]
+(defn get-pos-from-camera-dir []
   (let [camera (api.camera/active-camera)
         forward (j/get (j/call camera :getForwardRay) :direction)
-        scaled-forward (j/call forward :scale 10)
-        new-pos (j/call (j/get camera :position) :add scaled-forward)
+        scaled-forward (j/call forward :scale 10)]
+    (j/call (j/get camera :position) :add scaled-forward)))
+
+(defmethod handle-ui-update :add-text-mesh [_]
+  (let [new-pos (get-pos-from-camera-dir)
         params {:type :text3D
                 :text "Text"
                 :face-to-screen? true
@@ -250,10 +254,7 @@
         texture (api.core/texture value)]
     (j/call-in texture [:onLoadObservable :add]
                (fn [texture]
-                 (let [camera (api.camera/active-camera)
-                       forward (j/get (j/call camera :getForwardRay) :direction)
-                       scaled-forward (j/call forward :scale 10)
-                       new-pos (j/call (j/get camera :position) :add scaled-forward)
+                 (let [new-pos (get-pos-from-camera-dir)
                        params {:type :image
                                :texture texture
                                :path value
@@ -265,10 +266,56 @@
                                :transparent? true}
                        mesh (api.component/image uuid params)]
                    (slide/add-slide-data mesh (-> params
+                                                  (assoc :asset-type :texture)
                                                   (update :position api.core/v3->v)
                                                   (update :rotation api.core/v3->v)
                                                   (update :scale api.core/v3->v)))
                    (api.core/attach-to-mesh mesh))))))
+
+(defn- minimize [total-x bounding-info]
+  (j/call Vector3 :Minimize total-x (j/get-in bounding-info [:boundingBox :minimumWorld])))
+
+(defn- maximize [total-x bounding-info]
+  (j/call Vector3 :Maximize total-x (j/get-in bounding-info [:boundingBox :maximumWorld])))
+
+(defmethod handle-ui-update :add-model [{{:keys [value]} :data}]
+  (let [uuid (str (random-uuid))
+        task (api.core/add-mesh-task
+               {:name (str uuid "-mesh-task")
+                :meshes-name ""
+                :url value
+                :on-complete
+                (fn [meshes root-mesh]
+                  (j/call root-mesh :computeWorldMatrix true)
+                  (let [total-min (atom (v3 js/Number.POSITIVE_INFINITY))
+                        total-max (atom (v3 js/Number.NEGATIVE_INFINITY))
+                        _ (j/call meshes :forEach
+                                  (fn [mesh]
+                                    (when (j/get mesh :getBoundingInfo)
+                                      (let [bounding-info (j/call mesh :getBoundingInfo)]
+                                        (reset! total-min (minimize @total-min bounding-info))
+                                        (reset! total-max (maximize @total-max bounding-info))))))
+                        model-size (j/call @total-max :subtract @total-min)
+                        model-max-dimension (js/Math.max (j/get model-size :x)
+                                                         (j/get model-size :y)
+                                                         (j/get model-size :z))
+                        target-size 5
+                        scale (/ target-size model-max-dimension)
+                        params {:type :glb
+                                :path value
+                                :position (get-pos-from-camera-dir)
+                                :rotation (v3)
+                                :scale (v3 scale)
+                                ;; :visibility 1.0
+                                }
+                        mesh (api.mesh/glb->mesh uuid params)]
+                    (slide/add-slide-data mesh (-> params
+                                                   (assoc :asset-type :model)
+                                                   (update :position api.core/v3->v)
+                                                   (update :rotation api.core/v3->v)
+                                                   (update :scale api.core/v3->v)))
+                    (api.core/attach-to-mesh mesh)))})]
+    (j/call task :run (api.core/get-scene) (fn []))))
 
 (defn init-ui-update-listener []
   (go-loop-sub event-bus-pub :get-ui-update [_ data]

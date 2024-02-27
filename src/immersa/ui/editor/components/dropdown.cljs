@@ -6,7 +6,7 @@
     [spade.core :refer [defclass]]))
 
 (def dropdown-content-width "200px")
-(def dropdown-content-height "220px")
+(def dropdown-content-height "180px")
 
 (defclass content-style []
   {:min-width "200px"

@@ -195,3 +195,8 @@
   ::uploaded-images
   (fn [db]
     (-> db :user :images)))
+
+(reg-sub
+  ::uploaded-models
+  (fn [db]
+    (-> db :user :models)))

@@ -35,8 +35,9 @@
                            on-complete]}]
   (let [type-prefix (case type
                       :image "images/user/"
-                      :glb "models/user/")
-        storage-ref (ref storage (str type-prefix user-id "/" (j/get file :name)) #js{:timestamp (js/Date.now)})
+                      :model "models/user/")
+        storage-ref (ref storage (str type-prefix user-id "/" (j/get file :name)) #js{:timestamp (-> (js/Date.)
+                                                                                                     (j/call :toISOString))})
         task (uploadBytesResumable storage-ref file)]
     (reset! task-state task)
     (.on task "state_changed"
@@ -60,8 +61,11 @@
                                 (println "Firebase download URL error")
                                 (js/console.error e))))))))
 
-(defn get-last-uploaded-images [{:keys [user-id on-complete]}]
-  (let [storage-ref (ref storage (str "images/user/" user-id "/"))
+(defn get-last-uploaded-files [{:keys [type user-id on-complete]}]
+  (let [type-prefix (case type
+                      :image "images/user/"
+                      :model "models/user/")
+        storage-ref (ref storage (str type-prefix user-id "/"))
         images (list storage-ref #js {:maxResults 20})]
     (j/call images :then (fn [result]
                            (let [items (j/get result :items)]
@@ -78,5 +82,5 @@
 (comment
   (init-app)
   (get-download-url "images/schaltbau/logo.png")
-  (get-last-uploaded-images "user_2c20lPttd6jIbGObJJhbKwN3tLh")
+  (get-last-uploaded-files "user_2c20lPttd6jIbGObJJhbKwN3tLh")
   )

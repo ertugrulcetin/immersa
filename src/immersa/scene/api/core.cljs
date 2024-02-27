@@ -402,16 +402,18 @@
   (let [task (j/call-in db [:assets-manager :addTextFileTask] name url)]
     (j/assoc! task :onSuccess #(j/assoc-in! db [:assets-manager :texts url] (j/get % :text)))))
 
-(defn add-mesh-task [name meshes-names url]
+(defn add-mesh-task [{:keys [name meshes-names url on-complete]}]
   (let [task (j/call-in db [:assets-manager :addMeshTask] name meshes-names url)]
-    (j/assoc! task :onSuccess (fn [task]
-                                (let [mesh (j/get-in task [:loadedMeshes 0])]
-                                  (set-enabled mesh false)
-                                  (j/assoc-in! db [:models url] mesh)))
+    (j/assoc! task
+              :onSuccess (fn [task]
+                           (let [root-mesh (j/get-in task [:loadedMeshes 0])]
+                             (set-enabled root-mesh false)
+                             (j/assoc-in! db [:models url] root-mesh)
+                             (when on-complete (on-complete (j/get task :loadedMeshes) root-mesh))))
               :onError (fn [task]
                          (let [meshes (j/get task :loadedMeshes)]
                            (when (and meshes (> (j/get meshes :length) 0))
-                             (js/console.warn "Failed meshes: " meshes)
+                             (js/console.error "Failed meshes: " meshes)
                              (j/call meshes :forEach dispose)))))))
 
 (defn load-async [slides]
@@ -430,7 +432,9 @@
         :text (add-text-task (str "text-" index) path)
         :texture (add-texture-task (str "texture-" index) path)
         :cube-texture (add-cube-texture-task (str "cube-texture-" index) path)
-        :model (add-mesh-task (str "mesh-" index) "" path)))
+        :model (add-mesh-task {:name (str "mesh-" index)
+                               :meshes-names ""
+                               :url path})))
     (j/call (j/call-in db [:assets-manager :loadAsync]) :then #(a/put! p true))
     p))
 
