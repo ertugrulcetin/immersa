@@ -305,8 +305,8 @@
                                 :path value
                                 :position (j/update! (get-pos-from-camera-dir) :y #(- % 2))
                                 :rotation (v3)
-                                :scale (v3 scale)
-                                ;; :visibility 1.0
+                                :scale    (v3 scale)
+                                ;; :visibility 1.0, maybe we need it
                                 }
                         mesh (api.mesh/glb->mesh uuid params)]
                     (slide/add-slide-data mesh (-> params
