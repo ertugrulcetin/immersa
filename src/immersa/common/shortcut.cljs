@@ -113,18 +113,19 @@
               :action #(ui-listener/handle-ui-update {:type :add-text-mesh})}
    :toggle-position-gizmo {:label "Toggle position gizmo"
                            :shortcut ["1"]
-                           :pred (fn [_ key]
-                                   (and (= key "1") (api.core/selected-mesh)))
+                           :pred (fn [info key]
+                                   (and (= key "1") (not (cmd? info)) (api.core/selected-mesh)))
                            :action #(api.gizmo/toggle-gizmo :position)}
    :toggle-rotation-gizmo {:label "Toggle rotation gizmo"
                            :shortcut ["2"]
-                           :pred (fn [_ key]
-                                   (and (= key "2") (api.core/selected-mesh)))
+                           :pred (fn [info key]
+                                   (and (= key "2") (not (cmd? info)) (api.core/selected-mesh)))
                            :action #(api.gizmo/toggle-gizmo :rotation)}
    :toggle-scale-gizmo {:label "Toggle scale gizmo"
                         :shortcut ["3"]
-                        :pred (fn [_ key]
+                        :pred (fn [info key]
                                 (and (= key "3")
+                                     (not (cmd? info))
                                      (api.core/selected-mesh)
                                      (not= (api.core/selected-mesh-type) "text3D")))
                         :action #(api.gizmo/toggle-gizmo :scale)}

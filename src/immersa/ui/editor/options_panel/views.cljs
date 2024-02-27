@@ -315,7 +315,7 @@
     :prev-linked [animation-info-text "Selected object is used in the previous slide."]
     :next-linked [animation-info-text "Selected object is used in the next slide."]
     :both-linked [animation-info-text "Selected object is used in both previous and next slides."]
-    "Selected object is not used in any slide."))
+    "Selected object is not used in other slides."))
 
 (defn- linked-text []
   (let [linked-type @(subscribe [::subs/selected-mesh-linked-type])]

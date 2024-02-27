@@ -184,14 +184,16 @@
               :gizmos.positionGizmo.xGizmo.scaleRatio 1.5
               :gizmos.positionGizmo.yGizmo.scaleRatio 1.5
               :gizmos.positionGizmo.zGizmo.scaleRatio 1.5
+              ;; :gizmos.positionGizmo.xGizmo._gizmoMesh.rotation.y (/ Math/PI 2)
+              :gizmos.positionGizmo.zGizmo._gizmoMesh.rotation.y Math/PI
               :gizmos.rotationGizmo.xGizmo.scaleRatio 1.2
               :gizmos.rotationGizmo.yGizmo.scaleRatio 1.2
               :gizmos.rotationGizmo.zGizmo.scaleRatio 1.2
               :gizmos.positionGizmo.planarGizmoEnabled true
               :gizmos.positionGizmo.xPlaneGizmo._gizmoMesh.position.y 0.05
-              :gizmos.positionGizmo.xPlaneGizmo._gizmoMesh.position.z 0.05
+              :gizmos.positionGizmo.xPlaneGizmo._gizmoMesh.position.z -0.05
               :gizmos.positionGizmo.yPlaneGizmo._gizmoMesh.position.x 0.05
-              :gizmos.positionGizmo.yPlaneGizmo._gizmoMesh.position.z 0.05
+              :gizmos.positionGizmo.yPlaneGizmo._gizmoMesh.position.z -0.05
               :gizmos.positionGizmo.zPlaneGizmo._gizmoMesh.position.x 0.05
               :gizmos.positionGizmo.zPlaneGizmo._gizmoMesh.position.y 0.05)
     (add-drag-observables gizmo-manager)

@@ -115,23 +115,30 @@
           :color (or color colors/text-primary)
           :weight (or text-weight :light)} (:text opts)]])
 
-(defn- invisible-img-file-input []
+(defn- invisible-file-input [{:keys [type
+                                     user-id
+                                     max-size
+                                     title
+                                     on-complete]}]
   (let [open? (r/atom false)
         err? (r/atom false)
         limit-exceeded? (r/atom false)
         progress* (r/atom 0)
         task (atom nil)
-        max-size 5]
+        type-label (if (= type :image)
+                     "image"
+                     "model")]
+    (println "type-label: " type-label)
     (fn []
       [:<>
        [alert-dialog
         {:open? @open?
-         :title "Uploading image"
+         :title title
          :description (cond
                         @limit-exceeded? (str "The file size exceeds the limit of " max-size "MB. "
                                               "Please choose a smaller file.")
-                        @err? "An error occurred while uploading your image. Please try again."
-                        :else "Please wait while we upload your image.")
+                        @err? (str "An error occurred while uploading your " type-label ". Please try again.")
+                        :else (str "Please wait while we upload your " type-label "."))
          :content (when-not @limit-exceeded?
                     [progress {:value @progress*
                                :style {:width "100%"}}])
@@ -141,10 +148,12 @@
                                                (j/call task* :cancel))
                                              (reset! open? false))}]}]
        [:input
-        {:id "file-input"
+        {:id (str type-label "-file-input")
          :type "file"
          :style {:display "none"}
-         :accept ".jpg, .jpeg, .png"
+         :accept (if (= type :image)
+                   ".jpg, .jpeg, .png"
+                   ".glb")
          :on-change (fn [this]
                       (when (-> this .-target .-value (not= ""))
                         (let [^js/File file (-> this .-target .-files (aget 0))]
@@ -155,7 +164,7 @@
                           (reset! task nil)
                           (if (< (j/get file :size) (* 1024 1024 max-size))
                             (firebase/upload-file
-                              {:user-id @(subscribe [::main.subs/user-id])
+                              {:user-id user-id
                                :file file
                                :type :image
                                :task-state task
@@ -165,11 +174,20 @@
                                            (reset! err? true))
                                :on-complete (fn [url]
                                               (reset! open? false)
-                                              (dispatch [::events/add-image url])
-                                              (dispatch [::events/add-uploaded-image {:name (j/get file :name)
-                                                                                      :url url}]))})
+                                              (on-complete file url))})
                             (reset! limit-exceeded? true))
                           (set! (-> this .-target .-value) ""))))}]])))
+
+(defn- invisible-img-file-input []
+  [invisible-file-input
+   {:type :image
+    :user-id @(subscribe [::main.subs/user-id])
+    :max-size 5
+    :title "Uploading image"
+    :on-complete (fn [file url]
+                   (dispatch [::events/add-image url])
+                   (dispatch [::events/add-uploaded-image {:name (j/get file :name)
+                                                           :url url}]))}])
 
 (defn- image-component []
   (let [images @(subscribe [::subs/uploaded-images])]
@@ -186,7 +204,7 @@
                                         :width "100%"}}
                           [text {:size :l} "Upload image"]
                           [icon/upload {:size 16}]]
-                   :on-select #(some-> (js/document.getElementById "file-input") .click)}]
+                   :on-select #(some-> (js/document.getElementById "image-file-input") .click)}]
                  [dropdown-separator]
                  (for [{:keys [name url]} images
                        :let [tr ^{:key url}
