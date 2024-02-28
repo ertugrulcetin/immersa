@@ -22,7 +22,7 @@
 
 (defn- cmd? [info]
   (or (j/get-in info [:event :metaKey])
-      (= (j/get-in info [:event :key]) "Control")))
+      (j/get-in info [:event :ctrlKey])))
 
 (defn- shift? [info]
   (j/get-in info [:event :shiftKey]))
