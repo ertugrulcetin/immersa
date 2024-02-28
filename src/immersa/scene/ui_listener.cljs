@@ -266,6 +266,7 @@
                                :transparent? true}
                        mesh (api.component/image uuid params)]
                    (slide/add-slide-data mesh (-> params
+                                                  (dissoc :texture)
                                                   (assoc :asset-type :texture)
                                                   (update :position api.core/v3->v)
                                                   (update :rotation api.core/v3->v)

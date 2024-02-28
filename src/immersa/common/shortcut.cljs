@@ -97,7 +97,7 @@
                                            (try
                                              (slide/duplicate-slide-data (reader/read-string text))
                                              (catch js/Error e
-                                               (js/console.warn "Clipboard data is not in EDN format.")
+                                               (js/console.error "Clipboard data is not in EDN format.")
                                                (js/console.warn e))))))
                          (j/call :catch (fn []
                                           (js/console.error "Clipboard failed.")))))}
