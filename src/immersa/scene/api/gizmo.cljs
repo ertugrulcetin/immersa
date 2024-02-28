@@ -19,21 +19,30 @@
   (let [prev-index (dec @slide/current-slide-index)
         next-index (inc @slide/current-slide-index)
         slides-count (count @slide/all-slides)]
-    (if (or (< prev-index 0)
-            (>= next-index slides-count))
+    (cond
+      (and (= 0 @slide/current-slide-index)
+           (slide/get-slide-data-by-index next-index mesh :type))
+      :next-linked
+
+      (and (= (dec slides-count) @slide/current-slide-index)
+           (slide/get-slide-data-by-index prev-index mesh :type))
+      :prev-linked
+
+      (or (< prev-index 0)
+          (>= next-index slides-count))
       :unlinked
-      (cond
-        (and (slide/get-slide-data-by-index prev-index mesh :type)
-             (slide/get-slide-data-by-index next-index mesh :type))
-        :both-linked
 
-        (slide/get-slide-data-by-index prev-index mesh :type)
-        :prev-linked
+      (and (slide/get-slide-data-by-index prev-index mesh :type)
+           (slide/get-slide-data-by-index next-index mesh :type))
+      :both-linked
 
-        (slide/get-slide-data-by-index next-index mesh :type)
-        :next-linked
+      (slide/get-slide-data-by-index prev-index mesh :type)
+      :prev-linked
 
-        :else :unlinked))))
+      (slide/get-slide-data-by-index next-index mesh :type)
+      :next-linked
+
+      :else :unlinked)))
 
 (defn- render-outline-selected-mesh [mesh linked-type]
   (let [color (if (= linked-type :unlinked)
