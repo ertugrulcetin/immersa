@@ -55,10 +55,11 @@
                        (j/assoc! transform-js :x 0))]
     [context-menu
      {:children [:<>
-                 [context-menu-item {:label "Add slide"
+                 [context-menu-item {:label "Duplicate"
                                      :shortcut (shortcut/get-shortcut-key-labels :add-slide)
                                      :on-select #(shortcut/call-shortcut-action :add-slide)}]
-                 [context-menu-item {:label "Delete slide"
+                 [context-menu-item {:label "Delete"
+                                     :color colors/warning
                                      :shortcut (shortcut/get-shortcut-key-labels :delete-slide)
                                      :on-select #(shortcut/call-shortcut-action :delete-slide)}]]
       :trigger [:div

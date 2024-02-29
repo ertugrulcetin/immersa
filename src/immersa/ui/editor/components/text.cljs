@@ -10,9 +10,9 @@
 (defn text
   ([text*]
    (text {} text*))
-  ([{:keys [size weight color class style disabled?]
-     :or {color colors/text-primary}} text]
-   (let [font-size (case size
+  ([{:keys [size weight color class style disabled?]} text]
+   (let [color (or color colors/text-primary)
+         font-size (case size
                      :xxs typography/xxs
                      :xs typography/xs
                      :s typography/s
@@ -28,7 +28,7 @@
                        :medium typography/medium
                        :semi-bold typography/semi-bold
                        :bold typography/bold
-                       typography/medium)]
+                       typography/regular)]
      [:span
       {:style (merge {:font-size font-size
                       :font-weight font-weight

@@ -53,7 +53,7 @@
   {:width "150px"
    :font-size typography/l})
 
-(defclass canvas-container [state camera-unlocked?]
+(defclass canvas-container []
   {:box-sizing "border-box"})
 
 (defclass canvas-wrapper []

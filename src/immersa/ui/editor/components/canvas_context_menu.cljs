@@ -6,27 +6,13 @@
                                                    dropdown-item
                                                    dropdown-separator
                                                    dropdown-context-menu]]
-    [immersa.ui.editor.components.scroll-area :refer [scroll-area]]
     [immersa.ui.editor.components.text :refer [text]]
     [immersa.ui.editor.events :as events]
     [immersa.ui.editor.subs :as subs]
     [re-frame.core :refer [dispatch subscribe]]
     [spade.core :refer [defclass defattrs]]))
 
-(def context-menu-width "220px")
-(def context-menu-height "220px")
-
-(defclass context-menu-scroll-area []
-  {:width context-menu-width
-   :height context-menu-height
-   :overflow :hidden}
-  ;; Fade out effect
-  [:&:before
-   {:content "''"
-    :position "fixed"
-    :width context-menu-width
-    :height "8px"
-    :background "linear-gradient(180deg,#ffffff 0%,rgba(252,252,253,0) 100%)"}])
+(def gap "2px")
 
 (defclass option-text-style [disabled?]
   {:display :flex
@@ -40,7 +26,7 @@
 (defn- option-text [{:keys [label shortcut disabled?]}]
   [:div {:class (option-text-style disabled?)}
    [text {:weight :light
-          :size :xs
+          :size :s
           :disabled? disabled?} label]
    (when (seq shortcut)
      [:div
@@ -51,22 +37,22 @@
         [shortcut-button s])])])
 
 (defn- main-options []
-  [:<>
+  [:div {:style {:display "flex"
+                 :flex-direction "column"
+                 :gap gap}}
    [dropdown-item
-    {:item [option-text {:label "Add new slide"
+    {:item [option-text {:label "Duplicate slide"
                          :shortcut (shortcut/get-shortcut-key-labels :add-slide)}]
      :on-select #(shortcut/call-shortcut-action :add-slide)}]
-   [dropdown-item
-    {:item [option-text {:label "Delete slide"
-                         :shortcut (shortcut/get-shortcut-key-labels :delete-slide)}]
-     :on-select #(shortcut/call-shortcut-action :delete-slide)}]
    [dropdown-item
     {:item [option-text {:label "Paste"
                          :shortcut (shortcut/get-shortcut-key-labels :paste)}]
      :on-select #(shortcut/call-shortcut-action :paste)}]])
 
 (defn- selected-object-options []
-  [:<>
+  [:div {:style {:display "flex"
+                 :flex-direction "column"
+                 :gap gap}}
    [dropdown-item
     {:item [option-text {:label "Focus"
                          :shortcut (shortcut/get-shortcut-key-labels :focus)}]
@@ -112,7 +98,9 @@
 (defn- camera-options []
   (let [camera-locked? @(subscribe [::subs/camera-locked?])
         lock-text (if camera-locked? "Unlock" "Lock")]
-    [:<>
+    [:div {:style {:display "flex"
+                   :flex-direction "column"
+                   :gap gap}}
      [dropdown-item
       {:item [option-text {:label "Reset camera to initials"
                            :shortcut (shortcut/get-shortcut-key-labels :camera-reset-to-initials)}]
@@ -136,12 +124,9 @@
                            :z-index 9999
                            :top (str (- y 55) "px")
                            :left (str (+ x 115) "px")}}]
-        :children [scroll-area
-                   {:class (context-menu-scroll-area)
-                    :children
-                    [:<>
-                     (if @(subscribe [::subs/selected-mesh])
-                       [selected-object-options]
-                       [main-options])
-                     [dropdown-separator]
-                     [camera-options]]}]}])))
+        :children [:<>
+                   (if @(subscribe [::subs/selected-mesh])
+                     [selected-object-options]
+                     [main-options])
+                   [dropdown-separator]
+                   [camera-options]]}])))

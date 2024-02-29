@@ -130,10 +130,12 @@
                                      (api.core/selected-mesh)
                                      (not= (api.core/selected-mesh-type) "text3D")))
                         :action #(api.gizmo/toggle-gizmo :scale)}
-   :add-slide {:label "Add slide"
-               :shortcut ["n"]
-               :pred (fn [_ key]
-                       (= key "n"))
+   :add-slide {:label "Duplicate slide"
+               :shortcut ["⌘" "d"]
+               :prevent-default? true
+               :pred (fn [info key]
+                       ;; (and (cmd? info) (= key "d"))
+                       false)
                :action #(ui-listener/handle-ui-update {:type :add-slide})}
    :delete-slide {:label "Delete slide"
                   :shortcut ["⌘" "⌫"]

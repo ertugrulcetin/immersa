@@ -147,7 +147,7 @@
                   :flex-direction "row"
                   :align-items "center"
                   :gap "2px"}}
-    [text "Arrow helpers"]
+    [text {:weight :medium} "Arrow helpers"]
     [tooltip
      {:trigger [icon/info {:size 12
                            :weight :fill
@@ -171,7 +171,7 @@
    [:div {:style {:display "flex"
                   :flex-direction "column"
                   :gap "12px"}}
-    [text "Content"]
+    [text {:weight :medium} "Content"]
     [textarea {:value @(subscribe [::subs/selected-mesh-text-content])
                :on-change #(dispatch [::events/update-selected-mesh-text-content (-> % .-target .-value)])}]]])
 
@@ -323,7 +323,8 @@
                    :flex-direction "row"
                    :align-items "center"
                    :gap "4px"}}
-     [text {:size :xs} (linked-type->text linked-type)]
+     [text {:size :xs
+            :weight :medium} (linked-type->text linked-type)]
      [tooltip
       {:trigger [icon/info {:size 12
                             :weight :fill
@@ -339,6 +340,47 @@
    [text {:size :xxl
           :weight :semi-bold} type]
    [linked-text]])
+
+(defn- camera-lock []
+  [:div
+   {:style {:display "flex"
+            :align-items "center"
+            :justify-content "space-between"
+            :gap "5px"}}
+   [:div {:style {:display "flex"
+                  :flex-direction "row"
+                  :align-items "center"
+                  :gap "2px"}}
+    [text "Locked"]
+    [tooltip
+     {:trigger [icon/info {:size 12
+                           :weight :fill
+                           :color colors/button-bg}]
+      :content (if @(subscribe [::subs/camera-locked?])
+                 [:<>
+                  [tooltip-text {:text "The view displayed on the canvas is from the camera's perspective."}]
+                  [tooltip-text {:text "Locking the camera disables movement control."}]
+                  [tooltip-text {:text "Recommended option for beginners."
+                                 :weight :regular}]]
+                 [:<>
+                  [tooltip-text {:text "The view displayed on the canvas is from the camera's perspective."}]
+                  [tooltip-text {:text "Unlocking the camera enables movement control."}]
+                  [tooltip-text {:text "Recommended for advanced users."
+                                 :weight :regular}]])}]]
+   [switch {:checked? @(subscribe [::subs/camera-locked?])
+            :on-change #(dispatch [::events/toggle-camera-lock])}]])
+
+(defn- camera-lock-option []
+  [:div {:style {:display "flex"
+                 :flex-direction "column"
+                 :gap "15px"}}
+
+   [:div {:style {:display "flex"
+                  :flex-direction "row"
+                  :align-items "center"
+                  :gap "2px"}}
+    [text "Camera"]]
+   [camera-lock]])
 
 (defn- text-3d-options []
   (let [type "text"]
@@ -424,33 +466,7 @@
                         :event ::events/update-camera
                         :disabled? @(subscribe [::subs/camera-locked?])
                         :value @(subscribe [::subs/camera-rotation])}]
-   [:div
-    {:style {:display "flex"
-             :align-items "center"
-             :justify-content "space-between"
-             :gap "5px"}}
-    [:div {:style {:display "flex"
-                   :flex-direction "row"
-                   :align-items "center"
-                   :gap "2px"}}
-     [text "Locked"]
-     [tooltip
-      {:trigger [icon/info {:size 12
-                            :weight :fill
-                            :color colors/button-bg}]
-       :content (if @(subscribe [::subs/camera-locked?])
-                  [:<>
-                   [tooltip-text {:text "The view displayed on the canvas is from the camera's perspective."}]
-                   [tooltip-text {:text "Locking the camera disables movement control."}]
-                   [tooltip-text {:text "Recommended option for beginners."
-                                  :weight :regular}]]
-                  [:<>
-                   [tooltip-text {:text "The view displayed on the canvas is from the camera's perspective."}]
-                   [tooltip-text {:text "Unlocking the camera enables movement control."}]
-                   [tooltip-text {:text "Recommended for advanced users."
-                                  :weight :regular}]])}]]
-    [switch {:checked? @(subscribe [::subs/camera-locked?])
-             :on-change #(dispatch [::events/toggle-camera-lock])}]]])
+   [camera-lock]])
 
 (defn options-panel []
   [:div (styles/options-panel)

@@ -9,6 +9,7 @@
 (def text-primary "rgb(63, 66, 80)")
 
 (def error "#fa6c80")
+(def warning "#c40b25")
 
 ;; (def text-primary "rgb(107, 111, 118)")
 

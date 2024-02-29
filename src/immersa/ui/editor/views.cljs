@@ -31,7 +31,7 @@
   (:require-macros
     [immersa.common.macros :as m]))
 
-(defn- canvas [state]
+(defn- canvas []
   (r/create-class
     {:component-did-mount #(scene.core/start-scene (js/document.getElementById "renderCanvas")
                                                    {:mode :editor
@@ -40,26 +40,20 @@
      :reagent-render (fn []
                        [:canvas
                         {:id "renderCanvas"
-                         :on-blur #(do
-                                     (reset! state :blur)
-                                     (dispatch [::events/update-thumbnail]))
-                         :on-focus #(reset! state :focus)
+                         :on-blur #(dispatch [::events/update-thumbnail])
                          :class (styles/canvas)}])}))
 
 (defn- canvas-container []
-  (let [state (r/atom :blur)]
-    (fn []
-      (let [{:keys [width height]} @(subscribe [::subs/calculated-canvas-wrapper-dimensions])
-            camera-unlocked? (not @(subscribe [::subs/camera-locked?]))]
-        (when (and width height (> width 0) (> height 0))
-          [:div
-           {:id "canvas-container"
-            :style {:width (str width "px")
-                    :height (str height "px")}
-            :class (styles/canvas-container @state camera-unlocked?)}
-           [canvas state]
-           (when @(subscribe [::main.subs/loading-screen?])
-             [loading-screen height])])))))
+  (let [{:keys [width height]} @(subscribe [::subs/calculated-canvas-wrapper-dimensions])]
+    (when (and width height (> width 0) (> height 0))
+      [:div
+       {:id "canvas-container"
+        :style {:width (str width "px")
+                :height (str height "px")}
+        :class (styles/canvas-container)}
+       [canvas]
+       (when @(subscribe [::main.subs/loading-screen?])
+         [loading-screen height])])))
 
 (defn- canvas-wrapper []
   (let [ref (r/atom nil)
