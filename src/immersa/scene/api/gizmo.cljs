@@ -63,6 +63,9 @@
   (when mesh
     (let [linked-type (get-linked-type mesh)
           type (api.core/get-object-type-by-name (j/get mesh :immersa-id))]
+      (when (api.core/get-node-attr mesh :face-to-screen?)
+        (j/assoc! (api.core/gizmo-manager) :rotationGizmoEnabled false)
+        (ui.notifier/notify-gizmo-state :rotation false))
       (when (= type "text3D")
         (j/assoc! (api.core/gizmo-manager) :scaleGizmoEnabled false)
         (ui.notifier/notify-gizmo-state :scale false))
@@ -176,7 +179,7 @@
                (fn []
                  (f)
                  (let [mesh (api.core/selected-mesh)]
-                   (some-> mesh (slide/update-slide-data :scaling (api.core/v3->v (j/get mesh :scaling)))))))
+                   (some-> mesh (slide/update-slide-data :scale (api.core/v3->v (j/get mesh :scaling)))))))
     (create-rotation-gizmo-drag-observables gizmo-manager)))
 
 (defn toggle-gizmo [type]

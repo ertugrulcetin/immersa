@@ -120,7 +120,10 @@
    :toggle-rotation-gizmo {:label "Toggle rotation gizmo"
                            :shortcut ["2"]
                            :pred (fn [info key]
-                                   (and (= key "2") (not (cmd? info)) (api.core/selected-mesh)))
+                                   (and (= key "2")
+                                        (not (cmd? info))
+                                        (api.core/selected-mesh)
+                                        (not (api.core/get-node-attr (api.core/selected-mesh) :face-to-screen?))))
                            :action #(api.gizmo/toggle-gizmo :rotation)}
    :toggle-scale-gizmo {:label "Toggle scale gizmo"
                         :shortcut ["3"]

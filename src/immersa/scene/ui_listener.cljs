@@ -165,6 +165,9 @@
       (j/assoc! mesh :billboardMode api.const/mesh-billboard-mode-none))
     (slide/update-slide-data mesh :face-to-screen? value)
     (api.core/update-node-attr mesh :face-to-screen? value)
+    (when (api.core/get-node-attr mesh :face-to-screen?)
+      (j/assoc! (api.core/gizmo-manager) :rotationGizmoEnabled false)
+      (ui.notifier/notify-gizmo-state :rotation false))
     (ui.notifier/notify-ui-selected-mesh mesh)))
 
 (defmethod handle-ui-update :update-selected-image-mesh-transparent? [{{:keys [value]} :data}]
