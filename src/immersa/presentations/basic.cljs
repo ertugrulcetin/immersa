@@ -10,6 +10,12 @@
            :skybox {:background {:color [87 97 166]
                                  ;; [95 106 183]
                                  :brightness 0.1}}
+           "b112fe37-e51b-49e5-a152-4f3989f1c2f8" {:type :glb
+                                                   :asset-type :model
+                                                   :path "https://firebasestorage.googleapis.com/v0/b/immersa-6d29f.appspot.com/o/models%2Fuser%2Fuser_2c20lPttd6jIbGObJJhbKwN3tLh%2Fporche_911.glb?alt=media&token=c613a184-6bf1-4fe1-a059-756eec8415c4"
+                                                   :position [0 0.8064738512039185 -0.15192247927188873]
+                                                   :rotation [0 0 0]
+                                                   :scale [0.9707924241723223 0.9707924241723223 0.9707924241723223]}
            "e25cfb4a-5f35-4c05-a4cb-9b8d1aa7702b" {:type :image
                                                    :path "https://firebasestorage.googleapis.com/v0/b/immersa-6d29f.appspot.com/o/images%2Fuser%2Fuser_2c20lPttd6jIbGObJJhbKwN3tLh%2FPorsche-Logo-PNG%40zeevector.com_.png?alt=media&token=a0a18b90-d0d0-4ffe-9b7f-ebbb85517b6f"
                                                    :asset-type :texture

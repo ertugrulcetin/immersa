@@ -11,14 +11,21 @@
 
 (def body
   (assoc defaults
+         :background "#f0f0f0"
          :font-family typography/font
          :overscroll-behavior :none))
+
+(def app
+  {:border-radius "25px"
+   :border "5px solid #f0f0f0"
+   :box-sizing :border-box
+   :background :white})
 
 (defglobal theme
   [:html defaults]
   [":root"
    [:body body]
-   [:div#app defaults]
+   [:div#app (merge defaults app)]
 
    [:h1 {:font-family typography/font}]
    [:h2 {:font-family typography/font}]
