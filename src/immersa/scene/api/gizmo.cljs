@@ -66,7 +66,8 @@
       (when (= type "text3D")
         (j/assoc! (api.core/gizmo-manager) :scaleGizmoEnabled false)
         (ui.notifier/notify-gizmo-state :scale false))
-      (when (j/get (api.core/gizmo-manager) :positionGizmoEnabled)
+      (when (and (j/get (api.core/gizmo-manager) :positionGizmoEnabled)
+                 (slide/camera-locked?))
         (api.core/attach-pointer-drag-behav mesh))
       (if (bb-types type)
         (do
@@ -187,7 +188,7 @@
     (j/assoc-in! api.core/db [:gizmo :manager gizmo] enabled?)
     (when (= type :position)
       (when-let [mesh (api.core/selected-mesh)]
-        (if enabled?
+        (if (and enabled? (slide/camera-locked?))
           (api.core/attach-pointer-drag-behav mesh)
           (api.core/detach-pointer-drag-behav mesh))))
     (ui.notifier/notify-gizmo-state type enabled?)))

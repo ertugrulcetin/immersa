@@ -209,6 +209,10 @@
 (defmethod handle-ui-update :toggle-camera-lock [{{:keys [value]} :data}]
   (slide/update-slide-data :camera :locked? value)
   (api.camera/toggle-camera-lock value)
+  (when-let [mesh (api.core/selected-mesh)]
+    (if (and value (slide/camera-locked?))
+      (api.core/attach-pointer-drag-behav mesh)
+      (api.core/detach-pointer-drag-behav mesh)))
   (ui.notifier/notify-camera-lock-state value))
 
 (defn get-pos-from-camera-dir []
