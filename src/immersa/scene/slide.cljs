@@ -606,6 +606,25 @@
     (ui.notifier/sync-slides-info @current-slide-index @all-slides)
     (update-thumbnail)))
 
+(defn blank-slide []
+  (let [index @current-slide-index
+        uuid (str (random-uuid))
+        position (get-slide-data :camera :position)
+        rotation (get-slide-data :camera :rotation)]
+    (api.core/clear-selected-mesh)
+    (swap! all-slides (fn [slides]
+                        (let [slide (get slides index)
+                              slide (-> slide
+                                        (assoc-in [:data :camera :initial-position] position)
+                                        (assoc-in [:data :camera :initial-rotation] rotation))
+                              slide {:id uuid
+                                     :data {:camera (get-in slide [:data :camera])
+                                            :skybox (get-in slide [:data :skybox])}}]
+                          (vec-insert slides slide (inc index)))))
+    (ui.notifier/sync-slides-info @current-slide-index @all-slides)
+    (go-to-slide (inc @current-slide-index))
+    (js/setTimeout update-thumbnail 550)))
+
 (defn delete-slide []
   (when (> (count @all-slides) 1)
     (let [index @current-slide-index]

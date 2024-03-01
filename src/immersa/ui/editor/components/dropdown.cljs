@@ -1,7 +1,9 @@
 (ns immersa.ui.editor.components.dropdown
   (:require
     ["@radix-ui/react-dropdown-menu" :as DropdownMenu]
+    [immersa.ui.editor.components.button :refer [shortcut-button]]
     [immersa.ui.editor.components.scroll-area :refer [scroll-area]]
+    [immersa.ui.editor.components.text :refer [text]]
     [immersa.ui.theme.colors :as colors]
     [spade.core :refer [defclass]]))
 
@@ -60,6 +62,31 @@
 (defn dropdown-separator []
   [:> DropdownMenu/Separator {:class (seprator-style)}])
 
+(defclass option-text-style [disabled?]
+  {:display :flex
+   :flex-direction :row
+   :align-items :center
+   :justify-content :space-between
+   :width "100%"}
+  (when disabled?
+    {:cursor :not-allowed}))
+
+(defn option-text [{:keys [label icon shortcut disabled?]}]
+  [:div {:class (option-text-style disabled?)}
+   [:div {:style {:display "flex"
+                  :align-items "center"
+                  :gap "4px"}}
+    icon
+    [text {:weight :light
+           :disabled? disabled?} label]]
+   (when (seq shortcut)
+     [:div
+      {:style {:display "flex"
+               :gap "4px"}}
+      (for [s shortcut]
+        ^{:key s}
+        [shortcut-button s])])])
+
 (defn dropdown-item [{:keys [item on-select disabled?]}]
   [:> DropdownMenu/Item
    {:class (menu-item disabled?)
@@ -67,7 +94,7 @@
     :disabled disabled?}
    item])
 
-(defn dropdown [{:keys [trigger children style]}]
+(defn dropdown [{:keys [trigger children style scroll?]}]
   [:> DropdownMenu/Root
    [:> DropdownMenu/Trigger {:as-child true}
     (if (-> trigger first fn?)
@@ -76,12 +103,14 @@
    [:> DropdownMenu/Portal
     [:> DropdownMenu/Content {:style style
                               :class (content-style)}
-     [scroll-area
-      {:class (dropdown-content-scroll-area)
-       :children children}]]]])
+     (if scroll?
+       [scroll-area
+        {:class (dropdown-content-scroll-area)
+         :children children}]
+       children)]]])
 
 (defclass context-menu-content-style []
-  {:width "220px"
+  {:width "225px"
    :z-index "5000"
    :background-color "white"
    :border-radius "6px"

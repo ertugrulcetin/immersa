@@ -136,12 +136,19 @@
    :add-slide {:label "Duplicate slide"
                :shortcut ["⌘" "d"]
                :prevent-default? true
+               :ui-only? true
                :pred (fn [info key]
-                       ;; (and (cmd? info) (= key "d"))
-                       false)
+                       (and (cmd? info) (= key "d")))
                :action #(ui-listener/handle-ui-update {:type :add-slide})}
+   :blank-slide {:label "Blank slide"
+                 :shortcut ["⌘" "n"]
+                 :prevent-default? true
+                 :pred (fn [info key]
+                         ;; (and (cmd? info) (= key "d"))
+                         false)
+                 :action #(ui-listener/handle-ui-update {:type :blank-slide})}
    :delete-slide {:label "Delete slide"
-                  :shortcut ["⌘" "⌫"]
+                  :shortcut ["⌫"]
                   :pred (fn [info _]
                           (and (cmd? info) (delete? info)))
                   :action #(slide/delete-slide)}
@@ -213,9 +220,18 @@
   (when-let [f (get-in shortcuts [type :action])]
     (f)))
 
+(defn call-shortcut-action-with-event [type event]
+  (let [f (get-in shortcuts [type :action])
+        pred (get-in shortcuts [type :pred])
+        prevent-default? (get-in shortcuts [type :prevent-default?])]
+    (when (pred #js {:event event} (str/lower-case (j/get event :key)))
+      (when prevent-default?
+        (.preventDefault event))
+      (f))))
+
 (defn process [info key]
-  (doseq [[_ {:keys [pred action prevent-default?]}] shortcuts]
-    (when (and (key-down? info) (pred info key))
+  (doseq [[_ {:keys [pred action prevent-default? ui-only?]}] shortcuts]
+    (when (and (key-down? info) (pred info key) (not ui-only?))
       (when prevent-default?
         (j/call-in info [:event :preventDefault]))
       (action info))))

@@ -53,12 +53,15 @@
   (when disabled?
     {:cursor :not-allowed}))
 
-(defn- option-text [{:keys [label shortcut disabled? color]}]
+(defn- option-text [{:keys [label shortcut disabled? icon color]}]
   [:div {:class (option-text-style disabled?)}
-   [text {:weight :light
-          :size :s
-          :disabled? disabled?
-          :color color} label]
+   [:div {:style {:display "flex"
+                  :align-items "center"
+                  :gap "4px"}}
+    icon
+    [text {:weight :light
+           :disabled? disabled?
+           :color color} label]]
    (when (seq shortcut)
      [:div
       {:style {:display "flex"
@@ -67,13 +70,14 @@
         ^{:key s}
         [shortcut-button s])])])
 
-(defn context-menu-item [{:keys [label on-select disabled? shortcut color]}]
+(defn context-menu-item [{:keys [label icon on-select disabled? shortcut color]}]
   [:> ContextMenu/Item
    {:on-select on-select
     :disabled disabled?
     :class (context-menu-item-styles disabled?)}
    [option-text {:label label
                  :disabled disabled?
+                 :icon icon
                  :shortcut shortcut
                  :color color}]])
 

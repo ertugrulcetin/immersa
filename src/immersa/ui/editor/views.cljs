@@ -199,7 +199,8 @@
 (defn- image-component []
   (let [images @(subscribe [::subs/uploaded-images])]
     [dropdown
-     {:style (when (<= (count images) 4)
+     {:scroll? true
+      :style (when (<= (count images) 4)
                {:height (str (* 30 (inc (count images))) "px")})
       :trigger [presentation-component {:icon icon/image
                                         :text "Image"}]
@@ -233,7 +234,8 @@
 (defn- model-component []
   (let [models @(subscribe [::subs/uploaded-models])]
     [dropdown
-     {:style (when (<= (count models) 4)
+     {:scroll? true
+      :style (when (<= (count models) 4)
                {:height (str (* 30 (inc (count models))) "px")})
       :trigger [presentation-component {:icon icon/cube
                                         :text "3D Model"

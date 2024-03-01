@@ -1,40 +1,16 @@
 (ns immersa.ui.editor.components.canvas-context-menu
   (:require
     [immersa.common.shortcut :as shortcut]
-    [immersa.ui.editor.components.button :refer [shortcut-button]]
     [immersa.ui.editor.components.dropdown :refer [dropdown
                                                    dropdown-item
                                                    dropdown-separator
-                                                   dropdown-context-menu]]
-    [immersa.ui.editor.components.text :refer [text]]
+                                                   dropdown-context-menu
+                                                   option-text]]
     [immersa.ui.editor.events :as events]
     [immersa.ui.editor.subs :as subs]
-    [re-frame.core :refer [dispatch subscribe]]
-    [spade.core :refer [defclass defattrs]]))
+    [re-frame.core :refer [dispatch subscribe]]))
 
 (def gap "2px")
-
-(defclass option-text-style [disabled?]
-  {:display :flex
-   :flex-direction :row
-   :align-items :center
-   :justify-content :space-between
-   :width "100%"}
-  (when disabled?
-    {:cursor :not-allowed}))
-
-(defn- option-text [{:keys [label shortcut disabled?]}]
-  [:div {:class (option-text-style disabled?)}
-   [text {:weight :light
-          :size :s
-          :disabled? disabled?} label]
-   (when (seq shortcut)
-     [:div
-      {:style {:display "flex"
-               :gap "4px"}}
-      (for [s shortcut]
-        ^{:key s}
-        [shortcut-button s])])])
 
 (defn- main-options []
   [:div {:style {:display "flex"

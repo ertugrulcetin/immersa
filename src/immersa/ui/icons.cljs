@@ -9,8 +9,10 @@
     ["@phosphor-icons/react/dist/csr/ChatCenteredText" :refer [ChatCenteredText]]
     ["@phosphor-icons/react/dist/csr/ChatsCircle" :refer [ChatsCircle]]
     ["@phosphor-icons/react/dist/csr/Command" :refer [Command]]
+    ["@phosphor-icons/react/dist/csr/Copy" :refer [Copy]]
     ["@phosphor-icons/react/dist/csr/Cube" :refer [Cube]]
     ["@phosphor-icons/react/dist/csr/DotsThreeVertical" :refer [DotsThreeVertical]]
+    ["@phosphor-icons/react/dist/csr/File" :refer [File]]
     ["@phosphor-icons/react/dist/csr/Image" :refer [Image]]
     ["@phosphor-icons/react/dist/csr/Info" :refer [Info]]
     ["@phosphor-icons/react/dist/csr/Lightbulb" :refer [Lightbulb]]
@@ -23,6 +25,7 @@
     ["@phosphor-icons/react/dist/csr/SmileySticker" :refer [SmileySticker]]
     ["@phosphor-icons/react/dist/csr/Student" :refer [Student]]
     ["@phosphor-icons/react/dist/csr/TextT" :refer [TextT]]
+    ["@phosphor-icons/react/dist/csr/Trash" :refer [Trash]]
     ["@phosphor-icons/react/dist/csr/UploadSimple" :refer [UploadSimple]]
     ["@phosphor-icons/react/dist/csr/X" :refer [X]]
     [reagent.core :as r]))
@@ -52,3 +55,6 @@
 (def info (r/adapt-react-class Info))
 (def unlock (r/adapt-react-class LockSimpleOpen))
 (def upload (r/adapt-react-class UploadSimple))
+(def copy (r/adapt-react-class Copy))
+(def file (r/adapt-react-class File))
+(def trash (r/adapt-react-class Trash))

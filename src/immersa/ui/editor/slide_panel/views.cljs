@@ -20,10 +20,11 @@
     [immersa.common.shortcut :as shortcut]
     [immersa.ui.editor.components.button :refer [button]]
     [immersa.ui.editor.components.context-menu :refer [context-menu context-menu-item]]
+    [immersa.ui.editor.components.dropdown :refer [dropdown dropdown-item option-text]]
     [immersa.ui.editor.components.scroll-area :refer [scroll-area]]
     [immersa.ui.editor.components.tooltip :refer [tooltip]]
     [immersa.ui.editor.events :as events]
-    [immersa.ui.editor.styles :as styles]
+    [immersa.ui.editor.slide-panel.styles :as styles]
     [immersa.ui.editor.subs :as subs]
     [immersa.ui.icons :as icon]
     [immersa.ui.theme.colors :as colors]
@@ -56,14 +57,19 @@
     [context-menu
      {:children [:<>
                  [context-menu-item {:label "Duplicate"
+                                     :icon [icon/copy {:size 16
+                                                       :color colors/text-primary}]
                                      :shortcut (shortcut/get-shortcut-key-labels :add-slide)
                                      :on-select #(shortcut/call-shortcut-action :add-slide)}]
                  [context-menu-item {:label "Delete"
+                                     :icon [icon/trash {:size 16
+                                                        :color colors/warning}]
                                      :color colors/warning
                                      :shortcut (shortcut/get-shortcut-key-labels :delete-slide)
                                      :on-select #(shortcut/call-shortcut-action :delete-slide)}]]
       :trigger [:div
                 (merge {:id (:id props)
+                        :tabIndex "0"
                         :ref setNodeRef
                         :style {:display "flex"
                                 :align-items "flex-start"
@@ -103,24 +109,16 @@
                     {:trigger [icon/unlock {:size 12
                                             :color colors/unlocked-camera}]
                      :content "Camera unlocked"}])]
-                [:div
-                 {:style {:width "123px"
-                          :height "70px"
-                          :border-radius "5px"
-                          :border (cond
-                                    (and camera-unlocked? selected?)
-                                    (str "2px solid " colors/unlocked-camera)
-
-                                    selected?
-                                    (str "2px solid " colors/button-outline-border)
-
-                                    :else (str "2px solid " colors/border2))}}
+                [:div {:id (str "slide-container-" (:id props))
+                       :tabIndex "0"
+                       :ref (fn [ref]
+                              (when (and ref selected?)
+                                (.focus ref)))
+                       :class (styles/slide camera-unlocked? selected?)
+                       :on-key-down #(shortcut/call-shortcut-action-with-event :add-slide %)
+                       :on-click #(some-> (js/document.getElementById (str "slide-container-" (:id props))) .focus)}
                  [:img {:src thumbnail
-                        :style {:width "100%"
-                                :height "100%"
-                                :box-sizing "border-box"
-                                :border "2px solid transparent"
-                                :border-radius "3px"}}]]]}]))
+                        :class (styles/slide-img)}]]]}]))
 
 (defn- sortable-slides-list [slides]
   (let [slide-ids (clj->js (mapv :id slides))
@@ -163,14 +161,26 @@
     {:style {:display "flex"
              :align-items "center"
              :padding "8px 16px 0 16px"}}
-    [tooltip
-     {:trigger [button {:text "Add slide"
+    [dropdown
+     {:style {:height "100%"}
+      :trigger [button {:text "Add slide"
                         :on-click #(dispatch [::events/add-slide])
                         :class (styles/add-slide-button)
                         :icon-left [icon/plus {:size 18
                                                :color colors/text-primary}]}]
-      :content "Add a new slide"
-      :shortcuts "N"}]]
+      :children [:<>
+                 [dropdown-item
+                  {:item [option-text {:label "Duplicate"
+                                       :icon [icon/copy {:size 16
+                                                         :color colors/text-primary}]
+                                       :shortcut (shortcut/get-shortcut-key-labels :add-slide)}]
+                   :on-select #(shortcut/call-shortcut-action :add-slide)}]
+                 [dropdown-item
+                  {:item [option-text {:label "Blank slide"
+                                       :icon [icon/file {:size 16
+                                                         :color colors/text-primary}]
+                                       :shortcut (shortcut/get-shortcut-key-labels :blank-slide)}]
+                   :on-select #(shortcut/call-shortcut-action :blank-slide)}]]}]]
    [scroll-area
     {:class (styles/slides-scroll-area)
      :children [:div {:tabIndex "0"

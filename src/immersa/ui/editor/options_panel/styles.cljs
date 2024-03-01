@@ -1,7 +1,6 @@
 (ns immersa.ui.editor.options-panel.styles
   (:require
     [immersa.ui.theme.colors :as colors]
-    [immersa.ui.theme.typography :as typography]
     [spade.core :refer [defclass defattrs]]))
 
 (def header-height "57px")

@@ -193,6 +193,9 @@
 (defmethod handle-ui-update :add-slide [_]
   (slide/add-slide))
 
+(defmethod handle-ui-update :blank-slide [_]
+  (slide/blank-slide))
+
 (defmethod handle-ui-update :delete-slide [_]
   (slide/delete-slide))
 

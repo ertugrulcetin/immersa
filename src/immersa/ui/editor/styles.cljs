@@ -5,8 +5,6 @@
     [spade.core :refer [defclass defattrs]]))
 
 (def header-height "57px")
-
-(def slides-panel-size "170px")
 (def options-panel-size "340px")
 
 (def hover-style
@@ -36,22 +34,6 @@
    :flex 1
    :overflow :hidden
    :position :relative})
-
-(defattrs side-bar []
-  {:flex-shrink 0
-   :width slides-panel-size
-   ;; :border-right (str "1px solid " colors/panel-border)
-   :box-sizing :border-box
-   :box-shadow :none
-   :display :flex
-   :position :relative
-   :flex-direction :column
-   :align-items :center
-   :gap "8px"})
-
-(defclass add-slide-button []
-  {:width "150px"
-   :font-size typography/l})
 
 (defclass canvas-container []
   {:box-sizing "border-box"})
@@ -185,18 +167,6 @@
 (defattrs private-badge-label []
   {:font-size typography/s
    :font-weight "300"})
-
-(defclass slides-scroll-area []
-  {:width slides-panel-size
-   :height "100%"
-   :overflow :hidden}
-  ;; Fade out effect
-  [:&:before
-   {:content "''"
-    :position "fixed"
-    :width slides-panel-size
-    :height "8px"
-    :background "linear-gradient(180deg,#ffffff 0%,rgba(252,252,253,0) 100%)"}])
 
 (defclass options-scroll-area []
   {:width options-panel-size
