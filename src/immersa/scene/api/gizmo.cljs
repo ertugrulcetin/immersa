@@ -155,15 +155,21 @@
   (j/call-in gizmo-manager [:gizmos :rotationGizmo :zGizmo :dragBehavior :onDragEndObservable :add]
              (create-rotation-gizmo-on-drag-end :z)))
 
+(defn- notify-ui-selected-mesh []
+  (some-> (api.core/selected-mesh) ui.notifier/notify-ui-selected-mesh))
+
+(defn- update-slide-data-for-position []
+  (let [mesh (api.core/selected-mesh)]
+    (notify-ui-selected-mesh)
+    (some-> mesh (slide/update-slide-data :position (api.core/v3->v (j/get mesh :position))))))
+
 (defn- add-drag-observables [gizmo-manager]
-  (let [f (fn []
-            (some-> (api.core/selected-mesh) ui.notifier/notify-ui-selected-mesh))]
+  (let [f notify-ui-selected-mesh]
     (j/call-in gizmo-manager [:gizmos :positionGizmo :onDragObservable :add] f)
     (j/call-in gizmo-manager [:gizmos :positionGizmo :onDragEndObservable :add]
                (fn []
                  (f)
-                 (let [mesh (api.core/selected-mesh)]
-                   (some-> mesh (slide/update-slide-data :position (api.core/v3->v (j/get mesh :position)))))))
+                 (update-slide-data-for-position)))
     (j/call-in gizmo-manager [:gizmos :scaleGizmo :onDragObservable :add] f)
     (j/call-in gizmo-manager [:gizmos :scaleGizmo :onDragEndObservable :add]
                (fn []
@@ -181,11 +187,17 @@
     (j/assoc-in! api.core/db [:gizmo :manager gizmo] enabled?)
     (ui.notifier/notify-gizmo-state type enabled?)))
 
+(defn- init-pointer-drag-behaviour []
+  (let [pdb (j/assoc! (PointerDragBehavior.)
+                      :useObjectOrientationForDragging false
+                      :updateDragPlane false)]
+    (j/call-in pdb [:onDragObservable :add] notify-ui-selected-mesh)
+    (j/call-in pdb [:onDragEndObservable :add] update-slide-data-for-position)
+    pdb))
+
 (defn init-gizmo-manager []
   (let [gizmo-manager (GizmoManager. (api.core/get-scene) 3)
-        pointer-drag-behaviour (j/assoc! (PointerDragBehavior.)
-                                         :useObjectOrientationForDragging false
-                                         :updateDragPlane false)]
+        pointer-drag-behaviour (init-pointer-drag-behaviour)]
     (set! hl (api.core/highlight-layer "outline-highlight-layer"
                                        :stroke? true
                                        :main-texture-ratio 1
