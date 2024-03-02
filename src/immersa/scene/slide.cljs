@@ -530,6 +530,7 @@
 (defonce slide-in-progress? (atom false))
 (defonce prev-slide (atom nil))
 (defonce current-slide-index (atom 0))
+(defonce disabled-component-anims (atom []))
 
 (defonce thumbnails (atom {}))
 
@@ -774,10 +775,11 @@
                                                                     (let [prev-slide-object-names (-> @prev-slide keys set)]
                                                                       [prev-slide-object-names
                                                                        (set/difference prev-slide-object-names current-slide-object-names #{:camera :skybox})]))
-                ;; TODO add anims to the current-running-anims and block here
-                ;; so that the next slide is not processed until the current slide is done
-                _ (doseq [name object-names-to-dispose]
-                    (disable-component name))
+                _ (doseq [{:keys [force-finish-fn]} @disabled-component-anims]
+                    (force-finish-fn))
+                _ (reset! disabled-component-anims (doall
+                                                     (for [name object-names-to-dispose]
+                                                       (disable-component name))))
                 _ (create-objects objects-to-create objects-data)
                 animations (reduce
                              (fn [acc object-name]

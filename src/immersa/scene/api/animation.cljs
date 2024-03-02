@@ -5,6 +5,7 @@
     ["@babylonjs/core/Animations/easing" :refer [CubicEase EasingFunction]]
     [applied-science.js-interop :as j]
     [cljs.core.async :as a]
+    [clojure.string :as str]
     [immersa.scene.api.camera :as api.camera]
     [immersa.scene.api.constant :as api.const]
     [immersa.scene.api.core :as api.core :refer [v3]])
@@ -54,11 +55,12 @@
                            (when on-animation-end
                              (on-animation-end target))
                            (a/put! p true))
+        animations (if (vector? animations)
+                     animations
+                     [animations])
         f #(j/call-in api.core/db [:scene :beginDirectAnimation]
                       target
-                      (clj->js (if (vector? animations)
-                                 animations
-                                 [animations]))
+                      (clj->js animations)
                       from
                       to
                       loop?
@@ -74,7 +76,17 @@
                           (js/clearTimeout @time-out-fn-id))
                         (j/call-in api.core/db [:scene :stopAnimation] target)
                         (doseq [anim animations]
-                          (j/assoc! target (j/get anim :targetProperty) (-> anim (j/call :getKeys) last (j/get :value))))
+                          (let [last-val (-> anim (j/call :getKeys) last (j/get :value))]
+                            (if (str/includes? (j/get anim :targetProperty) ".")
+                              (let [props (str/split (j/get anim :targetProperty) #"\.")]
+                                (->> props
+                                     drop-last
+                                     (reduce
+                                       (fn [target prop]
+                                         (aget target prop))
+                                       target)
+                                     (#(aset % (last props) last-val))))
+                              (j/assoc! target (j/get anim :targetProperty) last-val))))
                         (when on-animation-end
                           (on-animation-end)))}))
 
@@ -204,13 +216,13 @@
           final-position (j/call mesh-world-center :add (j/call direction :scale final-radius))
           easing-function (cubic-ease api.const/easing-ease-in)
           #_#_position-animation (animation "camera-position-anim"
-                                           :duration duration
-                                           :target-prop "position"
-                                           :from camera-pos
-                                           :to final-position
-                                           :data-type api.const/animation-type-v3
-                                           :loop-mode api.const/animation-loop-cons
-                                           :easing easing-function)
+                                            :duration duration
+                                            :target-prop "position"
+                                            :from camera-pos
+                                            :to final-position
+                                            :data-type api.const/animation-type-v3
+                                            :loop-mode api.const/animation-loop-cons
+                                            :easing easing-function)
           target-animation (animation "camera-target-anim"
                                       :duration duration
                                       :target-prop "target"
