@@ -149,6 +149,7 @@
                  :action #(ui-listener/handle-ui-update {:type :blank-slide})}
    :delete-slide {:label "Delete slide"
                   :shortcut ["⌫"]
+                  :ui-only? true
                   :pred (fn [info _]
                           (delete? info))
                   :action #(slide/delete-slide)}

@@ -69,7 +69,6 @@
                                      :on-select #(shortcut/call-shortcut-action :delete-slide)}]]
       :trigger [:div
                 (merge {:id (:id props)
-                        :tabIndex "0"
                         :ref setNodeRef
                         :style {:display "flex"
                                 :align-items "flex-start"
@@ -111,9 +110,6 @@
                      :content "Camera unlocked"}])]
                 [:div {:id (str "slide-container-" (:id props))
                        :tabIndex "0"
-                       :ref (fn [ref]
-                              (when (and ref selected?)
-                                (.focus ref)))
                        :class (styles/slide camera-unlocked? selected?)
                        :on-key-down (fn [e]
                                       (shortcut/call-shortcut-action-with-event :delete-slide e)

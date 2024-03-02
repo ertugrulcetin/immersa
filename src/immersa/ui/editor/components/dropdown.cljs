@@ -26,7 +26,7 @@
   {:border-radius "3px"
    :display "flex"
    :align-items "center"
-   :height "25px"
+   :min-height "25px"
    :padding "0 12px"
    :position "relative"
    :margin-bottom "5px"
@@ -71,14 +71,15 @@
   (when disabled?
     {:cursor :not-allowed}))
 
-(defn option-text [{:keys [label icon shortcut disabled?]}]
+(defn option-text [{:keys [label icon color shortcut disabled?]}]
   [:div {:class (option-text-style disabled?)}
    [:div {:style {:display "flex"
                   :align-items "center"
                   :gap "4px"}}
     icon
     [text {:weight :light
-           :disabled? disabled?} label]]
+           :disabled? disabled?
+           :color color} label]]
    (when (seq shortcut)
      [:div
       {:style {:display "flex"

@@ -37,6 +37,7 @@
 (defclass slide [camera-unlocked? selected?]
   {:width "123px"
    :height "70px"
+   :outline :none
    :border-radius "5px"
    :border (cond
              (and camera-unlocked? selected?)
@@ -47,7 +48,8 @@
 
              :else (str "2px solid " colors/border2))}
   [:&:focus
-   {:filter "brightness(0.8)"}])
+   (when selected?
+     {:filter "brightness(0.8)"})])
 
 (defclass slide-img []
   {:width "100%"
