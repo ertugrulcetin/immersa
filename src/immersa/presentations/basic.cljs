@@ -5,7 +5,7 @@
     :data {:camera {:position [0 5 -10]
                     :rotation [0.17453292519943295 0 0]
                     :initial-position [0 5 -10]
-                    :initial-rotation [0.17453292519943295 0.17453292519943295 0]
+                    :initial-rotation [0.17453292519943295 0 0]
                     :locked? true}
            :skybox {:background {:color [87 97 166]
                                  ;; [95 106 183]

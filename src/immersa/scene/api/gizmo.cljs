@@ -12,6 +12,8 @@
     [immersa.ui.editor.events :as events]
     [re-frame.core :refer [dispatch]]))
 
+(def distance (atom nil))
+
 (def hl)
 
 (def outline-color-linked (api.core/color 0.3 1.0 0.5))
@@ -54,6 +56,12 @@
       (j/call child-meshes :forEach #(j/call hl :addMesh % color)))
     (j/call hl :addMesh mesh color)))
 
+(defn- set-distance-of-mesh-and-camera []
+  (reset! distance
+          (api.core/distance
+            (j/get (api.core/selected-mesh) :position)
+            (j/get (api.camera/active-camera) :position))))
+
 (def bb-types #{"text3D" "image"})
 
 (defn- on-attached-to-mesh [mesh]
@@ -62,6 +70,7 @@
   (some-> (api.core/selected-mesh) api.core/detach-pointer-drag-behav)
   (j/assoc-in! api.core/db [:gizmo :selected-mesh] mesh)
   (when mesh
+    (set-distance-of-mesh-and-camera)
     (let [linked-type (get-linked-type mesh)
           type (api.core/get-object-type-by-name (j/get mesh :immersa-id))]
       (when (api.core/get-node-attr mesh :face-to-screen?)
@@ -169,7 +178,9 @@
     (some-> mesh (slide/update-slide-data :position (api.core/v3->v (j/get mesh :position))))))
 
 (defn- add-drag-observables [gizmo-manager]
-  (let [f notify-ui-selected-mesh]
+  (let [f (fn []
+            (set-distance-of-mesh-and-camera)
+            (notify-ui-selected-mesh))]
     (j/call-in gizmo-manager [:gizmos :positionGizmo :onDragObservable :add] f)
     (j/call-in gizmo-manager [:gizmos :positionGizmo :onDragEndObservable :add]
                (fn []
@@ -197,7 +208,7 @@
           (api.core/detach-pointer-drag-behav mesh))))
     (ui.notifier/notify-gizmo-state type enabled?)))
 
-(defn adjust-distance-to-camera [mesh distance]
+(defn- adjust-distance-to-camera [mesh distance]
   (when-let [distance @distance]
     (let [camera (api.camera/active-camera)
           camera-position (j/get camera :position)
@@ -207,23 +218,17 @@
                         (j/call :normalize))]
       (when (not= current-distance distance)
         (let [desired-position (-> (j/call camera-position :add (j/call direction :scale distance)))]
-          (j/call mesh-position :copyFrom desired-position))))))
+          (j/assoc! mesh :position (api.core/clone desired-position)))))))
 
 (defn- init-pointer-drag-behaviour []
-  (let [distance (atom nil)
-        pdb (j/assoc! (PointerDragBehavior.)
+  (let [pdb (j/assoc! (PointerDragBehavior. #js {:moveAttached false})
                       :useObjectOrientationForDragging false
                       :updateDragPlane false)]
-    (j/call-in pdb [:onDragStartObservable :add] (fn []
-                                                   (reset! distance
-                                                           (api.core/distance
-                                                             (j/get (api.core/selected-mesh) :position)
-                                                             (j/get (api.camera/active-camera) :position)))))
-    (j/call-in pdb [:onDragObservable :add] (fn []
-                                              (adjust-distance-to-camera (api.core/selected-mesh) distance)
-                                              (notify-ui-selected-mesh)))
+    (j/call-in pdb [:onDragStartObservable :add] set-distance-of-mesh-and-camera)
+    (j/call-in pdb [:onDragObservable :add] notify-ui-selected-mesh)
     (j/call-in pdb [:onDragEndObservable :add] (fn []
-                                                 (reset! distance nil)
+                                                 (adjust-distance-to-camera (api.core/selected-mesh) distance)
+                                                 (notify-ui-selected-mesh)
                                                  (update-slide-data-for-position)))
     pdb))
 
