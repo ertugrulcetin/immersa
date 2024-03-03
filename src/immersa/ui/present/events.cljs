@@ -20,7 +20,8 @@
 (reg-fx
   ::animate-progress-bar
   (fn [[progress-bar progress]]
-    (j/call progress-bar :animate progress)))
+    (when progress-bar
+      (j/call progress-bar :animate progress))))
 
 (reg-event-db
   ::set-show-arrow-keys-text?

@@ -26,24 +26,46 @@
     [immersa.ui.editor.subs :as subs]
     [immersa.ui.icons :as icon]
     [immersa.ui.loading-screen :refer [loading-screen]]
+    [immersa.ui.present.events :as present.events]
+    [immersa.ui.present.views :as present.views]
     [immersa.ui.subs :as main.subs]
     [immersa.ui.theme.colors :as colors]
+    [immersa.ui.theme.styles :as main.styles]
     [re-frame.core :refer [dispatch subscribe]]
     [reagent.core :as r])
   (:require-macros
     [immersa.common.macros :as m]))
 
+(defonce present? (r/atom false))
+(defonce canvas-started? (atom false))
+
 (defn- canvas []
   (r/create-class
-    {:component-did-mount #(scene.core/start-scene (js/document.getElementById "renderCanvas")
-                                                   {:mode :editor
-                                                    :slides @(subscribe [::subs/slides-all])
-                                                    :thumbnails @(subscribe [::subs/slides-thumbnails])})
+    {:component-did-mount (fn []
+                            (println "Canvas editor mounted")
+                            (let [canvas (js/document.getElementById "renderCanvas")
+                                  app (js/document.getElementById "app")]
+                              (->> canvas
+                                   (j/call (js/document.getElementById "canvas-editor-origin") :append))
+                              (j/assoc! canvas :className (styles/canvas :editor))
+                              (j/assoc-in! app [:style :border] main.styles/app-border)
+                              (j/assoc-in! canvas [:style :pointer-events] "auto")
+                              (when-not @canvas-started?
+                                (reset! canvas-started? true)
+                                (j/call canvas :addEventListener "blur" #(dispatch [::events/update-thumbnail]))
+                                (scene.core/start-scene canvas
+                                                        {:mode :editor
+                                                         :slides @(subscribe [::subs/slides-all])
+                                                         :thumbnails @(subscribe [::subs/slides-thumbnails])}))
+                              (when @canvas-started?
+                                (js/setTimeout #(dispatch [::events/resize-scene]) 200))))
+     :component-will-unmount (fn []
+                               (->> (js/document.getElementById "renderCanvas")
+                                    (j/call js/document.body :append)))
      :reagent-render (fn []
-                       [:canvas
-                        {:id "renderCanvas"
-                         :on-blur #(dispatch [::events/update-thumbnail])
-                         :class (styles/canvas)}])}))
+                       [:div {:id "canvas-editor-origin"
+                              :style {:width "100%"
+                                      :height "100%"}}])}))
 
 (defn- canvas-container []
   (let [{:keys [width height]} @(subscribe [::subs/calculated-canvas-wrapper-dimensions])]
@@ -70,7 +92,6 @@
                     200)]
     (r/create-class
       {:component-did-mount (fn []
-                              (println "canvas-wrapper did mount")
                               (when @ref
                                 (let [observer (js/ResizeObserver. on-resize)]
                                   (reset! ob observer)
@@ -80,6 +101,7 @@
                          [:div
                           {:id "canvas-wrapper"
                            :ref #(reset! ref %)
+                           ;; :style {:flex 1}
                            :class (styles/canvas-wrapper)}
                           (when @ref
                             [canvas-container])])})))
@@ -305,6 +327,8 @@
   [:div (styles/header-right)
    [:div (styles/header-right-container)
     [button {:text "Present"
+             :on-click #(reset! present? true)
+             :disabled? (not @(subscribe [::subs/scene-ready?]))
              :type :outline
              :class (styles/present-share-width)
              :icon-left [icon/play {:size 18
@@ -330,6 +354,8 @@
     js/document
     "keydown"
     (fn [e]
+      (when (= (j/get e :key) "Escape")
+        (reset! present? false))
       (when (and (or (j/get e :metaKey)
                      (j/get e :ctrlKey))
                  (= (some-> (j/get e :key) str/lower-case) "d"))
@@ -337,6 +363,26 @@
       (when (and (not (j/get e :repeat))
                  (not (blocked-fields (j/get-in js/document [:activeElement :tagName]))))
         (shortcut/call-shortcut-action-with-event :blank-slide e)))))
+
+(defn- present-panel []
+  (r/create-class
+    {:component-did-mount (fn []
+                            (dispatch [::events/clear-selected-mesh])
+                            (dispatch [::events/update-slide-info])
+                            (let [canvas (js/document.getElementById "renderCanvas")
+                                  app (js/document.getElementById "app")]
+                              (j/assoc! canvas :className (styles/canvas :present))
+                              (j/assoc-in! app [:style :border] "0px")
+                              (j/assoc-in! canvas [:style :pointer-events] "none")
+                              (->> canvas
+                                   (j/call (js/document.getElementById "canvas-present-origin") :append))
+                              (js/setTimeout #(dispatch [::events/resize-scene]) 200)))
+     :component-will-unmount (fn []
+                               (let [canvas (js/document.getElementById "renderCanvas")]
+                                 (->> canvas
+                                      (j/call js/document.body :append))))
+     :reagent-render (fn []
+                       [present.views/present-panel {:mode :editor}])}))
 
 (defn editor-panel []
   (let [{:keys [user]} (j/lookup (useUser))
@@ -368,15 +414,22 @@
                             :object user}])
                 (register-global-events)))
             #js[])]
-    [:div (styles/editor-container)
-     [header]
-     [:div (styles/content-container)
-      [slides-panel]
-      [canvas-wrapper]
-      [options-panel]
-      [canvas-context-menu]]]))
+    [:<>
+     (if @present?
+       [present-panel]
+       [:div (styles/editor-container)
+        [header]
+        [:div (styles/content-container)
+         [slides-panel]
+         [canvas-wrapper]
+         [options-panel]
+         [canvas-context-menu]]])]))
 
 (comment
+
+  (->> (js/document.getElementById "canvas-wrapper")
+       (j/call (js/document.getElementById "temp") :append))
+
   @(subscribe [::subs/editor])
   @(subscribe [::main.subs/user])
   )

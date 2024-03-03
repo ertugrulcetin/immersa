@@ -6,7 +6,8 @@
 (def default-db
   {:name "re-frame"
    :mode :editor
-   :editor {:slides {:current-index 0
+   :editor {:scene-ready? false
+            :slides {:current-index 0
                      :all basic/slides
                      :thumbnails basic/thumbnails}
             :gizmo {:position true

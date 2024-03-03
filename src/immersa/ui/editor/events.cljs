@@ -14,9 +14,14 @@
         (assoc-in [:editor :canvas-wrapper :height] height))))
 
 (reg-event-db
-  ::clear-selected-mesh
+  ::remove-selected-mesh
   (fn [db]
     (dissoc-in db [:editor :selected-mesh])))
+
+(reg-event-fx
+  ::clear-selected-mesh
+  (fn []
+    {:scene {:type :clear-selected-mesh}}))
 
 (reg-event-fx
   ::update-selected-mesh
@@ -294,3 +299,23 @@
   ::add-uploaded-model
   (fn [db [_ model]]
     (update-in db [:user :models] (fnil conj []) model)))
+
+(reg-event-db
+  ::scene-ready
+  (fn [db]
+    (assoc-in db [:editor :scene-ready?] true)))
+
+(reg-event-fx
+  ::attach-camera-controls
+  (fn []
+    {:scene {:type :attach-camera-controls}}))
+
+(reg-event-fx
+  ::detach-camera-controls
+  (fn []
+    {:scene {:type :detach-camera-controls}}))
+
+(reg-event-fx
+  ::update-slide-info
+  (fn []
+    {:scene {:type :update-slide-info}}))

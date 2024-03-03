@@ -8,6 +8,7 @@
     [cljs.core.async :as a :refer [go-loop <!]]
     [clojure.string :as str]
     [goog.functions :as functions]
+    [immersa.common.communication :refer [fire]]
     [immersa.common.shortcut :as shortcut]
     [immersa.common.utils :as common.utils]
     [immersa.scene.api.animation :as api.anim]
@@ -220,7 +221,7 @@
           ]
       (when dev?
         (common.utils/remove-element-listeners))
-      (common.utils/register-event-listener js/window "resize" (functions/debounce #(j/call engine :resize) 250))
+      (common.utils/register-event-listener js/window "resize" (functions/debounce api.core/resize 250))
       (j/assoc! light :intensity 0.7)
       (j/call free-camera :setTarget (v3))
       (j/call free-camera :attachControl canvas false)

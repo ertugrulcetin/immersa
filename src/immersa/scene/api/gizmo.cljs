@@ -91,7 +91,7 @@
         (render-outline-selected-mesh mesh linked-type))
       (ui.notifier/notify-ui-selected-mesh (j/assoc! mesh :linked-type linked-type))))
   (when-not mesh
-    (dispatch [::events/clear-selected-mesh])))
+    (dispatch [::events/remove-selected-mesh])))
 
 (defn- create-rotation-gizmo-on-drag-start [axis]
   (fn []

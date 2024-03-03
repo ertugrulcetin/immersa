@@ -726,9 +726,11 @@
                  :slide-in-progress? slide-in-progress?
                  :current-running-anims current-running-anims}))))))))
 
-(defn- hide-loading-screen []
+(defn- hide-loading-screen [mode]
   (dispatch [::main.events/hide-loading-screen])
-  (api.core/resize))
+  (api.core/resize)
+  (when (= mode :editor)
+    (dispatch [::editor.events/scene-ready])))
 
 (defn start-slide-show [{:keys [mode slides] :as opts}]
   (let [_ (init-slide-show-state)
@@ -744,7 +746,7 @@
     (capture-thumbnail-changes)
     (a/put! command-ch :next)
     (add-listeners-for-present-mode mode)
-    (js/setTimeout hide-loading-screen 500)
+    (js/setTimeout #(hide-loading-screen mode) 500)
     (go-loop [index -1]
       (let [command (a/<! command-ch)
             current-index (case command
@@ -754,8 +756,7 @@
             slides (get-slides @all-slides)]
         (if (and (>= current-index 0) (< current-index (count slides)))
           (let [_ (reset! current-slide-index current-index)
-                _ (when (= mode :present)
-                    (notify-ui current-index (count slides)))
+                _ (notify-ui current-index (count slides))
                 slide (slides current-index)
                 objects-data (:data slide)
                 ground (api.core/get-object-by-name "ground")
@@ -776,7 +777,7 @@
                                                                       [prev-slide-object-names
                                                                        (set/difference prev-slide-object-names current-slide-object-names #{:camera :skybox})]))
                 _ (doseq [{:keys [force-finish-fn]} @disabled-component-anims]
-                    (force-finish-fn))
+                    (when force-finish-fn (force-finish-fn)))
                 _ (reset! disabled-component-anims (doall
                                                      (for [name object-names-to-dispose]
                                                        (disable-component name))))

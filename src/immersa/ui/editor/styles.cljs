@@ -50,11 +50,11 @@
    :box-sizing :border-box
    :box-shadow :none})
 
-(defclass canvas []
+(defclass canvas [mode]
   {:width "100%"
    :height "100%"
    :box-sizing "border-box"
-   :border-radius "15px"
+   :border-radius (if (= :editor mode) "15px" "0px")
    :margin 0
    :padding 0
    :touch-action :none
@@ -178,7 +178,7 @@
     :position "fixed"
     :width options-panel-size
     :height "8px"
-    :background "linear-gradient(180deg,#ffffff 0%,rgba(252,252,253,0) 100%)"}])
+    :background (str "linear-gradient(180deg," colors/app-background " 0%,rgba(252,252,253,0) 100%)")}])
 
 (defclass present-share-width []
   {:width "88px"})

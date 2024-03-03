@@ -54,6 +54,7 @@
   (j/get db :engine))
 
 (defn resize []
+  (println "Canvas resized")
   (j/call (get-engine) :resize))
 
 (defn create-scene [engine]

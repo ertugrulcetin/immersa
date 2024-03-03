@@ -97,6 +97,7 @@
 
 (defclass wait-list-button []
   {:font-family "'Open Sans', sans-serif"
+   :user-select :none
    :font-size "16px"
    :cursor :pointer
    :transition "all 0.3s ease"

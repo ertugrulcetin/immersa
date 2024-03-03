@@ -20,12 +20,16 @@
                                                    {:mode :present
                                                     :slides @(subscribe [::editor.subs/slides-all])})
      :reagent-render (fn []
-                       [:<>
-                        [:canvas
-                         {:id "renderCanvas"
-                          :class (styles/canvas)}]])}))
+                       [:canvas
+                        {:id "renderCanvas"
+                         :class (styles/canvas)}])}))
 
-(defn- canvas-container []
+(defn- canvas-editor []
+  [:div {:id "canvas-present-origin"
+         :style {:width "100%"
+                 :height "100%"}}])
+
+(defn- canvas-container [mode]
   (let [{:keys [width height]} @(subscribe [::subs/calculated-canvas-dimensions])]
     (when (and (> width 0) (> height 0))
       [:div
@@ -46,7 +50,9 @@
        (when @(subscribe [::subs/show-pre-warm-text?])
          [:div (styles/arrow-keys-text)
           [:h2 "Pre-warming scene..."]])
-       [canvas]
+       (if (= mode :editor)
+         [canvas-editor]
+         [canvas])
        (when @(subscribe [::main.subs/loading-screen?])
          [loading-screen height])])))
 
@@ -108,12 +114,14 @@
                    (styles/wait-list-button-gradient-border)]}
           "Join Waitlist"])})))
 
-(defn present-panel []
+(defn present-panel [& {:keys [mode]}]
   [:div
    {:id "content-container"
     :class (styles/content-container)
     :style {:background @(subscribe [::subs/background-color])}}
-   [canvas-container]
+   (if (= mode :editor)
+     [canvas-container mode]
+     [canvas-container])
    [:div
     {:id "progress-bar"
      :class (styles/progress-bar)}

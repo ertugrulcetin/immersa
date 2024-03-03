@@ -32,7 +32,7 @@
     :position "fixed"
     :width slides-panel-size
     :height "8px"
-    :background "linear-gradient(180deg,#ffffff 0%,rgba(252,252,253,0) 100%)"}])
+    :background (str "linear-gradient(180deg," colors/app-background " 0%,rgba(252,252,253,0) 100%)")}])
 
 (defclass slide [camera-unlocked? selected?]
   {:width "123px"

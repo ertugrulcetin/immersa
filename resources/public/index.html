@@ -22,6 +22,14 @@
     })(window, document, 'script', 'dataLayer', 'GTM-W62M2JGJ');</script>
     <!-- End Google Tag Manager -->
 </head>
+<style>
+    .canvas-init {
+        height: 0;
+        width: 0;
+        position: absolute;
+        z-index: -1;
+    }
+</style>
 <body>
 <!-- Google Tag Manager (noscript) -->
 <noscript>
@@ -48,6 +56,7 @@
 <!--      href="https://prod-waitlist-widget.s3.us-east-2.amazonaws.com/getwaitlist.min.css"/>-->
 <!--<script src="https://prod-waitlist-widget.s3.us-east-2.amazonaws.com/getwaitlist.min.js"></script>-->
 <div id="app"></div>
+<canvas id="renderCanvas" class="canvas-init"></canvas>
 <script src="js/compiled/app.js?v=__COMMIT_SHA__"></script>
 </body>
 </html>

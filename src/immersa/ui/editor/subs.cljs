@@ -205,3 +205,8 @@
   ::uploaded-models
   (fn [db]
     (-> db :user :models)))
+
+(reg-sub
+  ::scene-ready?
+  (fn [db]
+    (-> db :editor :scene-ready?)))

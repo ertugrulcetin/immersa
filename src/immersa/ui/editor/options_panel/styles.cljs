@@ -36,7 +36,7 @@
     :position "fixed"
     :width options-panel-size
     :height "8px"
-    :background "linear-gradient(180deg,#ffffff 0%,rgba(252,252,253,0) 100%)"}])
+    :background (str "linear-gradient(180deg," colors/app-background " 0%,rgba(252,252,253,0) 100%)")}])
 
 (defattrs pos-rot-scale-comp-container [disabled?]
   {:display :flex

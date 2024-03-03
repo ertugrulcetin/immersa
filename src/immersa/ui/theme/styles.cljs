@@ -15,9 +15,11 @@
          :font-family typography/font
          :overscroll-behavior :none))
 
+(def app-border (str "9px solid " colors/background))
+
 (def app
   {:border-radius "20px"
-   :border (str "9px solid " colors/background)
+   :border app-border
    :box-sizing :border-box
    :background colors/app-background})
 

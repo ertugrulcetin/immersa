@@ -20,6 +20,6 @@
 (defn main-panel []
   [editor]
   #_[:div (styles/app-container)
-     ;; [present.views/present-panel]
+      [present.views/present-panel]
 
      ])

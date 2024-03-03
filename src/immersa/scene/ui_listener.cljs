@@ -13,6 +13,7 @@
     [immersa.scene.slide :as slide]
     [immersa.scene.ui-notifier :as ui.notifier]
     [immersa.ui.editor.events :as editor.events]
+    [immersa.ui.present.events :as present.events]
     [re-frame.core :refer [dispatch]])
   (:require-macros
     [immersa.common.macros :refer [go-loop-sub]]))
@@ -340,6 +341,24 @@
                     :url value
                     :on-complete on-complete})]
         (j/call task :run (api.core/get-scene) (fn []))))))
+
+(defmethod handle-ui-update :attach-camera-controls [_]
+  (let [free-camera (api.core/get-object-by-name "free-camera")
+        arc-camera (api.core/get-object-by-name "arc-camera")]
+    (api.camera/attach-control free-camera)
+    (api.camera/attach-control arc-camera)))
+
+(defmethod handle-ui-update :detach-camera-controls [_]
+  (let [free-camera (api.core/get-object-by-name "free-camera")
+        arc-camera (api.core/get-object-by-name "arc-camera")]
+    (api.camera/detach-control free-camera)
+    (api.camera/detach-control arc-camera)))
+
+(defmethod handle-ui-update :clear-selected-mesh [_]
+  (api.core/clear-selected-mesh))
+
+(defmethod handle-ui-update :update-slide-info [_]
+  (dispatch [::present.events/update-slide-info @slide/current-slide-index (count @slide/all-slides)]))
 
 (defn init-ui-update-listener []
   (go-loop-sub event-bus-pub :get-ui-update [_ data]

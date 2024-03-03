@@ -16,6 +16,10 @@
    :font-size typography/m
    :font-weight typography/medium})
 
+(defclass common-class []
+  [:&:disabled {:cursor :not-allowed
+                :opacity 0.5}])
+
 (defclass button-regular []
   (merge common
          {:color colors/button-text
@@ -74,15 +78,18 @@
                       on-click
                       icon-left
                       icon-right
+                      disabled?
                       class
                       style
                       type]}]
   [:button
    {:on-click on-click
+    :disabled disabled?
     :class [(case type
               :regular (button-regular)
               :outline (button-outline)
               (button-primary))
+            (common-class)
             class]
     :style style}
    (when icon-left icon-left)
