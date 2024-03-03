@@ -5,6 +5,7 @@
     [com.rpl.specter :as sp]
     [goog.functions :as functions]
     [immersa.common.communication :refer [event-bus-pub]]
+    [immersa.common.utils :as common.utils]
     [immersa.scene.api.camera :as api.camera]
     [immersa.scene.api.component :as api.component]
     [immersa.scene.api.constant :as api.const]
@@ -359,6 +360,12 @@
 
 (defmethod handle-ui-update :update-slide-info [_]
   (dispatch [::present.events/update-slide-info @slide/current-slide-index (count @slide/all-slides)]))
+
+(defmethod handle-ui-update :add-listeners-for-present-mode [_]
+  (slide/add-listeners-for-present-mode))
+
+(defmethod handle-ui-update :remove-listeners-for-present-mode [_]
+  (common.utils/remove-element-listener js/window "keydown" slide/next-prev-slide-event-listener))
 
 (defn init-ui-update-listener []
   (go-loop-sub event-bus-pub :get-ui-update [_ data]

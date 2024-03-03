@@ -319,3 +319,13 @@
   ::update-slide-info
   (fn []
     {:scene {:type :update-slide-info}}))
+
+(reg-event-fx
+  ::add-listeners-for-present-mode
+  (fn []
+    {:scene {:type :add-listeners-for-present-mode}}))
+
+(reg-event-fx
+  ::remove-listeners-for-present-mode
+  (fn []
+    {:scene {:type :remove-listeners-for-present-mode}}))

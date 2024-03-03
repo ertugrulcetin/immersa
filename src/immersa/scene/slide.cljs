@@ -685,46 +685,46 @@
                (when-not (= old-val new-val)
                  (swap! thumbnails assoc :last-time-slide-updated (js/Date.now))))))
 
-(defn- add-listeners-for-present-mode [mode]
-  (when (= mode :present)
-    (api.camera/detach-control (api.camera/active-camera))
-    (let [slide-controls (js/document.getElementById "slide-controls")
-          prev-button (j/get-in slide-controls [:children 0])
-          next-button (j/get-in slide-controls [:children 2])]
-      (common.utils/register-event-listener prev-button "click"
-        (fn [e]
-          (when-not (j/get e :repeat)
-            (process-next-prev-command
-              {:type :prev
-               :ch command-ch
-               :slide-in-progress? slide-in-progress?
-               :current-running-anims current-running-anims}))))
-      (common.utils/register-event-listener next-button "click"
-        (fn [e]
-          (when-not (j/get e :repeat)
-            (process-next-prev-command
-              {:type :next
-               :ch command-ch
-               :slide-in-progress? slide-in-progress?
-               :current-running-anims current-running-anims}))))
-      (common.utils/register-event-listener js/window "keydown"
-        (fn [e]
-          (when-not (j/get e :repeat)
-            (cond
-              (or (= (.-keyCode e) 39)
-                  (= (.-keyCode e) 40))
-              (process-next-prev-command
-                {:type :next
-                 :ch command-ch
-                 :slide-in-progress? slide-in-progress?
-                 :current-running-anims current-running-anims})
-              (or (= (.-keyCode e) 37)
-                  (= (.-keyCode e) 38))
-              (process-next-prev-command
-                {:type :prev
-                 :ch command-ch
-                 :slide-in-progress? slide-in-progress?
-                 :current-running-anims current-running-anims}))))))))
+(defn- next-prev-slide-event-listener [e]
+  (when-not (j/get e :repeat)
+    (cond
+      (or (= (.-keyCode e) 39)
+          (= (.-keyCode e) 40))
+      (process-next-prev-command
+        {:type :next
+         :ch command-ch
+         :slide-in-progress? slide-in-progress?
+         :current-running-anims current-running-anims})
+      (or (= (.-keyCode e) 37)
+          (= (.-keyCode e) 38))
+      (process-next-prev-command
+        {:type :prev
+         :ch command-ch
+         :slide-in-progress? slide-in-progress?
+         :current-running-anims current-running-anims}))))
+
+(defn add-listeners-for-present-mode []
+  (let [slide-controls (js/document.getElementById "slide-controls")
+        prev-button (j/get-in slide-controls [:children 0])
+        next-button (j/get-in slide-controls [:children 2])]
+    (common.utils/register-event-listener prev-button "click"
+      (fn [e]
+        (when-not (j/get e :repeat)
+          (process-next-prev-command
+            {:type :prev
+             :ch command-ch
+             :slide-in-progress? slide-in-progress?
+             :current-running-anims current-running-anims}))))
+    (common.utils/register-event-listener next-button "click"
+      (fn [e]
+        (when-not (j/get e :repeat)
+          (process-next-prev-command
+            {:type :next
+             :ch command-ch
+             :slide-in-progress? slide-in-progress?
+             :current-running-anims current-running-anims}))))
+    (common.utils/remove-element-listener js/window "keydown" next-prev-slide-event-listener)
+    (common.utils/register-event-listener js/window "keydown" next-prev-slide-event-listener)))
 
 (defn- hide-loading-screen [mode]
   (dispatch [::main.events/hide-loading-screen])
@@ -745,7 +745,9 @@
     (prepare-first-skybox slides)
     (capture-thumbnail-changes)
     (a/put! command-ch :next)
-    (add-listeners-for-present-mode mode)
+    (when (= mode :present)
+      (api.camera/detach-control (api.camera/active-camera))
+      (add-listeners-for-present-mode))
     (js/setTimeout #(hide-loading-screen mode) 500)
     (go-loop [index -1]
       (let [command (a/<! command-ch)

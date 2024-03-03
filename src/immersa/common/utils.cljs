@@ -9,6 +9,9 @@
   (swap! db update :event-listeners (fnil conj []) [element type f])
   f)
 
+(defn remove-element-listener [element type f]
+  (j/call element :removeEventListener type f))
+
 (defn remove-element-listeners []
   (doseq [[element type f] (:event-listeners @db)]
     (j/call element :removeEventListener type f))
