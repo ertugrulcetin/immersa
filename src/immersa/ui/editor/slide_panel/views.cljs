@@ -40,6 +40,14 @@
 (defn- to-clj-map [hash-map]
   (js->clj hash-map :keywordize-keys true))
 
+(defn- click-prev-slide [props index-state]
+  (when-let [id (j/get (:items props) (dec @index-state))]
+    (some-> (js/document.getElementById (str "slide-container-" id)) .click)))
+
+(defn- click-next-slide [props index-state]
+  (when-let [id (j/get (:items props) (inc @index-state))]
+    (some-> (js/document.getElementById (str "slide-container-" id)) .click)))
+
 (defn- slide [props]
   (let [{:keys [attributes
                 listeners
@@ -116,15 +124,14 @@
                                       (when-not (j/get e :repeat)
                                         (when (or (= "ArrowDown" (j/get e :code))
                                                   (= "ArrowRight" (j/get e :code)))
-                                          (when-let [id (j/get (:items props) (inc @index-state))]
-                                            (some-> (js/document.getElementById (str "slide-container-" id)) .click)))
+                                          (click-next-slide props index-state))
 
                                         (when (or (= "ArrowUp" (j/get e :code))
                                                   (= "ArrowLeft" (j/get e :code)))
-                                          (when-let [id (j/get (:items props) (dec @index-state))]
-                                            (some-> (js/document.getElementById (str "slide-container-" id)) .click)))
+                                          (click-prev-slide props index-state))
 
-                                        (shortcut/call-shortcut-action-with-event :delete-slide e)
+                                        (when (shortcut/call-shortcut-action-with-event :delete-slide e)
+                                          (click-prev-slide props index-state))
                                         (shortcut/call-shortcut-action-with-event :add-slide e)))
                        :on-click #(some-> (js/document.getElementById (str "slide-container-" (:id props))) .focus)}
                  [:img {:src thumbnail

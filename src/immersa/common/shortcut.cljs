@@ -228,7 +228,8 @@
     (when (pred #js {:event event} (some-> (j/get event :key) str/lower-case))
       (when prevent-default?
         (.preventDefault event))
-      (f))))
+      (f)
+      true)))
 
 (defn process [info key]
   (doseq [[_ {:keys [pred action prevent-default? ui-only?]}] shortcuts]
