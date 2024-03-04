@@ -836,6 +836,7 @@
                                :skybox (:skybox objects-data)})
             (doseq [{:keys [ch]} @current-running-anims]
               (a/<! ch))
+            (reset! current-running-anims [])
             (reset! prev-slide objects-data)
             (reset! slide-in-progress? false)
             (recur current-index))

@@ -48,17 +48,17 @@
                                        :to to
                                        :items items}})))
 
-(defn- go-to-prev-slide [props]
-  (when-let [index (.indexOf (:items props) (:id props))]
+(defn- go-to-prev-slide [props current-index-state]
+  (when-let [index @current-index-state]
     (when-let [prev-id (j/get (:items props) (dec index))]
-      (when-let [next-index (.indexOf (:items props) prev-id)]
+      (when-let [prev-index (.indexOf (:items props) prev-id)]
         (create-go-to-slide-action {:from (:id props)
                                     :to prev-id
                                     :items (:items props)})
-        (dispatch [::events/go-to-slide next-index])))))
+        (dispatch [::events/go-to-slide prev-index])))))
 
-(defn- go-to-next-slide [props]
-  (when-let [index (.indexOf (:items props) (:id props))]
+(defn- go-to-next-slide [props current-index-state]
+  (when-let [index @current-index-state]
     (when-let [next-id (j/get (:items props) (inc index))]
       (when-let [next-index (.indexOf (:items props) next-id)]
         (create-go-to-slide-action {:from (:id props)
@@ -146,14 +146,14 @@
                                       (when-not (j/get e :repeat)
                                         (when (or (= "ArrowDown" (j/get e :code))
                                                   (= "ArrowRight" (j/get e :code)))
-                                          (go-to-next-slide props))
+                                          (go-to-next-slide props current-index-state))
 
                                         (when (or (= "ArrowUp" (j/get e :code))
                                                   (= "ArrowLeft" (j/get e :code)))
-                                          (go-to-prev-slide props))
+                                          (go-to-prev-slide props current-index-state))
 
                                         (when (shortcut/call-shortcut-action-with-event :delete-slide e)
-                                          (go-to-prev-slide props))
+                                          (go-to-prev-slide props current-index-state))
                                         (shortcut/call-shortcut-action-with-event :add-slide e)))
                        :on-click #(some-> (js/document.getElementById (str "slide-container-" (:id props))) .focus)}
                  [:img {:src thumbnail
