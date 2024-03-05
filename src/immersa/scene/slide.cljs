@@ -18,6 +18,7 @@
     [immersa.scene.api.particle :as api.particle]
     [immersa.scene.materials-in-sphere :as mat.spheres]
     [immersa.scene.ui-notifier :as ui.notifier]
+    [immersa.scene.utils :as utils]
     [immersa.ui.editor.events :as editor.events]
     [immersa.ui.events :as main.events]
     [immersa.ui.present.events :as events]
@@ -575,10 +576,6 @@
     (sp/setval [sp/ATOM id] params prev-slide)
     mesh))
 
-(defn vec-insert [lst elem index]
-  (let [[l r] (split-at index lst)]
-    (vec (concat l [elem] r))))
-
 (defn update-thumbnail []
   (let [{:keys [last-time-slide-updated last-time-thumbnail-updated]} @thumbnails]
     (when (> last-time-slide-updated last-time-thumbnail-updated)
@@ -626,10 +623,11 @@
                                                          (assoc :initial-scale (:scale form)))
                                                      form))
                                                  duplicated-slide)]
-                          (vec-insert slides (assoc duplicated-slide :id uuid) (inc index)))))
+                          (utils/vec-insert slides (assoc duplicated-slide :id uuid) (inc index)))))
     (swap! current-slide-index inc)
     (ui.notifier/sync-slides-info @current-slide-index @all-slides)
-    (update-thumbnail)))
+    (update-thumbnail)
+    [(inc index) (get @all-slides (inc index))]))
 
 (defn blank-slide []
   (let [index @current-slide-index
@@ -645,7 +643,7 @@
                               slide {:id uuid
                                      :data {:camera (get-in slide [:data :camera])
                                             :skybox (get-in slide [:data :skybox])}}]
-                          (vec-insert slides slide (inc index)))))
+                          (utils/vec-insert slides slide (inc index)))))
     (ui.notifier/sync-slides-info @current-slide-index @all-slides)
     (go-to-slide (inc @current-slide-index))
     (js/setTimeout update-thumbnail 550)))
@@ -657,7 +655,7 @@
       (if (= index 0)
         (go-to-slide 0)
         (go-to-slide (dec @current-slide-index)))
-      (sp/setval* [sp/ATOM index] sp/NONE all-slides)
+      (sp/setval [sp/ATOM index] sp/NONE all-slides)
       (when-not (= index 0)
         (swap! current-slide-index dec))
       (ui.notifier/sync-slides-info @current-slide-index @all-slides))))

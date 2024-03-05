@@ -14,6 +14,7 @@
     [immersa.scene.slide :as slide]
     [immersa.scene.ui-notifier :as ui.notifier]
     [immersa.scene.undo-redo :as undo.redo]
+    [immersa.scene.utils :as utils]
     [immersa.ui.editor.events :as editor.events]
     [immersa.ui.present.events :as present.events]
     [re-frame.core :refer [dispatch]])
@@ -198,7 +199,10 @@
   (slide/go-to-slide index))
 
 (defmethod handle-ui-update :add-slide [_]
-  (slide/add-slide))
+  (let [[index slide] (slide/add-slide)]
+    (undo.redo/create-action {:type :duplicate-slide
+                              :params {:index index
+                                       :slide slide}})))
 
 (defmethod handle-ui-update :blank-slide [_]
   (slide/blank-slide))
@@ -211,7 +215,7 @@
         old-index-slide (get @slide/all-slides old-index)
         selected-slide-id (get-in @slide/all-slides [@slide/current-slide-index :id])
         _ (sp/setval [sp/ATOM old-index] sp/NONE slide/all-slides)
-        _ (sp/transform sp/ATOM #(slide/vec-insert % old-index-slide new-index) slide/all-slides)
+        _ (sp/transform sp/ATOM #(utils/vec-insert % old-index-slide new-index) slide/all-slides)
         current-index (first (sp/select-one [sp/INDEXED-VALS #(= selected-slide-id (:id (second %)))] @slide/all-slides))]
     (reset! slide/current-slide-index current-index)
     (ui.notifier/sync-slides-info @slide/current-slide-index @slide/all-slides)))

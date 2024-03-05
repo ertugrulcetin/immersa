@@ -22,3 +22,7 @@
         (assoc acc attr data)))
     {}
     attrs))
+
+(defn vec-insert [lst elem index]
+  (let [[l r] (split-at index lst)]
+    (vec (concat l [elem] r))))

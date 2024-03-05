@@ -166,7 +166,7 @@
                   :ui-only? true
                   :pred (fn [info _]
                           (delete? info))
-                  :action #(slide/delete-slide)}
+                  :action #(ui-listener/handle-ui-update {:type :delete-slide})}
    :camera-reset-to-initials {:label "Reset camera to initials"
                               :shortcut ["shift" "c"]
                               :pred (fn [info key]

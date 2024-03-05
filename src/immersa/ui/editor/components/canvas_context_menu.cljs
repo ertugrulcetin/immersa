@@ -19,11 +19,12 @@
                  :flex-direction "column"
                  :gap gap}}
    [dropdown-item
-    {:item [option-text {:label "Duplicate slide"
+    {:item [option-text {:label "Copy"
                          :icon [icon/copy {:size 16
                                            :color colors/text-primary}]
-                         :shortcut (shortcut/get-shortcut-key-labels :add-slide)}]
-     :on-select #(shortcut/call-shortcut-action :add-slide)}]
+                         :shortcut (shortcut/get-shortcut-key-labels :copy)}]
+     :on-select #(shortcut/call-shortcut-action :copy)
+     :disabled? true}]
    [dropdown-item
     {:item [option-text {:label "Paste"
                          :icon [icon/clipboard {:size 16

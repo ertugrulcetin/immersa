@@ -2,11 +2,13 @@
   (:require
     [applied-science.js-interop :as j]
     [clojure.string :as str]
+    [com.rpl.specter :as sp]
     [immersa.common.utils :as common.utils]
     [immersa.scene.api.core :as api.core]
     [immersa.scene.api.mesh :as api.mesh]
     [immersa.scene.slide :as slide]
     [immersa.scene.ui-notifier :as ui.notifier]
+    [immersa.scene.utils :as utils]
     [immersa.ui.editor.events :as events]
     [re-frame.core :refer [dispatch]]))
 
@@ -23,7 +25,8 @@
    :update-position :revert-position
    :update-rotation :revert-rotation
    :update-scale :revert-scale
-   :go-to-slide :back-to-slide})
+   :go-to-slide :back-to-slide
+   :duplicate-slide :revert-duplicate-slide})
 
 (defmulti execute :type)
 
@@ -89,6 +92,18 @@
     (dispatch [::events/go-to-slide index])
     ;; to be able to force animations to be executed
     (js/setTimeout #(dispatch [::events/go-to-slide index]) 10)))
+
+(defmethod execute :duplicate-slide [{{:keys [index slide]} :params}]
+  (api.core/clear-selected-mesh)
+  (swap! slide/all-slides #(utils/vec-insert % slide index))
+  (reset! slide/current-slide-index index)
+  (ui.notifier/sync-slides-info @slide/current-slide-index @slide/all-slides))
+
+(defmethod execute :revert-duplicate-slide [{{:keys [index]} :params}]
+  (api.core/clear-selected-mesh)
+  (sp/setval [sp/ATOM index] sp/NONE slide/all-slides)
+  (swap! slide/current-slide-index dec)
+  (ui.notifier/sync-slides-info @slide/current-slide-index @slide/all-slides))
 
 (defmethod execute :default [name]
   (println "default execute!"))
