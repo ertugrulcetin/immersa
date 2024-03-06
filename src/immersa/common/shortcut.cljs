@@ -166,7 +166,8 @@
                   :ui-only? true
                   :pred (fn [info _]
                           (delete? info))
-                  :action #(ui-listener/handle-ui-update {:type :delete-slide})}
+                  :action #(ui-listener/handle-ui-update {:type :delete-slide
+                                                          :index %})}
    :camera-reset-to-initials {:label "Reset camera to initials"
                               :shortcut ["shift" "c"]
                               :pred (fn [info key]
@@ -231,9 +232,13 @@
           s)))
     (get-in shortcuts [type :shortcut])))
 
-(defn call-shortcut-action [type]
-  (when-let [f (get-in shortcuts [type :action])]
-    (f)))
+(defn call-shortcut-action
+  ([type]
+   (when-let [f (get-in shortcuts [type :action])]
+     (f)))
+  ([type param]
+   (when-let [f (get-in shortcuts [type :action])]
+     (f param))))
 
 (defn call-shortcut-action-with-event [type event]
   (let [f (get-in shortcuts [type :action])

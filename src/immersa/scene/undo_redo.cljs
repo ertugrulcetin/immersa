@@ -26,7 +26,9 @@
    :update-rotation :revert-rotation
    :update-scale :revert-scale
    :go-to-slide :back-to-slide
-   :duplicate-slide :revert-duplicate-slide})
+   :duplicate-slide :revert-duplicate-slide
+   :delete-slide :revert-delete-slide
+   :blank-slide :revert-blank-slide})
 
 (defmulti execute :type)
 
@@ -103,6 +105,29 @@
   (api.core/clear-selected-mesh)
   (sp/setval [sp/ATOM index] sp/NONE slide/all-slides)
   (swap! slide/current-slide-index dec)
+  (ui.notifier/sync-slides-info @slide/current-slide-index @slide/all-slides))
+
+(defmethod execute :delete-slide [{{:keys [index]} :params}]
+  (slide/delete-slide index))
+
+(defmethod execute :revert-delete-slide [{{:keys [index slide selected-index-before]} :params}]
+  (api.core/clear-selected-mesh)
+  (reset! slide/current-slide-index selected-index-before)
+  (swap! slide/all-slides #(utils/vec-insert % slide index))
+  (ui.notifier/sync-slides-info @slide/current-slide-index @slide/all-slides))
+
+(defmethod execute :blank-slide [{{:keys [index slide]} :params}]
+  (api.core/clear-selected-mesh)
+  (swap! slide/all-slides #(utils/vec-insert % slide index))
+  (reset! slide/current-slide-index index)
+  (slide/go-to-slide index)
+  (ui.notifier/sync-slides-info @slide/current-slide-index @slide/all-slides))
+
+(defmethod execute :revert-blank-slide [{{:keys [index]} :params}]
+  (api.core/clear-selected-mesh)
+  (sp/setval [sp/ATOM index] sp/NONE slide/all-slides)
+  (swap! slide/current-slide-index dec)
+  (slide/go-to-slide @slide/current-slide-index)
   (ui.notifier/sync-slides-info @slide/current-slide-index @slide/all-slides))
 
 (defmethod execute :default [name]

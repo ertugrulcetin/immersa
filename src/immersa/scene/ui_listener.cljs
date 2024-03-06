@@ -205,10 +205,20 @@
                                        :slide slide}})))
 
 (defmethod handle-ui-update :blank-slide [_]
-  (slide/blank-slide))
+  (let [[index slide] (slide/blank-slide)]
+    (undo.redo/create-action {:type :blank-slide
+                              :params {:index index
+                                       :slide slide}})))
 
-(defmethod handle-ui-update :delete-slide [_]
-  (slide/delete-slide))
+(defmethod handle-ui-update :delete-slide [{:keys [index]}]
+  (let [current-index @slide/current-slide-index
+        index (or index @slide/current-slide-index)
+        slide (get @slide/all-slides index)]
+    (slide/delete-slide index)
+    (undo.redo/create-action {:type :delete-slide
+                              :params {:index index
+                                       :selected-index-before current-index
+                                       :slide slide}})))
 
 (defmethod handle-ui-update :re-order-slides [{{:keys [value]} :data}]
   (let [[old-index new-index] value

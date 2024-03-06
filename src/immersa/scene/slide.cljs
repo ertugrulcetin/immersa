@@ -646,19 +646,28 @@
                           (utils/vec-insert slides slide (inc index)))))
     (ui.notifier/sync-slides-info @current-slide-index @all-slides)
     (go-to-slide (inc @current-slide-index))
-    (js/setTimeout update-thumbnail 550)))
+    (js/setTimeout update-thumbnail 550)
+    [(inc index) (get @all-slides (inc index))]))
 
-(defn delete-slide []
+(defn delete-slide [index]
   (when (> (count @all-slides) 1)
-    (let [index @current-slide-index]
-      (api.core/clear-selected-mesh)
-      (if (= index 0)
-        (go-to-slide 0)
-        (go-to-slide (dec @current-slide-index)))
-      (sp/setval [sp/ATOM index] sp/NONE all-slides)
-      (when-not (= index 0)
-        (swap! current-slide-index dec))
-      (ui.notifier/sync-slides-info @current-slide-index @all-slides))))
+    (api.core/clear-selected-mesh)
+    (if (and index (not= index @current-slide-index))
+      (let [current-selected-slide-id (get-in @all-slides [@current-slide-index :id])
+            _ (sp/setval [sp/ATOM index] sp/NONE all-slides)
+            new-current-index (->> @all-slides
+                                   (sp/select-one [sp/INDEXED-VALS #(= current-selected-slide-id (:id (second %)))])
+                                   first)]
+        (reset! current-slide-index new-current-index)
+        (ui.notifier/sync-slides-info @current-slide-index @all-slides))
+      (let [index @current-slide-index]
+        (if (= index 0)
+          (go-to-slide 0)
+          (go-to-slide (dec @current-slide-index)))
+        (sp/setval [sp/ATOM index] sp/NONE all-slides)
+        (when-not (= index 0)
+          (swap! current-slide-index dec))
+        (ui.notifier/sync-slides-info @current-slide-index @all-slides)))))
 
 (defn add-slide-data [obj params]
   (let [index @current-slide-index]

@@ -95,7 +95,7 @@
                                                         :color colors/warning}]
                                      :color colors/warning
                                      :shortcut (shortcut/get-shortcut-key-labels :delete-slide)
-                                     :on-select #(shortcut/call-shortcut-action :delete-slide)}]]
+                                     :on-select #(shortcut/call-shortcut-action :delete-slide index)}]]
       :trigger [:div
                 (merge {:id (:id props)
                         :ref setNodeRef
