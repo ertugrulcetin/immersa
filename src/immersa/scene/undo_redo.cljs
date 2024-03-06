@@ -3,6 +3,7 @@
     [applied-science.js-interop :as j]
     [clojure.string :as str]
     [com.rpl.specter :as sp]
+    [goog.functions :as functions]
     [immersa.common.utils :as common.utils]
     [immersa.scene.api.core :as api.core]
     [immersa.scene.api.mesh :as api.mesh]
@@ -29,7 +30,8 @@
    :duplicate-slide :revert-duplicate-slide
    :delete-slide :revert-delete-slide
    :blank-slide :revert-blank-slide
-   :re-order-slides :revert-re-order-slides})
+   :re-order-slides :revert-re-order-slides
+   :update-text-content :revert-text-content})
 
 (defmulti execute :type)
 
@@ -137,6 +139,22 @@
 (defmethod execute :revert-re-order-slides [{{:keys [old-index new-index]} :params}]
   (slide/re-order-slides new-index old-index))
 
+(defmethod execute :update-text-content [{{:keys [to]} :params
+                                          id :id}]
+  (let [mesh (api.core/get-object-by-name id)]
+    (some-> mesh (slide/update-slide-data :text to))
+    (slide/update-text-mesh-with-debounce {:mesh mesh
+                                           :text to})
+    (ui.notifier/notify-ui-selected-mesh mesh)))
+
+(defmethod execute :revert-text-content [{{:keys [from]} :params
+                                          id :id}]
+  (let [mesh (api.core/get-object-by-name id)]
+    (some-> mesh (slide/update-slide-data :text from))
+    (slide/update-text-mesh-with-debounce {:mesh mesh
+                                           :text from})
+    (ui.notifier/notify-ui-selected-mesh mesh)))
+
 (defmethod execute :default [name]
   (println "default execute!"))
 
@@ -150,6 +168,8 @@
     (j/call undo-stack :shift))
   (j/assoc! redo-stack :length 0)
   (notify-ui))
+
+(def create-action-with-debounce (functions/debounce create-action 500))
 
 (defn undo []
   (let [action (j/call undo-stack :pop)]

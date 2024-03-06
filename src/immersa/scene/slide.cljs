@@ -707,6 +707,56 @@
     (sp/setval [sp/ATOM index :data object-id path] v all-slides)
     (sp/setval [sp/ATOM object-id path] v prev-slide)))
 
+(defn update-text-mesh [data]
+  (let [mesh (:mesh data)
+        data (dissoc data :mesh)
+        material (api.core/clone (j/get mesh :material))
+        position (api.core/clone (j/get mesh :position))
+        rotation (api.core/clone (j/get mesh :rotation))
+        scale (api.core/clone (j/get mesh :scaling))
+        depth (api.core/get-node-attr mesh :depth)
+        size (api.core/get-node-attr mesh :size)
+        text (api.core/get-node-attr mesh :text)
+        name (j/get mesh :immersa-id)
+        opts (merge
+               {:mat material
+                :depth depth
+                :size size
+                :position position
+                :rotation rotation
+                :scale scale
+                :text text}
+               data)
+        opts (cond
+               (<= (:depth data) 0)
+               (assoc opts :depth 0.01)
+
+               (<= (:size data) 0)
+               (assoc opts :size 0.1)
+
+               :else opts)
+        mesh (cond
+               (:depth data) (j/assoc-in! mesh [:scaling :z] (:depth data))
+               (:size data) (-> mesh
+                                (j/assoc-in! [:scaling :x] (:size data))
+                                (j/assoc-in! [:scaling :y] (:size data)))
+               (:text data) (do
+                              (api.core/dispose name)
+                              (api.mesh/text name opts)))]
+    (when (:size data)
+      (update-slide-data mesh :scale [(:size opts)
+                                      (:size opts)
+                                      (j/get-in mesh [:scaling :z])]))
+    (when (:depth data)
+      (update-slide-data mesh :scale [(j/get-in mesh [:scaling :x])
+                                      (j/get-in mesh [:scaling :y])
+                                      (:depth opts)]))
+    (when (:text data)
+      (update-slide-data mesh :text (:text opts))
+      (j/call-in api.core/db [:gizmo :manager :attachToMesh] mesh))))
+
+(def update-text-mesh-with-debounce (functions/debounce update-text-mesh 500))
+
 (defn camera-locked? []
   (get-slide-data :camera :locked?))
 
