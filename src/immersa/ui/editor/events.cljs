@@ -6,6 +6,8 @@
     [medley.core :refer [dissoc-in]]
     [re-frame.core :refer [reg-event-db reg-event-fx reg-fx]]))
 
+(def start-scene nil)
+
 (reg-event-db
   ::set-canvas-wrapper-dimensions
   (fn [db [_ width height]]
@@ -289,6 +291,31 @@
   ::init-user
   (fn [db [_ user]]
     (assoc db :user user)))
+
+(reg-event-fx
+  ::init-presentation
+  (fn [{:keys [db]} [_ {:keys [id title slides thumbnails present-state] :as opts}]]
+    {:db (-> db
+             (assoc-in [:editor :slides :id] id)
+             (assoc-in [:editor :slides :title] title)
+             (assoc-in [:editor :slides :all] slides)
+             (assoc-in [:editor :slides :thumbnails] thumbnails)
+             (assoc-in [:editor :slides :present-state] present-state))
+     ::start-scene opts}))
+
+(reg-fx
+  ::start-scene
+  (fn [{:keys [slides thumbnails present-state]}]
+    (start-scene (js/document.getElementById "renderCanvas")
+                 {:mode :editor
+                  :present-state present-state
+                  :slides slides
+                  :thumbnails thumbnails})))
+
+(reg-event-db
+  ::add-thumbnail
+  (fn [db [_ slide-id url]]
+    (assoc-in db [:editor :slides :thumbnails slide-id] url)))
 
 (reg-event-db
   ::add-uploaded-image

@@ -55,7 +55,7 @@
 
 (defn resize []
   (println "Canvas resized")
-  (j/call (get-engine) :resize))
+  (some-> (get-engine) (j/call :resize)))
 
 (defn create-scene [engine]
   (let [s (Scene. engine)]

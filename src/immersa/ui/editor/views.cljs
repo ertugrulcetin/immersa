@@ -10,6 +10,7 @@
     [immersa.common.firebase :as firebase]
     [immersa.common.shortcut :as shortcut]
     [immersa.common.utils :as common.utils]
+    [immersa.presentations.init :refer [slides thumbnails]]
     [immersa.scene.core :as scene.core]
     [immersa.ui.crisp-chat :as crisp-chat]
     [immersa.ui.editor.components.alert-dialog :refer [alert-dialog]]
@@ -31,6 +32,7 @@
     [immersa.ui.subs :as main.subs]
     [immersa.ui.theme.colors :as colors]
     [immersa.ui.theme.styles :as main.styles]
+    [nano-id.core :refer [nano-id]]
     [re-frame.core :refer [dispatch subscribe]]
     [reagent.core :as r])
   (:require-macros
@@ -42,6 +44,7 @@
 (defn- canvas []
   (r/create-class
     {:component-did-mount (fn []
+                            (set! events/start-scene scene.core/start-scene)
                             (println "Canvas editor mounted")
                             (let [canvas (js/document.getElementById "renderCanvas")
                                   app (js/document.getElementById "app")]
@@ -52,12 +55,7 @@
                               (j/assoc-in! canvas [:style :pointer-events] "auto")
                               (when-not @canvas-started?
                                 (reset! canvas-started? true)
-                                (j/call canvas :addEventListener "blur" #(dispatch [::events/update-thumbnail]))
-                                (scene.core/start-scene canvas
-                                                        {:mode :editor
-                                                         :present-state present?
-                                                         :slides @(subscribe [::subs/slides-all])
-                                                         :thumbnails @(subscribe [::subs/slides-thumbnails])}))
+                                (j/call canvas :addEventListener "blur" #(dispatch [::events/update-thumbnail])))
                               (when @canvas-started?
                                 (js/setTimeout #(dispatch [::events/resize-scene]) 200))))
      :component-will-unmount (fn []
@@ -175,7 +173,6 @@
          :on-change (fn [this]
                       (when (-> this .-target .-value (not= ""))
                         (let [^js/File file (-> this .-target .-files (aget 0))]
-                          (js/console.log file)
                           (reset! open? true)
                           (reset! err? false)
                           (reset! limit-exceeded? false)
@@ -389,6 +386,86 @@
      :reagent-render (fn []
                        [present.views/present-panel {:mode :editor}])}))
 
+(defn- init-crisp-chat
+  ([email full-name]
+   (init-crisp-chat email full-name 0))
+  ([email full-name retry-count]
+   (try
+     (crisp-chat/set-user-email email)
+     (when-not (str/blank? full-name)
+       (crisp-chat/set-user-name full-name))
+     (js/console.log "Crisp Chat initialized")
+     (catch js/Error e
+       (if (< retry-count 3)
+         (do
+           (js/console.log "Retrying to initialize Crisp Chat")
+           (js/setTimeout #(init-crisp-chat email full-name (inc retry-count)) (* 1000 (inc retry-count))))
+         (do
+           (js/console.error e)
+           (js/console.error "Failed to initialize Crisp Chat")))))))
+
+(defn init-app [{:keys [title slides thumbnails user-id presentation-id email full-name]}]
+  (firebase/get-last-uploaded-files
+    {:type :image
+     :user-id user-id
+     :on-complete #(dispatch [::events/add-uploaded-image %])})
+  (firebase/get-last-uploaded-files
+    {:type :model
+     :user-id user-id
+     :on-complete #(dispatch [::events/add-uploaded-model %])})
+  (dispatch [::events/init-user
+             {:id user-id
+              :full-name full-name
+              :email email}])
+  (dispatch [::events/init-presentation
+             {:id presentation-id
+              :title title
+              :slides slides
+              :thumbnails thumbnails
+              :present-state present?}]))
+
+#_(defn- upload-first-slide-and-thumbnail [{:keys [user-id presentation-id email full-name object]}]
+    (m/js-await [_ (firebase/upload-presentation {:user-id user-id
+                                                  :presentation-id presentation-id
+                                                  :presentation-data slides})]
+                (m/js-await [_ (firebase/upload-thumbnail {:user-id user-id
+                                                           :presentation-id presentation-id
+                                                           :slide-id "14e4ee76-bb27-4904-9d30-360a40d8abb7"
+                                                           :thumbnail (get thumbnails "14e4ee76-bb27-4904-9d30-360a40d8abb7")})]
+                            (init-app {:slides slides
+                                       :thumbnails thumbnails
+                                       :user-id user-id
+                                       :presentation-id presentation-id
+                                       :email email
+                                       :full-name full-name
+                                       :object object})
+                            (catch fail-upload-thumbnail))
+                (catch fail-upload-presentation)))
+
+(defn- init-thumbnails [{:keys [user-id presentation-id]}]
+  (firebase/get-thumbnails {:user-id user-id
+                            :presentation-id presentation-id
+                            :on-complete (fn [slide-id url]
+                                           (dispatch [::events/add-thumbnail slide-id url]))}))
+
+(defn- get-presentation-and-start [{:keys [user-id email full-name]}]
+  (m/js-await [q (firebase/get-presentation-info user-id)]
+    (let [{:keys [id title]} (j/lookup (j/call-in q [:docs 0 :data]))]
+      (m/js-await [presentation-url (firebase/get-presentation id user-id)]
+        (m/js-await [response (js/fetch presentation-url)]
+          (m/js-await [presentation (j/call response :text)]
+            (init-app {:title title
+                       :slides (cljs.reader/read-string presentation)
+                       :thumbnails {}
+                       :user-id user-id
+                       :presentation-id id
+                       :email email
+                       :full-name full-name})
+            (init-thumbnails {:user-id user-id
+                              :presentation-id id})))))
+    (catch e
+           (js/console.log e))))
+
 (defn editor-panel []
   (let [{:keys [user]} (j/lookup (useUser))
         {:keys [getToken]} (j/lookup (useAuth))
@@ -400,27 +477,33 @@
                     _ (firebase/init-app)
                     auth (getAuth)]
                 (m/js-await [token (getToken #js {:template "integration_firebase"})]
-                  (m/js-await [userCredentials (signInWithCustomToken auth token)]))
-
-                (try
-                  (crisp-chat/set-user-email email)
-                  (when-not (str/blank? full-name)
-                    (crisp-chat/set-user-name full-name))
-                  (catch js/Error e
-                    (js/console.error e)))
-                (firebase/get-last-uploaded-files
-                  {:type :image
-                   :user-id user-id
-                   :on-complete #(dispatch [::events/add-uploaded-image %])})
-                (firebase/get-last-uploaded-files
-                  {:type :model
-                   :user-id user-id
-                   :on-complete #(dispatch [::events/add-uploaded-model %])})
-                (dispatch [::events/init-user
-                           {:id user-id
-                            :full-name full-name
-                            :email email
-                            :object user}])
+                  (m/js-await [userCredentials (signInWithCustomToken auth token)]
+                    (init-crisp-chat email full-name)
+                    (m/js-await [doc (firebase/get-user user-id)]
+                      (if (j/call doc :exists)
+                        (get-presentation-and-start {:user-id user-id
+                                                     :email email
+                                                     :full-name full-name})
+                        (let [presentation-id (nano-id 10)]
+                          (m/js-await [_ (firebase/init-user-and-presentation
+                                           {:user {:id user-id
+                                                   :email email
+                                                   :full_name full-name}
+                                            :presentation {:id presentation-id
+                                                           :title "Untitled"
+                                                           :created_at (-> (js/Date.)
+                                                                           (j/call :toISOString))}})]
+                            (init-app {:slides slides
+                                       :thumbnails thumbnails
+                                       :user-id user-id
+                                       :title "Untitled"
+                                       :presentation-id presentation-id
+                                       :email email
+                                       :full-name full-name})
+                            (catch fail-init-user-data
+                                   (println "Failed")))))
+                      (catch fail-get-user
+                             (println "Error!!!!..")))))
                 (register-global-events)))
             #js[])]
     [:<>
@@ -435,6 +518,12 @@
          [canvas-context-menu]]])]))
 
 (comment
+  @(subscribe [::subs/slides-thumbnails])
+  (firebase/set-presentation {:id (nano-id 10)
+                              :user_id "user_2c20lPttd6jIbGObJJhbKwN3tLh"
+                              :title "Untitled"
+                              :created_at (-> (js/Date.)
+                                              (j/call :toISOString))})
 
   (->> (js/document.getElementById "canvas-wrapper")
        (j/call (js/document.getElementById "temp") :append))

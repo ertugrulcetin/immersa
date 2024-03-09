@@ -8,8 +8,8 @@
    :mode :editor
    :editor {:scene-ready? false
             :slides {:current-index 0
-                     :all basic/slides
-                     :thumbnails basic/thumbnails}
+                     :all []
+                     :thumbnails {}}
             :gizmo {:position true
                     :rotation false
                     :scale false}}

@@ -13,7 +13,8 @@
                 [org.clojure/core.async "1.6.673"]
                 [breaking-point "0.1.2"]
                 [dev.weavejester/medley "1.7.0"]
-                [com.rpl/specter "1.1.4"]]
+                [com.rpl/specter "1.1.4"]
+                [nano-id "1.1.0"]]
 
  :dev-http {8280 "resources/public"
             8290 "target/browser-test"}
