@@ -44,7 +44,6 @@
 (defn- canvas []
   (r/create-class
     {:component-did-mount (fn []
-                            (set! events/start-scene scene.core/start-scene)
                             (println "Canvas editor mounted")
                             (let [canvas (js/document.getElementById "renderCanvas")
                                   app (js/document.getElementById "app")]
@@ -471,6 +470,7 @@
         {:keys [getToken]} (j/lookup (useAuth))
         _ (react/useEffect
             (fn []
+              (set! events/start-scene scene.core/start-scene)
               (let [user-id (j/get user :id)
                     email (j/get-in user [:primaryEmailAddress :emailAddress])
                     full-name (j/get user :fullName)
@@ -509,13 +509,18 @@
     [:<>
      (if @present?
        [present-panel]
-       [:div (styles/editor-container)
-        [header]
-        [:div (styles/content-container)
-         [slides-panel]
-         [canvas-wrapper]
-         [options-panel]
-         [canvas-context-menu]]])]))
+       [:<>
+        (when-not (seq @(subscribe [::subs/slides-all]))
+          [:div (styles/logo-loading)
+           [:img {:src "img/logo.png"
+                  :width "120px"}]])
+        [:div (styles/editor-container)
+         [header]
+         [:div (styles/content-container)
+          [slides-panel]
+          [canvas-wrapper]
+          [options-panel]
+          [canvas-context-menu]]]])]))
 
 (comment
   @(subscribe [::subs/slides-thumbnails])

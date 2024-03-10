@@ -2,7 +2,7 @@
   (:require
     [immersa.ui.theme.colors :as colors]
     [immersa.ui.theme.typography :as typography]
-    [spade.core :refer [defclass defattrs]]))
+    [spade.core :refer [defclass defattrs defkeyframes]]))
 
 (def header-height "57px")
 (def options-panel-size "340px")
@@ -188,3 +188,17 @@
   {:width "56px"
    :padding-right "5px"
    :user-select :none})
+
+(defkeyframes logo-scale-in-out []
+  ["0%" {:transform "scale(1)"}]
+  ["50%" {:transform "scale(1.25)"}]
+  ["100%" {:transform "scale(1)"}])
+
+(defattrs logo-loading []
+  {:width "100%"
+   :height "100%"
+   :display :flex
+   :justify-content :center
+   :align-items :center
+   :z-index 9999
+   :animation [[(logo-scale-in-out) "2s infinite"]]})
