@@ -3,6 +3,7 @@
     [applied-science.js-interop :as j]
     [clojure.string :as str]
     [immersa.common.communication :refer [fire]]
+    [immersa.common.firebase :as firebase]
     [immersa.ui.crisp-chat :as crisp-chat]
     [medley.core :refer [dissoc-in]]
     [re-frame.core :refer [reg-event-db reg-event-fx reg-fx]]))
@@ -379,3 +380,18 @@
   (fn [{:keys [db]}]
     {:scene {:type :go-to-slide
              :data {:index (-> db :editor :present :started-index)}}}))
+
+(reg-event-fx
+  ::update-presentation-title
+  (fn [{:keys [db]} [_ title]]
+    (let [id (-> db :editor :slides :id)
+          user-id (-> db :user :id)]
+      {:update-presentation-title {:user-id user-id
+                                   :presentation-id id
+                                   :title title}
+       ::set-title title})))
+
+(reg-fx
+  :update-presentation-title
+  (fn [opts]
+    (firebase/update-presentation-title opts)))

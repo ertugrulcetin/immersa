@@ -94,7 +94,7 @@
    :height "22px"
    :padding-right "2px"})
 
-(defattrs title-label []
+(defclass title-label []
   {:overflow :hidden
    :font-size typography/l
    :font-weight typography/medium
@@ -103,7 +103,11 @@
    :cursor :text
    :text-overflow :ellipsis
    :white-space :nowrap
-   :margin-right "4px"})
+   :margin-right "4px"}
+  [:&:hover
+   {:background-color "#f0f0f0"}]
+  [:&:focus
+   {:background-color "#f0f0f0"}])
 
 (defattrs menubar-list-icon []
   {:display :flex
@@ -194,11 +198,15 @@
   ["50%" {:transform "scale(1.25)"}]
   ["100%" {:transform "scale(1)"}])
 
-(defattrs logo-loading []
+(defattrs logo-container []
   {:width "100%"
    :height "100%"
+   :overflow :hidden
    :display :flex
    :justify-content :center
    :align-items :center
-   :z-index 9999
+   :z-index 9999})
+
+(defclass logo-loading []
+  {:width "120px"
    :animation [[(logo-scale-in-out) "2s infinite"]]})

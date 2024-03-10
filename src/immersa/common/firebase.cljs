@@ -146,6 +146,11 @@
         (j/call tx :set presentation-ref (clj->js (assoc presentation :user_id (:id user))))
         (js/Promise.resolve)))))
 
+(defn update-presentation-title [{:keys [user-id presentation-id title]}]
+  (set-presentation {:id presentation-id
+                     :title title
+                     :user_id user-id}))
+
 (comment
   (j/call (get-user "!23")
           :then (fn []

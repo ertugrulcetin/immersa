@@ -127,7 +127,25 @@
                  [:f> sign-out]]}]]
    [:div (styles/title-bar-full-width)
     [:div (styles/title-container)
-     [:span (styles/title-label) @(subscribe [::subs/slides-title])]
+     [:span {:class (styles/title-label)
+             :content-editable true
+             :on-key-down (fn [e]
+                            (when (= (j/get e :key) "Enter")
+                              (.preventDefault e)
+                              (.blur (-> e .-target))))
+             :on-blur (fn [e]
+                        (let [title (-> e .-target .-innerText)
+                              title (if (str/blank? title)
+                                      "Untitled"
+                                      title)
+                              title (if (> (count title) 50)
+                                      (str (subs title 0 50) "...")
+                                      title)
+                              title (str/replace title #"\n" "")
+                              title (str/trim title)]
+                          (j/assoc-in! e [:target :innerText] title)
+                          (dispatch [::events/update-presentation-title title])))}
+      @(subscribe [::subs/slides-title])]
      [:div (styles/private-badge)
       [icon/lock {:size 12}]
       [tooltip
@@ -526,10 +544,10 @@
      (if @present?
        [present-panel]
        [:<>
-        (when-not (seq @(subscribe [::subs/slides-all]))
-          [:div (styles/logo-loading)
+        (if-not (seq @(subscribe [::subs/slides-all]))
+          [:div (styles/logo-container)
            [:img {:src "img/logo.png"
-                  :width "120px"}]])
+                  :class (styles/logo-loading)}]])
         [:div (styles/editor-container)
          [header]
          [:div (styles/content-container)
