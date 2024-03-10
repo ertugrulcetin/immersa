@@ -71,7 +71,7 @@
   (when disabled?
     {:cursor :not-allowed}))
 
-(defn option-text [{:keys [label icon color shortcut disabled?]}]
+(defn option-text [{:keys [label size icon color shortcut disabled?]}]
   [:div {:class (option-text-style disabled?)}
    [:div {:style {:display "flex"
                   :align-items "center"
@@ -79,7 +79,8 @@
     icon
     [text {:weight :light
            :disabled? disabled?
-           :color color} label]]
+           :color color
+           :size size} label]]
    (when (seq shortcut)
      [:div
       {:style {:display "flex"

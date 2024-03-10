@@ -32,6 +32,7 @@
     ["@phosphor-icons/react/dist/csr/Play" :refer [Play]]
     ["@phosphor-icons/react/dist/csr/PlusCircle" :refer [PlusCircle]]
     ["@phosphor-icons/react/dist/csr/ShareNetwork" :refer [ShareNetwork]]
+    ["@phosphor-icons/react/dist/csr/SignOut" :refer [SignOut]]
     ["@phosphor-icons/react/dist/csr/SmileySticker" :refer [SmileySticker]]
     ["@phosphor-icons/react/dist/csr/Student" :refer [Student]]
     ["@phosphor-icons/react/dist/csr/TextT" :refer [TextT]]
@@ -78,3 +79,4 @@
 (def reset-cam (r/adapt-react-class ArrowArcLeft))
 (def undo (r/adapt-react-class ArrowCounterClockwise))
 (def redo (r/adapt-react-class ArrowClockwise))
+(def sign-out (r/adapt-react-class SignOut))

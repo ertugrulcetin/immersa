@@ -1,6 +1,6 @@
 (ns immersa.ui.editor.views
   (:require
-    ["@clerk/clerk-react" :refer [useUser useAuth]]
+    ["@clerk/clerk-react" :refer [useUser useAuth useClerk]]
     ["firebase/auth" :refer [getAuth signInWithCustomToken]]
     ["react" :as react]
     ["react-color" :refer [SketchPicker]]
@@ -16,7 +16,11 @@
     [immersa.ui.editor.components.alert-dialog :refer [alert-dialog]]
     [immersa.ui.editor.components.button :refer [button]]
     [immersa.ui.editor.components.canvas-context-menu :refer [canvas-context-menu]]
-    [immersa.ui.editor.components.dropdown :refer [dropdown dropdown-item dropdown-separator dropdown-context-menu]]
+    [immersa.ui.editor.components.dropdown :refer [dropdown
+                                                   dropdown-item
+                                                   dropdown-separator
+                                                   dropdown-context-menu
+                                                   option-text]]
     [immersa.ui.editor.components.progress :refer [progress]]
     [immersa.ui.editor.components.text :refer [text]]
     [immersa.ui.editor.components.tooltip :refer [tooltip]]
@@ -104,11 +108,23 @@
                           (when @ref
                             [canvas-container])])})))
 
+(defn- sign-out []
+  (let [{:keys [signOut]} (j/lookup (useClerk))]
+    [dropdown-item
+     {:item [option-text {:label "Sign out"
+                          :size :l
+                          :icon [icon/sign-out {:size 16
+                                                :color colors/text-primary}]}]
+      :on-select signOut}]))
+
 (defn- header-left-panel []
   [:div (styles/title-bar)
    [:div (styles/menubar-list-icon)
-    [icon/list-menu {:size 24
-                     :color colors/text-primary}]]
+    [dropdown
+     {:trigger [icon/list-menu {:size 24
+                                :color colors/text-primary}]
+      :children [:<>
+                 [:f> sign-out]]}]]
    [:div (styles/title-bar-full-width)
     [:div (styles/title-container)
      [:span (styles/title-label) @(subscribe [::subs/slides-title])]
