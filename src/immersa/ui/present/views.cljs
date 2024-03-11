@@ -96,10 +96,16 @@
             :justify-content "space-between"
             :align-items "center"
             :background "#2a2c37"}}
-   [text {:style {:padding "0 16px"}
-          :size :xl
-          :weight :medium
-          :color "#fff"} title]
+   [:div {:style {:display "flex"
+                  :flex-direction "row"
+                  :gap "5px"
+                  :padding "0 16px"}}
+    [icon/presentation {:size 18
+                        :weight "bold"
+                        :color "#fff"}]
+    [text {:size :xl
+           :weight :medium
+           :color "#fff"} title]]
    [button {:text "Exit present mode"
             :on-click #(reset! present-state false)
             :type :outline

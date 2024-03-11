@@ -386,7 +386,8 @@
   (fn [{:keys [db]} [_ title]]
     (let [id (-> db :editor :slides :id)
           user-id (-> db :user :id)]
-      {:update-presentation-title {:user-id user-id
+      {:db (assoc-in db [:editor :slides :title] title)
+       :update-presentation-title {:user-id user-id
                                    :presentation-id id
                                    :title title}
        ::set-title title})))
