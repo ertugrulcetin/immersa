@@ -58,37 +58,43 @@
         animations (if (vector? animations)
                      animations
                      [animations])
-        f #(j/call-in api.core/db [:scene :beginDirectAnimation]
-                      target
-                      (clj->js animations)
-                      from
-                      to
-                      loop?
-                      speed-ratio
-                      on-animation-end)
+        finished? (atom false)
+        f #(let [anim (j/call-in api.core/db [:scene :beginDirectAnimation]
+                                 target
+                                 (clj->js animations)
+                                 from
+                                 to
+                                 loop?
+                                 speed-ratio
+                                 on-animation-end)]
+             (j/call-in anim [:onAnimationEndObservable :add] (fn []
+                                                                (reset! finished? true)
+                                                                (when on-animation-end
+                                                                  (on-animation-end))))
+             anim)
         time-out-fn-id (atom nil)]
     (if (and delay (> delay 0))
       (reset! time-out-fn-id (js/setTimeout f delay))
       (f))
     {:ch p
+     :finished? finished?
      :force-finish-fn (fn []
-                        (when @time-out-fn-id
-                          (js/clearTimeout @time-out-fn-id))
-                        (j/call-in api.core/db [:scene :stopAnimation] target)
-                        (doseq [anim animations]
-                          (let [last-val (-> anim (j/call :getKeys) last (j/get :value))]
-                            (if (str/includes? (j/get anim :targetProperty) ".")
-                              (let [props (str/split (j/get anim :targetProperty) #"\.")]
-                                (->> props
-                                     drop-last
-                                     (reduce
-                                       (fn [target prop]
-                                         (aget target prop))
-                                       target)
-                                     (#(aset % (last props) last-val))))
-                              (j/assoc! target (j/get anim :targetProperty) last-val))))
-                        (when on-animation-end
-                          (on-animation-end)))}))
+                        (when-not @finished?
+                          (when @time-out-fn-id
+                            (js/clearTimeout @time-out-fn-id))
+                          (j/call-in api.core/db [:scene :stopAnimation] target)
+                          (doseq [anim animations]
+                            (let [last-val (-> anim (j/call :getKeys) last (j/get :value))]
+                              (if (str/includes? (j/get anim :targetProperty) ".")
+                                (let [props (str/split (j/get anim :targetProperty) #"\.")]
+                                  (->> props
+                                       drop-last
+                                       (reduce
+                                         (fn [target prop]
+                                           (aget target prop))
+                                         target)
+                                       (#(aset % (last props) last-val))))
+                                (j/assoc! target (j/get anim :targetProperty) last-val))))))}))
 
 (defn- get-anim-keys [{:keys [start end duration]}]
   (when (vector? end)

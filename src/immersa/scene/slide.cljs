@@ -564,7 +564,9 @@
         id (if exists? (str (random-uuid)) id)
         _ (when (and mesh (not exists?))
             (when (> (:visibility params) 0)
-              (j/assoc! mesh :visibility (:visibility params)))
+              (if (= (api.core/get-object-type mesh) "image")
+                (j/assoc-in! mesh [:material :alpha] (:visibility params))
+                (j/assoc! mesh :visibility (:visibility params))))
             (api.core/set-enabled mesh true))
         mesh (if exists?
                (let [params (->> params
