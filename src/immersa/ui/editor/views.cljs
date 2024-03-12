@@ -459,9 +459,9 @@
                                  (->> canvas
                                       (j/call js/document.body :append))))
      :reagent-render (fn []
-                       [present.views/present-panel {:mode :editor
-                                                     :title @(subscribe [::subs/slides-title])
-                                                     :present-state present?}])}))
+                       [:f> present.views/present-panel {:mode :editor
+                                                         :title @(subscribe [::subs/slides-title])
+                                                         :present-state present?}])}))
 
 (defn- init-crisp-chat
   ([email full-name]
@@ -548,6 +548,8 @@
         {:keys [getToken]} (j/lookup (useAuth))
         _ (react/useEffect
             (fn []
+              (-> (js/document.getElementById "app")
+                  (j/assoc-in! [:style :border] main.styles/app-border))
               (set! events/start-scene scene.core/start-scene)
               (let [user-id (j/get user :id)
                     email (j/get-in user [:primaryEmailAddress :emailAddress])

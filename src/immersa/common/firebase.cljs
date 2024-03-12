@@ -127,6 +127,9 @@
 (defn get-presentation-info [user-id]
   (getDocs (query (collection db "presentations") (where "user_id" "==" user-id))))
 
+(defn get-presentation-info-by-id [id]
+  (getDocs (query (collection db "presentations") (where "id" "==" id))))
+
 (defn set-user [user]
   (let [ref (doc db "users" (:id user))]
     (setDoc ref (clj->js user) #js{:merge true})))

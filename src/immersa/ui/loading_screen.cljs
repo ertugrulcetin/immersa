@@ -10,7 +10,7 @@
                  :top "0"
                  :left "0"
                  :width "100%"
-                 :height (str height "px")
+                 :height height
                  :background-color "black"
                  :z-index "9999"}}
    [:div {:style {:position "relative"

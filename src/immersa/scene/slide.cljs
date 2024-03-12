@@ -825,7 +825,9 @@
   (dispatch [::main.events/hide-loading-screen])
   (api.core/resize)
   (when (= mode :editor)
-    (dispatch [::editor.events/scene-ready])))
+    (dispatch [::editor.events/scene-ready]))
+  (when (= mode :present)
+    (dispatch [::events/scene-ready])))
 
 (defn start-slide-show [{:keys [mode slides] :as opts}]
   (let [_ (init-slide-show-state)

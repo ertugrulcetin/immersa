@@ -1,12 +1,13 @@
 (ns immersa.ui.present.views
   (:require
     ["progressbar.js" :as ProgressBar]
+    ["react" :as react]
     [applied-science.js-interop :as j]
-    [immersa.common.utils :as common.utils]
+    [clojure.string :as str]
+    [immersa.common.firebase :as firebase]
     [immersa.scene.core :as scene.core]
     [immersa.ui.editor.components.button :refer [button]]
     [immersa.ui.editor.components.text :refer [text]]
-    [immersa.ui.editor.subs :as editor.subs]
     [immersa.ui.icons :as icon]
     [immersa.ui.loading-screen :refer [loading-screen]]
     [immersa.ui.present.events :as events]
@@ -14,22 +15,22 @@
     [immersa.ui.present.subs :as subs]
     [immersa.ui.subs :as main.subs]
     [re-frame.core :refer [dispatch subscribe]]
-    [reagent.core :as r]))
+    [reagent.core :as r])
+  (:require-macros
+    [immersa.common.macros :as m]))
 
-(defn- canvas []
+(defn- canvas-editor [mode]
   (r/create-class
-    {:component-did-mount #(scene.core/start-scene (js/document.getElementById "renderCanvas")
-                                                   {:mode :present
-                                                    :slides @(subscribe [::editor.subs/slides-all])})
+    {:component-did-mount (fn []
+                            (when (= mode :present)
+                              (let [canvas (js/document.getElementById "renderCanvas")]
+                                (j/assoc! canvas :className (styles/canvas))
+                                (->> canvas
+                                     (j/call (js/document.getElementById "canvas-present-origin") :append)))))
      :reagent-render (fn []
-                       [:canvas
-                        {:id "renderCanvas"
-                         :class (styles/canvas)}])}))
-
-(defn- canvas-editor []
-  [:div {:id "canvas-present-origin"
-         :style {:width "100%"
-                 :height "100%"}}])
+                       [:div {:id "canvas-present-origin"
+                              :style {:width "100%"
+                                      :height "100%"}}])}))
 
 (defn- canvas-container [mode]
   (let [{:keys [width height]} (if (= mode :editor)
@@ -41,24 +42,11 @@
         :style {:width (str width "px")
                 :height (str height "px")}
         :class (styles/canvas-container)}
-       (when @(subscribe [::subs/show-arrow-keys-text?])
-         [:div (styles/arrow-keys-text)
-          [:h2 "Use arrow keys to navigate"]
-          [:div
-           [icon/arrow-left {:size 32
-                             :color "white"
-                             :weight "bold"}]
-           [icon/arrow-right {:size 32
-                              :color "white"
-                              :weight "bold"}]]])
-       (when @(subscribe [::subs/show-pre-warm-text?])
-         [:div (styles/arrow-keys-text)
-          [:h2 "Pre-warming scene..."]])
-       (if (= mode :editor)
-         [canvas-editor]
-         [canvas])
+       [canvas-editor mode]
        (when @(subscribe [::main.subs/loading-screen?])
-         [loading-screen height])])))
+         [loading-screen (if (= mode :editor)
+                           (str height "px")
+                           "100%")])])))
 
 (defn- progress-bar-line []
   [:div
@@ -121,47 +109,75 @@
                                 :weight "bold"
                                 :color "#fff"}]}]])
 
+(defn init-app [{:keys [title slides presentation-id]}]
+  (dispatch [::events/init-presentation
+             {:id presentation-id
+              :title title
+              :slides slides}]))
+
 (defn present-panel [& {:keys [mode title present-state]}]
-  [:<>
-   (when (= mode :editor)
-     [title-bar title present-state])
-   [:div
-    {:id "content-container"
-     :class (styles/content-container (= mode :editor))
-     :style {:background @(subscribe [::subs/background-color])}}
-    [canvas-container mode]
-    [:div
-     {:id "progress-bar"
-      :class (styles/progress-bar)}
-     [progress-bar-line]
+  (let [_ (when (= mode :present)
+            (react/useEffect
+              (fn []
+                (set! events/start-scene scene.core/start-scene)
+                (let [_ (firebase/init-app)
+                      path (j/get js/location :pathname)
+                      slide-id (last (str/split path #"-+"))]
+                  (m/js-await [q (firebase/get-presentation-info-by-id slide-id)]
+                    (let [{:keys [id user_id title]} (j/lookup (j/call-in q [:docs 0 :data]))]
+                      (m/js-await [presentation-url (firebase/get-presentation id user_id)]
+                        (m/js-await [response (js/fetch presentation-url)]
+                          (m/js-await [presentation (j/call response :text)]
+                            (init-app {:title title
+                                       :slides (cljs.reader/read-string presentation)
+                                       :user-id user_id
+                                       :presentation-id id})))))
+                    (catch e
+                           (js/console.log e)))))
+              #js[]))
+        present-loading? (and (= mode :present) (not @(subscribe [::subs/scene-ready?])))]
+    [:<>
+     (when (= mode :editor)
+       [title-bar title present-state])
      [:div
-      {:id "progress-controls"
-       :class (styles/progress-controls)}
+      {:id "content-container"
+       :class (styles/content-container (= mode :editor) present-loading?)
+       :style {:background @(subscribe [::subs/background-color])}}
+
+      [canvas-container mode]
+
       [:div
-       {:id "slide-controls"
-        :class (styles/slide-controls)}
-       [icon/prev {:size 24
-                   :color "white"
-                   :weight "bold"
-                   :cursor "pointer"}]
-       [:span {:id "slide-indicator"
-               :class (styles/current-slide-indicator)}
-        (let [{:keys [current-slide-index slide-count]} @(subscribe [::subs/slide-info])]
-          (str current-slide-index " / " slide-count))]
-       [icon/next {:size 24
-                   :color "white"
-                   :weight "bold"
-                   :cursor "pointer"}]]
-      [:div {:id "right-controls"
-             :class (styles/right-controls)}
-       [immersa-home-page-button]
-       #_[icon/control {:size 24
-                        :color "white"
-                        :cursor "pointer"}]
-       #_[icon/chat {:size 24
-                     :color "white"
-                     :cursor "pointer"}]
-       #_[icon/dots {:size 24
+       {:id "progress-bar"
+        :class (styles/progress-bar present-loading?)}
+       [progress-bar-line]
+       [:div
+        {:id "progress-controls"
+         :class (styles/progress-controls)}
+        [:div
+         {:id "slide-controls"
+          :class (styles/slide-controls)}
+         [icon/prev {:size 24
                      :color "white"
                      :weight "bold"
-                     :cursor "pointer"}]]]]]])
+                     :cursor "pointer"}]
+         [:span {:id "slide-indicator"
+                 :class (styles/current-slide-indicator)}
+          (let [{:keys [current-slide-index slide-count]} @(subscribe [::subs/slide-info])]
+            (str current-slide-index " / " slide-count))]
+         [icon/next {:size 24
+                     :color "white"
+                     :weight "bold"
+                     :cursor "pointer"}]]
+        [:div {:id "right-controls"
+               :class (styles/right-controls)}
+         [immersa-home-page-button]
+         #_[icon/control {:size 24
+                          :color "white"
+                          :cursor "pointer"}]
+         #_[icon/chat {:size 24
+                       :color "white"
+                       :cursor "pointer"}]
+         #_[icon/dots {:size 24
+                       :color "white"
+                       :weight "bold"
+                       :cursor "pointer"}]]]]]]))

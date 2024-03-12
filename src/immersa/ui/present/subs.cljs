@@ -51,3 +51,8 @@
   ::background-color
   (fn [db]
     (str "radial-gradient(" (-> db :present :background-color) ", rgb(0,0,0))")))
+
+(reg-sub
+  ::scene-ready?
+  (fn [db]
+    (-> db :present :scene-ready?)))

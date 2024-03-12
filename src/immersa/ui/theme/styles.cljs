@@ -19,7 +19,7 @@
 
 (def app
   {:border-radius "20px"
-   :border app-border
+   ;; :border app-border
    :box-sizing :border-box
    :background colors/app-background})
 

@@ -2,9 +2,12 @@
   (:require
     [spade.core :refer [defglobal defclass defattrs]]))
 
-(defclass content-container [editor-mode?]
+(defclass content-container [editor-mode? present-loading?]
   {:width "100%"
-   :height (if editor-mode? "calc(100vh - 119px)" "calc(100vh - 64px)")
+   :height (cond
+             editor-mode? "calc(100vh - 119px)"
+             present-loading? "100vh"
+             :else "calc(100vh - 64px)")
    :margin 0
    :padding 0
    :box-sizing "border-box"
@@ -28,7 +31,7 @@
    :display :block
    :outline :none})
 
-(defclass progress-bar []
+(defclass progress-bar [present-loading?]
   {:display "flex"
    :flex-direction "column"
    :align-items "center"
@@ -38,6 +41,7 @@
    :right "0"
    :width "100%"
    :height "64px"
+   :visibility (if present-loading? "hidden" "visible")
    :background-color "#2a2c37"
    :box-shadow "inset 0 1px 0 rgb(63, 66, 80)"
    :box-sizing "border-box"

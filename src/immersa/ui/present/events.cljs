@@ -3,6 +3,8 @@
     [applied-science.js-interop :as j]
     [re-frame.core :refer [reg-event-db reg-event-fx reg-fx]]))
 
+(def start-scene nil)
+
 (reg-event-db
   ::add-progress-bar
   (fn [db [_ bar]]
@@ -37,3 +39,32 @@
   ::set-background-color
   (fn [db [_ background-color]]
     (assoc-in db [:present :background-color] background-color)))
+
+(reg-event-fx
+  ::init-presentation
+  (fn [{:keys [db]} [_ {:keys [id title slides] :as opts}]]
+    {:db (-> db
+             (assoc-in [:present :slides :id] id)
+             (assoc-in [:present :slides :title] title)
+             (assoc-in [:present :slides :all] slides))
+     ::start-scene opts
+     ::set-title title}))
+
+(reg-fx
+  ::start-scene
+  (fn [{:keys [slides thumbnails present-state]}]
+    (start-scene (js/document.getElementById "renderCanvas")
+                 {:mode :present
+                  :present-state present-state
+                  :slides slides
+                  :thumbnails thumbnails})))
+
+(reg-fx
+  ::set-title
+  (fn [title]
+    (j/assoc! js/document :title (str title " - Immersa"))))
+
+(reg-event-db
+  ::scene-ready
+  (fn [db]
+    (assoc-in db [:present :scene-ready?] true)))

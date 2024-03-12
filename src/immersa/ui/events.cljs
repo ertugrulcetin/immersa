@@ -6,9 +6,10 @@
 
 (reg-event-fx
   ::initialize-db
-  (fn [_ _]
+  (fn [_ [_ mode]]
     {:db db/default-db
-     :fx [[::init-crisp-chat]]}))
+     :fx [(when (= mode :editor)
+            [::init-crisp-chat])]}))
 
 (reg-event-db
   ::show-loading-screen

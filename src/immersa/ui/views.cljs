@@ -17,9 +17,7 @@
    [:> SignedOut
     [:> RedirectToSignIn]]])
 
-(defn main-panel []
-  [editor]
-  #_[:div (styles/app-container)
-      [present.views/present-panel]
-
-     ])
+(defn main-panel [mode]
+  (if (= mode :editor)
+    [editor]
+    [:f> present.views/present-panel {:mode mode}]))
