@@ -88,15 +88,18 @@
     (some-> mesh (slide/update-slide-data :scale (api.core/v3->v (j/get mesh :scaling))))
     (ui.notifier/notify-ui-selected-mesh mesh)))
 
-;; TODO need to find a way for async actions like go-to-slide and back-to-slide
 (defmethod execute :go-to-slide [{{:keys [to items]} :params}]
-  (let [index (.indexOf items to)]
+  (let [index (if items
+                (.indexOf items to)
+                to)]
     (dispatch [::events/go-to-slide index])
     ;; to be able to force animations to be executed
     (js/setTimeout #(dispatch [::events/go-to-slide index]) 10)))
 
 (defmethod execute :back-to-slide [{{:keys [from items]} :params}]
-  (let [index (.indexOf items from)]
+  (let [index (if items
+                (.indexOf items from)
+                from)]
     (dispatch [::events/go-to-slide index])
     ;; to be able to force animations to be executed
     (js/setTimeout #(dispatch [::events/go-to-slide index]) 10)))

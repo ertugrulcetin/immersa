@@ -390,10 +390,11 @@
     (assoc-in db [:editor :present :started-index] (-> db :editor :slides :current-index))))
 
 (reg-event-fx
-  ::go-to-started-index
+  ::create-go-to-slide-action
   (fn [{:keys [db]}]
-    {:scene {:type :go-to-slide
-             :data {:index (-> db :editor :present :started-index)}}}))
+    {:scene {:type :create-go-to-slide-action
+             :data {:from (-> db :editor :present :started-index)
+                    :to (-> db :editor :slides :current-index)}}}))
 
 (reg-event-fx
   ::update-presentation-title

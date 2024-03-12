@@ -457,7 +457,7 @@
                                    (j/call (js/document.getElementById "canvas-present-origin") :append))
                               (js/setTimeout #(dispatch [::events/resize-scene]) 200)))
      :component-will-unmount (fn []
-                               (dispatch [::events/go-to-started-index])
+                               (dispatch [::events/create-go-to-slide-action])
                                (dispatch [::events/remove-listeners-for-present-mode])
                                (let [canvas (js/document.getElementById "renderCanvas")]
                                  (->> canvas

@@ -657,7 +657,8 @@
                                         (assoc-in [:data :camera :initial-rotation] rotation))
                               slide {:id uuid
                                      :data {:camera (get-in slide [:data :camera])
-                                            :skybox (get-in slide [:data :skybox])}}]
+                                            :skybox (get-in slide [:data :skybox])
+                                            :ground {:enabled? true}}}]
                           (utils/vec-insert slides slide (inc index)))))
     (ui.notifier/sync-slides-info @current-slide-index @all-slides)
     (go-to-slide (inc @current-slide-index))
@@ -726,6 +727,7 @@
         depth (api.core/get-node-attr mesh :depth)
         size (api.core/get-node-attr mesh :size)
         text (api.core/get-node-attr mesh :text)
+        face-to-screen? (api.core/get-node-attr mesh :face-to-screen?)
         name (j/get mesh :immersa-id)
         opts (merge
                {:mat material
@@ -734,6 +736,7 @@
                 :position position
                 :rotation rotation
                 :scale scale
+                :face-to-screen? face-to-screen?
                 :text text}
                data)
         opts (cond

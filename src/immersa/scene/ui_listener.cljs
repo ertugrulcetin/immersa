@@ -344,6 +344,12 @@
 (defmethod handle-ui-update :set-user-id [{{:keys [id]} :data}]
   (j/assoc-in! api.core/db [:user :id] id))
 
+(defmethod handle-ui-update :create-go-to-slide-action [{{:keys [from to]} :data}]
+  (when (not= from to)
+    (undo.redo/create-action {:type :go-to-slide
+                              :params {:from from
+                                       :to to}})))
+
 (defn init-ui-update-listener []
   (go-loop-sub event-bus-pub :get-ui-update [_ data]
     (handle-ui-update data)))
