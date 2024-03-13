@@ -8,7 +8,7 @@
                     :rotation [0.17453292519943295 0 0]
                     :initial-position [0 5 -10]
                     :initial-rotation [0.17453292519943295 0 0]
-                    :locked? true}
+                    :locked? false}
            :skybox {:background {:color [87 97 166]
                                  :brightness 0.1}}
            :ground {:enabled? true}

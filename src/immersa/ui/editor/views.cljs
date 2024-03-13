@@ -26,6 +26,7 @@
     [immersa.ui.editor.components.progress :refer [progress]]
     [immersa.ui.editor.components.text :refer [text]]
     [immersa.ui.editor.components.tooltip :refer [tooltip]]
+    [immersa.ui.editor.components.tutorial :refer [tutorial]]
     [immersa.ui.editor.events :as events]
     [immersa.ui.editor.options-panel.views :refer [options-panel]]
     [immersa.ui.editor.slide-panel.views :refer [slides-panel]]
@@ -355,9 +356,8 @@
    #_[presentation-component {:icon icon/camera
                               :text "Camera"
                               :disabled? true}]
-   [presentation-component {:icon icon/student
-                            :text "Tutorial"
-                            :disabled? true}]
+   [tutorial {:trigger [presentation-component {:icon icon/student
+                                                :text "Tutorial"}]}]
    [presentation-component {:icon icon/chats-circle
                             :text "Feedback"
                             :text-weight :regular
