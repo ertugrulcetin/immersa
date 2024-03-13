@@ -35,4 +35,4 @@
 
 (reg-fx
   :analytics
-  mixpanel/track)
+  mixpanel/track-with-debounce)

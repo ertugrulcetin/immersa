@@ -4,7 +4,7 @@
     [applied-science.js-interop :as j]
     [cljs.reader :as reader]
     [clojure.string :as str]
-    [com.rpl.specter :as sp]
+    [immersa.common.mixpanel :as mixpanel]
     [immersa.common.utils :as common.utils]
     [immersa.scene.api.animation :as api.anim]
     [immersa.scene.api.constant :as api.const]
@@ -58,7 +58,9 @@
            :pred (fn [_ key]
                    (and (= key "f") (api.core/selected-mesh)))
            ;; TODO should not focus when camera is locked
-           :action #(api.anim/run-camera-focus-anim (api.core/selected-mesh) (slide/camera-locked?))}
+           :action #(do
+                      (api.anim/run-camera-focus-anim (api.core/selected-mesh) (slide/camera-locked?))
+                      (mixpanel/track {:event "camera-focus"}))}
    :delete {:label "Delete"
             :shortcut ["⌫"]
             :pred (fn [_ key]
@@ -83,7 +85,8 @@
                :action (fn []
                          (try
                            (when (api.core/selected-mesh)
-                             (api.core/attach-to-mesh (slide/duplicate-slide-data (get-selected-object-data))))
+                             (api.core/attach-to-mesh (slide/duplicate-slide-data (get-selected-object-data)))
+                             (mixpanel/track {:event "duplicate-object"}))
                            (catch js/Error e
                              (js/console.warn "Duplicate failed.")
                              (js/console.warn e))))}
@@ -119,7 +122,8 @@
                                                (js/console.error "Clipboard data is not in EDN format.")
                                                (js/console.warn e))))))
                          (j/call :catch (fn []
-                                          (js/console.error "Clipboard failed.")))))}
+                                          (js/console.error "Clipboard failed."))))
+                     (mixpanel/track {:event "paste-object"}))}
    :escape {:label "Escape"
             :shortcut ["escape"]
             :pred (fn [_ key]
@@ -129,12 +133,16 @@
               :shortcut ["t"]
               :pred (fn [_ key]
                       (= key "t"))
-              :action #(ui-listener/handle-ui-update {:type :add-text-mesh})}
+              :action #(do
+                         (ui-listener/handle-ui-update {:type :add-text-mesh})
+                         (mixpanel/track {:event "text-add-shortcut"}))}
    :toggle-position-gizmo {:label "Toggle position gizmo"
                            :shortcut ["1"]
                            :pred (fn [info key]
                                    (and (= key "1") (not (cmd? info)) (api.core/selected-mesh)))
-                           :action #(api.gizmo/toggle-gizmo :position)}
+                           :action #(do
+                                      (api.gizmo/toggle-gizmo :position)
+                                      (mixpanel/track {:event "position-gizmo-toggle-shortcut"}))}
    :toggle-rotation-gizmo {:label "Toggle rotation gizmo"
                            :shortcut ["2"]
                            :pred (fn [info key]
@@ -142,7 +150,9 @@
                                         (not (cmd? info))
                                         (api.core/selected-mesh)
                                         (not (api.core/get-node-attr (api.core/selected-mesh) :face-to-screen?))))
-                           :action #(api.gizmo/toggle-gizmo :rotation)}
+                           :action #(do
+                                      (api.gizmo/toggle-gizmo :rotation)
+                                      (mixpanel/track {:event "rotation-gizmo-toggle-shortcut"}))}
    :toggle-scale-gizmo {:label "Toggle scale gizmo"
                         :shortcut ["3"]
                         :pred (fn [info key]
@@ -150,28 +160,36 @@
                                      (not (cmd? info))
                                      (api.core/selected-mesh)
                                      (not= (api.core/selected-mesh-type) "text3D")))
-                        :action #(api.gizmo/toggle-gizmo :scale)}
+                        :action #(do
+                                   (api.gizmo/toggle-gizmo :scale)
+                                   (mixpanel/track {:event "scale-gizmo-toggle-shortcut"}))}
    :add-slide {:label "Duplicate slide"
                :shortcut ["⌘" "d"]
                :prevent-default? true
                :ui-only? true
                :pred (fn [info key]
                        (and (cmd? info) (= key "d")))
-               :action #(ui-listener/handle-ui-update {:type :add-slide
-                                                       :index %})}
+               :action #(do
+                          (ui-listener/handle-ui-update {:type :add-slide
+                                                         :index %})
+                          (mixpanel/track {:event "slide-duplicate"}))}
    :blank-slide {:label "Blank slide"
                  :shortcut ["shift" "n"]
                  :prevent-default? true
                  :pred (fn [info key]
                          (and (shift? info) (= key "n")))
-                 :action #(ui-listener/handle-ui-update {:type :blank-slide})}
+                 :action #(do
+                            (ui-listener/handle-ui-update {:type :blank-slide})
+                            (mixpanel/track {:event "slide-blank"}))}
    :delete-slide {:label "Delete slide"
                   :shortcut ["⌫"]
                   :ui-only? true
                   :pred (fn [info _]
                           (delete? info))
-                  :action #(ui-listener/handle-ui-update {:type :delete-slide
-                                                          :index %})}
+                  :action #(do
+                             (ui-listener/handle-ui-update {:type :delete-slide
+                                                            :index %})
+                             (mixpanel/track {:event "slide-delete"}))}
    :camera-reset-to-initials {:label "Reset camera to initials"
                               :shortcut ["shift" "c"]
                               :pred (fn [info key]
@@ -182,7 +200,8 @@
                                               free-camera (api.core/get-object-by-name "free-camera")]
                                           (j/assoc! free-camera :position (api.core/v->v3 initial-position))
                                           (j/assoc! free-camera :rotation (api.core/v->v3 initial-rotation))
-                                          (j/assoc! (api.core/get-scene) :activeCamera free-camera)))}
+                                          (j/assoc! (api.core/get-scene) :activeCamera free-camera))
+                                        (mixpanel/track {:event "camera-reset-to-initials"}))}
    :reset-position {:label "Reset position"
                     :shortcut ["shift" "p"]
                     :pred (fn [info key]
@@ -190,7 +209,8 @@
                     :action (fn []
                               (let [mesh (api.core/selected-mesh)]
                                 (reset-position mesh)
-                                (ui.notifier/notify-ui-selected-mesh)))}
+                                (ui.notifier/notify-ui-selected-mesh)
+                                (mixpanel/track {:event "object-reset-position"})))}
    :reset-rotation {:label "Reset rotation"
                     :shortcut ["shift" "r"]
                     :pred (fn [info key]
@@ -198,7 +218,8 @@
                     :action (fn []
                               (let [mesh (api.core/selected-mesh)]
                                 (reset-rotation mesh)
-                                (ui.notifier/notify-ui-selected-mesh)))}
+                                (ui.notifier/notify-ui-selected-mesh)
+                                (mixpanel/track {:event "object-reset-rotation"})))}
    :reset-scale {:label "Reset scale"
                  :shortcut ["shift" "s"]
                  :pred (fn [info key]
@@ -206,7 +227,8 @@
                  :action (fn []
                            (let [mesh (api.core/selected-mesh)]
                              (reset-scale mesh)
-                             (ui.notifier/notify-ui-selected-mesh)))}
+                             (ui.notifier/notify-ui-selected-mesh)
+                             (mixpanel/track {:event "object-reset-scale"})))}
    :reset-initials {:label "Reset initials"
                     :shortcut ["shift" "i"]
                     :pred (fn [info key]
@@ -217,7 +239,8 @@
                                 (reset-rotation mesh)
                                 (when-not (= "text3D" (api.core/selected-mesh-type))
                                   (reset-scale mesh))
-                                (ui.notifier/notify-ui-selected-mesh)))}
+                                (ui.notifier/notify-ui-selected-mesh)
+                                (mixpanel/track {:event "object-reset-initials"})))}
    :toggle-camera-lock {:label "Toggle camera lock"
                         :shortcut ["shift" "l"]
                         :pred (fn [info key]

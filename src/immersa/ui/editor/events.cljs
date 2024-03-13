@@ -135,7 +135,8 @@
 (reg-event-fx
   ::update-selected-mesh-text-content
   (fn [{:keys [db]} [_ value]]
-    (cond-> {:db (assoc-in db [:editor :selected-mesh :text] value)}
+    (cond-> {:db (assoc-in db [:editor :selected-mesh :text] value)
+             :analytics {:event "text-content-update"}}
       (not (str/blank? value)) (assoc :scene {:type :update-selected-mesh-text-content
                                               :data {:value value}}))))
 
@@ -263,9 +264,7 @@
   (fn [{:keys [db]} _]
     (let [locked? (-> db :editor :camera :locked? not)]
       {:scene {:type :toggle-camera-lock
-               :data {:value locked?}}
-       :analytics {:event "camera-lock-update"
-                   :data {:locked? locked?}}})))
+               :data {:value locked?}}})))
 
 (reg-event-fx
   ::toggle-ground-enabled
