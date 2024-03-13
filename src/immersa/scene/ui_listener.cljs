@@ -239,7 +239,7 @@
     (undo.redo/create-action {:type :create-text
                               :id uuid
                               :params params})
-    (j/call-in api.core/db [:gizmo :manager :attachToMesh] mesh)))
+    (api.core/attach-to-mesh mesh)))
 
 (defmethod handle-ui-update :add-image [{{:keys [value]} :data}]
   (let [uuid (str (random-uuid))

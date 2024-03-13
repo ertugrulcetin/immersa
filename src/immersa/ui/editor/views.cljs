@@ -439,7 +439,8 @@
         (j/call e :preventDefault))
       (when (and (not (j/get e :repeat))
                  (not (blocked-fields (j/get-in js/document [:activeElement :tagName]))))
-        (shortcut/call-shortcut-action-with-event :blank-slide e)))))
+        (shortcut/call-shortcut-action-with-event :blank-slide e)
+        (shortcut/call-shortcut-action-with-event :paste e)))))
 
 (defn- present-panel []
   (r/create-class
