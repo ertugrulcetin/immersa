@@ -80,7 +80,7 @@
                  [:li li-style
                   [text text-style "Right-click (or Ctrl / ⌃) and drag to pan."]]
                  [:li li-style
-                  [text text-style "WASD to free move. Q/E to move up/down."]]]]
+                  [text text-style "Use W, A, S, D keys to free move. Q/E to move up/down."]]]]
       :video "video/mouse-drag.mp4"}
      {:title "Importing 3D models"
       :content [:div
