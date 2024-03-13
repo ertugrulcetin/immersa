@@ -5,6 +5,7 @@
     [immersa.common.communication :refer [fire]]
     [immersa.common.firebase :as firebase]
     [immersa.ui.crisp-chat :as crisp-chat]
+    [immersa.ui.events]
     [medley.core :refer [dissoc-in]]
     [re-frame.core :refer [reg-event-db reg-event-fx reg-fx]]))
 
@@ -64,14 +65,16 @@
   ::update-scene-background-color
   (fn [_ [_ rgb]]
     {:scene {:type :update-background-color
-             :data {:value rgb}}}))
+             :data {:value rgb}}
+     :analytics {:event "scene-background-color-update"}}))
 
 (reg-event-fx
   ::update-scene-background-brightness
   (fn [_ [_ value]]
     (let [value (/ (first value) 100)]
       {:scene {:type :update-background-brightness
-               :data {:value value}}})))
+               :data {:value value}}
+       :analytics {:event "scene-background-brightness-update"}})))
 
 #_(reg-event-db
     ::update-scene-background-color-success
@@ -144,7 +147,10 @@
           scaling (case type
                     :size [value value z]
                     :depth [x y value])]
-      (cond-> {:db (assoc-in db [:editor :selected-mesh :scaling] scaling)}
+      (cond-> {:db (assoc-in db [:editor :selected-mesh :scaling] scaling)
+               :analytics {:event "text-depth-or-size-update"
+                           :data {:update type
+                                  :value value}}}
 
         (not (str/blank? value))
         (assoc :scene {:type :update-selected-mesh-text-depth-or-size
@@ -154,19 +160,22 @@
 (reg-event-fx
   ::add-text-mesh
   (fn []
-    {:scene {:type :add-text-mesh}}))
+    {:scene {:type :add-text-mesh}
+     :analytics {:event "text-add"}}))
 
 (reg-event-fx
   ::add-image
   (fn [_ [_ url]]
     {:scene {:type :add-image
-             :data {:value url}}}))
+             :data {:value url}}
+     :analytics {:event "image-add"}}))
 
 (reg-event-fx
   ::add-model
   (fn [_ [_ url]]
     {:scene {:type :add-model
-             :data {:value url}}}))
+             :data {:value url}}
+     :analytics {:event "model-add"}}))
 
 (reg-event-fx
   ::go-to-slide
@@ -188,12 +197,8 @@
   ::re-order-slides
   (fn [_ [_ old-index new-index]]
     {:scene {:type :re-order-slides
-             :data {:value [old-index new-index]}}}))
-
-(reg-event-fx
-  ::apply-shortcut
-  (fn [_ [_ type]]
-    {:shortcut type}))
+             :data {:value [old-index new-index]}}
+     :analytics {:event "slide-re-order"}}))
 
 (reg-event-db
   ::sync-slides-info
@@ -217,7 +222,10 @@
       {:db (assoc-in db [:editor :gizmo type] value)
        :scene {:type :update-gizmo-visibility
                :data {:update type
-                      :value value}}})))
+                      :value value}}
+       :analytics {:event "gizmo-update"
+                   :data {:gizmo type
+                          :value value}}})))
 
 (reg-event-db
   ::notify-gizmo-state
@@ -255,14 +263,18 @@
   (fn [{:keys [db]} _]
     (let [locked? (-> db :editor :camera :locked? not)]
       {:scene {:type :toggle-camera-lock
-               :data {:value locked?}}})))
+               :data {:value locked?}}
+       :analytics {:event "camera-lock-update"
+                   :data {:locked? locked?}}})))
 
 (reg-event-fx
   ::toggle-ground-enabled
   (fn [{:keys [db]} _]
     (let [enabled? (-> db :editor :ground :enabled? not)]
       {:scene {:type :toggle-ground-enabled
-               :data {:value enabled?}}})))
+               :data {:value enabled?}}
+       :analytics {:event "ground-update"
+                   :data {:enabled? enabled?}}})))
 
 (reg-event-db
   ::set-context-menu-position
@@ -282,7 +294,8 @@
 (reg-event-fx
   ::open-crisp-chat
   (fn []
-    {:fx [[::open-crisp-chat]]}))
+    {:fx [[::open-crisp-chat]]
+     :analytics {:event "feedback-open"}}))
 
 (reg-fx
   ::open-crisp-chat
@@ -405,7 +418,8 @@
        :update-presentation-title {:user-id user-id
                                    :presentation-id id
                                    :title title}
-       ::set-title title})))
+       ::set-title title
+       :analytics {:event "title-update"}})))
 
 (reg-fx
   :update-presentation-title

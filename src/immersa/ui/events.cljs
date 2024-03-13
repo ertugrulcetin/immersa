@@ -1,5 +1,6 @@
 (ns immersa.ui.events
   (:require
+    [immersa.common.mixpanel :as mixpanel]
     [immersa.ui.crisp-chat :as crisp-chat]
     [immersa.ui.db :as db]
     [re-frame.core :refer [reg-event-db reg-event-fx reg-fx]]))
@@ -31,3 +32,7 @@
   ::init-crisp-chat
   (fn []
     (crisp-chat/init)))
+
+(reg-fx
+  :analytics
+  mixpanel/track)

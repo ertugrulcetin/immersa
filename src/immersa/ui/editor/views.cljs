@@ -8,6 +8,7 @@
     [clojure.string :as str]
     [goog.functions :as functions]
     [immersa.common.firebase :as firebase]
+    [immersa.common.mixpanel :as mixpanel]
     [immersa.common.shortcut :as shortcut]
     [immersa.common.utils :as common.utils]
     [immersa.presentations.init :refer [slides thumbnails]]
@@ -561,6 +562,7 @@
                     full-name (j/get user :fullName)
                     _ (firebase/init-app)
                     auth (getAuth)]
+                (mixpanel/init user-id)
                 (m/js-await [token (getToken #js {:template "integration_firebase"})]
                   (m/js-await [userCredentials (signInWithCustomToken auth token)]
                     (init-crisp-chat email full-name)
