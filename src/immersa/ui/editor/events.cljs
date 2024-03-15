@@ -424,3 +424,8 @@
   :update-presentation-title
   (fn [opts]
     (firebase/update-presentation-title opts)))
+
+(reg-event-fx
+  ::open-tutorial
+  (fn []
+    {:analytics {:event "tutorial-opened"}}))

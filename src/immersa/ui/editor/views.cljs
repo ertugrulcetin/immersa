@@ -363,7 +363,8 @@
                               :text "Camera"
                               :disabled? true}]
    [tutorial {:trigger [presentation-component {:icon icon/student
-                                                :text "Tutorial"}]}]
+                                                :text "Tutorial"
+                                                :on-click #(dispatch [::events/open-tutorial])}]}]
    [presentation-component {:icon icon/chats-circle
                             :text "Feedback"
                             :text-weight :regular
