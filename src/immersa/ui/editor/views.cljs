@@ -39,7 +39,7 @@
     [immersa.ui.subs :as main.subs]
     [immersa.ui.theme.colors :as colors]
     [immersa.ui.theme.styles :as main.styles]
-    [nano-id.core :refer [nano-id]]
+    [nano-id.core :refer [custom]]
     [re-frame.core :refer [dispatch subscribe]]
     [reagent.core :as r])
   (:require-macros
@@ -47,6 +47,12 @@
 
 (defonce present? (r/atom false))
 (defonce canvas-started? (atom false))
+
+(def nano-id
+  (custom (apply str (concat (map (fn [i] (char i)) (range 65 91))
+                             (map (fn [i] (char i)) (range 97 123))
+                             (map str (range 0 10))))
+          10))
 
 (defn- canvas []
   (r/create-class
@@ -611,15 +617,11 @@
 
 (comment
   @(subscribe [::subs/slides-thumbnails])
-  (firebase/set-presentation-info {:id (nano-id 10)
-                                   :user_id "user_2c20lPttd6jIbGObJJhbKwN3tLh"
-                                   :title "Untitled"
-                                   :created_at (-> (js/Date.)
-                                                   (j/call :toISOString))})
 
   (->> (js/document.getElementById "canvas-wrapper")
        (j/call (js/document.getElementById "temp") :append))
 
   @(subscribe [::subs/editor])
   @(subscribe [::main.subs/user])
+  (count (nano-id 10))
   )
