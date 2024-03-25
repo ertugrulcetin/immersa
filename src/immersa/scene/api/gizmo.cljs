@@ -296,9 +296,10 @@
     (j/assoc! gizmo-manager
               :rotationGizmoEnabled false
               :scaleGizmoEnabled false)
-    (j/call-in gizmo-manager [:onAttachedToMeshObservable :add] #(if (j/get % :hit-box?)
-                                                                   (api.core/attach-to-mesh (j/get % :parent))
-                                                                   (on-attached-to-mesh %)))
+    (j/call-in gizmo-manager [:onAttachedToMeshObservable :add] #(when-not (api.core/editor-present-mode?)
+                                                                   (if (j/get % :hit-box?)
+                                                                     (api.core/attach-to-mesh (j/get % :parent))
+                                                                     (on-attached-to-mesh %))))
     (j/assoc-in! api.core/db [:gizmo :manager] gizmo-manager)
     (j/assoc! api.core/db :pointer-drag-behaviour pointer-drag-behaviour)
     gizmo-manager))

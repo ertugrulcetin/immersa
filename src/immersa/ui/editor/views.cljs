@@ -461,13 +461,14 @@
                                   app (js/document.getElementById "app")]
                               (j/assoc! canvas :className (styles/canvas :present))
                               (j/assoc-in! app [:style :border] "0px")
-                              (j/assoc-in! canvas [:style :pointer-events] "none")
+                              (dispatch [::events/update-present-mode true])
                               (->> canvas
                                    (j/call (js/document.getElementById "canvas-present-origin") :append))
                               (js/setTimeout #(dispatch [::events/resize-scene]) 200)))
      :component-will-unmount (fn []
                                (dispatch [::events/create-go-to-slide-action])
                                (dispatch [::events/remove-listeners-for-present-mode])
+                               (dispatch [::events/update-present-mode false])
                                (let [canvas (js/document.getElementById "renderCanvas")]
                                  (->> canvas
                                       (j/call js/document.body :append))))

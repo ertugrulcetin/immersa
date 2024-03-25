@@ -25,6 +25,12 @@
     (detach-control free-camera)
     (detach-control arc-camera)))
 
+(defn enable-cameras []
+  (let [free-camera (api.core/get-object-by-name "free-camera")
+        arc-camera (api.core/get-object-by-name "arc-camera")]
+    (attach-control free-camera)
+    (attach-control arc-camera)))
+
 (defn set-pos [pos]
   (j/call-in (active-camera) [:position :copyFrom] pos))
 
@@ -119,7 +125,7 @@
 (defn toggle-camera-lock [locked?]
   (if locked?
     (disable-cameras)
-    (attach-control (active-camera))))
+    (enable-cameras)))
 
 (defn switch-camera-if-needed [locked?]
   (when-not locked?

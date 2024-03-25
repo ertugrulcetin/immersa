@@ -353,6 +353,12 @@
                               :params {:from from
                                        :to to}})))
 
+(defmethod handle-ui-update :update-present-mode [{{:keys [enabled]} :data}]
+  (j/assoc! api.core/db :present? enabled)
+  (j/assoc! (api.core/gizmo-manager) :enableAutoPicking (not enabled))
+  (when-not enabled
+    (slide/go-to-slide @slide/current-slide-index)))
+
 (defn init-ui-update-listener []
   (go-loop-sub event-bus-pub :get-ui-update [_ data]
     (handle-ui-update data)))

@@ -429,3 +429,9 @@
   ::open-tutorial
   (fn []
     {:analytics {:event "tutorial-opened"}}))
+
+(reg-event-fx
+  ::update-present-mode
+  (fn [_ [_ enabled?]]
+    {:scene {:type :update-present-mode
+             :data {:enabled enabled?}}}))
