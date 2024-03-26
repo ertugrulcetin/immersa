@@ -164,6 +164,7 @@
                                        :thumbnails thumbnails})
               (undo.redo/init present-state))
     :present (do
+               (register-scene-mouse-events scene)
                (slide/start-slide-show {:mode mode
                                         :slides slides})
                (start-background-lighting engine))))
