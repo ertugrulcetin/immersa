@@ -8,6 +8,7 @@
     [immersa.scene.core :as scene.core]
     [immersa.ui.editor.components.button :refer [button]]
     [immersa.ui.editor.components.text :refer [text]]
+    [immersa.ui.editor.components.tooltip :refer [tooltip]]
     [immersa.ui.icons :as icon]
     [immersa.ui.loading-screen :refer [loading-screen]]
     [immersa.ui.present.events :as events]
@@ -170,10 +171,14 @@
                      :cursor "pointer"}]]
         [:div {:id "right-controls"
                :class (styles/right-controls)}
+         [tooltip
+          {:trigger [icon/full-screen {:size 24
+                                       :color "white"
+                                       :on-click #(when (j/get js/document :fullscreenEnabled)
+                                                    (j/call-in js/document [:documentElement :requestFullscreen]))
+                                       :cursor "pointer"}]
+           :content "Full screen"}]
          [immersa-home-page-button]
-         #_[icon/control {:size 24
-                          :color "white"
-                          :cursor "pointer"}]
          #_[icon/chat {:size 24
                        :color "white"
                        :cursor "pointer"}]
