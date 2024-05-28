@@ -48,5 +48,3 @@ jobs:
           directory: resources/public
 #          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
           branch: master
-#          workingDirectory: my-site
-          wranglerVersion: '3'

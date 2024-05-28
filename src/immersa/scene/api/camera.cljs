@@ -7,6 +7,21 @@
   (:require-macros
     [immersa.scene.macros :as m]))
 
+(reg-rule
+  :move-player
+  {:locals {:v3-ref (v3)}
+   :subs [:able-to-attack?]
+   :what {:health {:default 100}
+          :dt {:then false}
+          :mouse/x {:value 0.15}}
+   :when (fn [] )
+   :then (fn [] )})
+
+(reg-sub
+  :able-to-attack?
+  [:other-sub-a]
+  (fn [] ))
+
 (defn active-camera []
   (j/get-in db [:scene :activeCamera]))
 
