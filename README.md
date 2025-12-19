@@ -6,6 +6,14 @@
 
 **A Web-based 3D Presentation Tool** - Create stunning 3D presentations with animated transitions between slides.
 
+## 🎥 Demo
+
+Watch Immersa in action: [Demo Video](https://www.youtube.com/watch?v=1yjtpf59jv0)
+
+<p align="center">
+  <img src="resources/public/img/app.png" alt="Immersa App Overview" width="800"/>
+</p>
+
 ## What is Immersa?
 
 Immersa is an innovative presentation tool that brings your presentations into the third dimension. Unlike traditional slide-based tools, Immersa allows you to:
