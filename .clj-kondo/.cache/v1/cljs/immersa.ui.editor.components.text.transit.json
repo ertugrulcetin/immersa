@@ -1,1 +1,0 @@
-["^ ","~$text",["^ ","~:row",6,"~:col",1,"~:fixed-arities",["~#set",[1,2]],"~:name","^0","~:ns","~$immersa.ui.editor.components.text","~:top-ns","^7","~:arities",["^ ","~i1",["^ ","~:ret","~:vector"],"~i2",["^ ","^:","^;"]],"~:type","~:fn"],"~:filename","src/immersa/ui/editor/components/text.cljs"]

@@ -618,8 +618,8 @@
             id (get-in @all-slides [index :id])]
         (sp/setval [sp/ATOM :thumbnails id] base64 thumbnails)
         (dispatch [::editor.events/sync-thumbnails (:thumbnails @thumbnails)])
-        (firebase/upload-thumbnail {:user-id (j/get-in api.core/db [:user :id])
-                                    :slide-id id
+        ;; Save thumbnail to local storage
+        (firebase/upload-thumbnail {:slide-id id
                                     :presentation-id (j/get-in api.core/db [:presentation :id])
                                     :thumbnail base64}))
       (swap! thumbnails assoc :last-time-thumbnail-updated (js/Date.now)))))
@@ -804,11 +804,10 @@
     (add-watch all-slides :slide-update
                (fn [_ _ old-val new-val]
                  (when-not (= old-val new-val)
-                   (let [user-id (j/get-in api.core/db [:user :id])
-                         presentation-id (j/get-in api.core/db [:presentation :id])]
-                     (when (and user-id presentation-id)
-                       (upload-presentation-with-debounce {:user-id user-id
-                                                           :presentation-id presentation-id
+                   (let [presentation-id (j/get-in api.core/db [:presentation :id])]
+                     (when presentation-id
+                       ;; Save to local storage
+                       (upload-presentation-with-debounce {:presentation-id presentation-id
                                                            :presentation-data new-val})))
                    (swap! thumbnails assoc :last-time-slide-updated (js/Date.now)))))))
 

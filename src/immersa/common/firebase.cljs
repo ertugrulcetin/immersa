@@ -1,165 +1,134 @@
 (ns immersa.common.firebase
+  "Local storage adapter - replaces Firebase with local IndexedDB storage.
+   Maintains the same API for backwards compatibility."
   (:refer-clojure :exclude [list])
   (:require
-    ["/immersa/vendor/utils" :as utils]
-    ["@firebase/firestore" :refer [getFirestore runTransaction collection getDoc doc setDoc getDocs query where]]
-    ["firebase/app" :refer [initializeApp]]
-    ["firebase/storage" :refer [getStorage uploadString ref getDownloadURL uploadBytes uploadBytesResumable listAll list]]
-    [applied-science.js-interop :as j]
-    [clojure.string :as str]))
+    [immersa.common.local-storage :as ls]
+    [applied-science.js-interop :as j]))
 
-(defonce app nil)
-(defonce storage nil)
-(defonce db nil)
-
-(defn get-download-url [path]
-  (-> (getDownloadURL (ref storage path))
-      (j/call :then (fn [url]
-                      (println "Url: " url)))
-      (j/call :catch (fn [e]
-                       (println "Firebase download URL error")
-                       (js/console.error e)))))
-
+;; No-op initialization (previously initialized Firebase)
 (defn init-app []
-  (set! app (initializeApp #js {:apiKey "AIzaSyDVBneQ2EVdElUSdSU1xBQYsk5AaOZo2Uc"
-                                :authDomain "immersa-6d29f.firebaseapp.com"
-                                :projectId "immersa-6d29f"
-                                :storageBucket "immersa-6d29f.appspot.com"
-                                :messagingSenderId "673288914536"
-                                :appId "1:673288914536:web:d8fab9505ffc63b0a65ddd"
-                                :measurementId "G-T62SN00GF8"}))
-  (set! storage (getStorage))
-  (set! db (getFirestore app)))
+  (-> (ls/init)
+      (j/call :then #(js/console.log "Local storage initialized"))
+      (j/call :catch #(js/console.error "Failed to initialize local storage:" %))))
 
-(defn upload-file [{:keys [user-id
-                           file
+;; ============ File Upload (now local storage) ============
+
+(defn upload-file [{:keys [file
                            type
-                           task-state
                            on-progress
                            on-error
                            on-complete]}]
-  (let [type-prefix (case type
-                      :image "images/user/"
-                      :model "models/user/")
-        storage-ref (ref storage (str type-prefix user-id "/" (j/get file :name)) #js{:timestamp (-> (js/Date.)
-                                                                                                     (j/call :toISOString))})
-        task (uploadBytesResumable storage-ref file)]
-    (reset! task-state task)
-    (.on task "state_changed"
-         (fn [snapshot]
-           (let [percentage (* (/ (j/get snapshot :bytesTransferred) (j/get snapshot :totalBytes)) 100)
-                 percentage (int percentage)]
-             (when on-progress (on-progress percentage))
-             (println "Upload is " percentage "% done")))
-         (fn [err]
-           (when on-error (on-error err))
-           (println "Upload error:" err)
-           (js/console.error err))
-         (fn []
-           (println "Upload complete!")
-           (-> (getDownloadURL storage-ref)
-               (j/call :then (fn [url]
-                               (when on-complete (on-complete url))
-                               (println "File available at" url)))
-               (j/call :catch (fn [e]
-                                (when on-error (on-error e))
-                                (println "Firebase download URL error")
-                                (js/console.error e))))))))
+  (ls/save-file {:file file
+                 :type type
+                 :on-progress on-progress
+                 :on-error on-error
+                 :on-complete on-complete}))
 
-(defn get-last-uploaded-files [{:keys [type user-id on-complete]}]
-  (let [type-prefix (case type
-                      :image "images/user/"
-                      :model "models/user/")
-        storage-ref (ref storage (str type-prefix user-id "/"))
-        images (list storage-ref #js {:maxResults 20})]
-    (j/call images :then (fn [result]
-                           (let [items (j/get result :items)]
-                             (doseq [item items]
-                               (-> (getDownloadURL item)
-                                   (j/call :then (fn [url]
-                                                   (when on-complete
-                                                     (on-complete {:name (j/get item :name)
-                                                                   :url url}))))
-                                   (j/call :catch (fn [e]
-                                                    (println "Firebase download URL error")
-                                                    (js/console.error e))))))))))
+(defn get-last-uploaded-files [{:keys [type on-complete]}]
+  (ls/get-files-by-type type on-complete))
 
-(defn upload-presentation [{:keys [user-id
-                                   presentation-id
+;; ============ Presentation Storage ============
+
+(defn upload-presentation [{:keys [presentation-id
                                    presentation-data]}]
-  (let [type-prefix "presentations/user/"
-        path (str type-prefix user-id "/" presentation-id "/" presentation-id ".edn")
-        storage-ref (ref storage path #js{:timestamp (-> (js/Date.)
-                                                         (j/call :toISOString))})]
-    (uploadString storage-ref (pr-str presentation-data))))
+  (ls/save-presentation {:id presentation-id
+                         :title (or (get-in presentation-data [0 :title]) "Untitled")
+                         :data presentation-data}))
 
-(defn upload-thumbnail [{:keys [user-id
-                                slide-id
+(defn upload-thumbnail [{:keys [slide-id
                                 presentation-id
                                 thumbnail]}]
-  (let [type-prefix "presentations/user/"
-        path (str type-prefix user-id "/" presentation-id "/thumbnails/" slide-id ".webp")
-        storage-ref (ref storage path #js{:timestamp (-> (js/Date.)
-                                                         (j/call :toISOString))})]
-    (uploadBytes storage-ref (utils/base64ToBlob thumbnail "webp"))))
+  (ls/save-thumbnail {:presentation-id presentation-id
+                      :slide-id slide-id
+                      :thumbnail thumbnail}))
 
-(defn get-presentation [id user-id]
-  (getDownloadURL (ref storage (str "presentations/user/" user-id "/" id "/" id ".edn"))))
+(defn get-presentation [id _user-id]
+  "Get presentation - returns a promise that resolves to the presentation data URL."
+  (js/Promise.
+    (fn [resolve reject]
+      (-> (ls/get-presentation id)
+          (j/call :then (fn [result]
+                          (if result
+                            ;; Return a data URL with the presentation data
+                            (let [data-str (pr-str (:data result))
+                                  blob (js/Blob. #js [data-str] #js {:type "text/plain"})
+                                  url (js/URL.createObjectURL blob)]
+                              (resolve url))
+                            (reject "Presentation not found"))))
+          (j/call :catch reject)))))
 
-(defn get-thumbnails [{:keys [presentation-id user-id on-complete]}]
-  (let [type-prefix "presentations/user/"
-        storage-ref (ref storage (str type-prefix user-id "/" presentation-id "/thumbnails/"))
-        images (list storage-ref)]
-    (j/call images :then (fn [result]
-                           (let [items (j/get result :items)]
-                             (doseq [item items]
-                               (-> (getDownloadURL item)
-                                   (j/call :then (fn [url]
-                                                   (let [[slide-id] (str/split (j/get item :name) #"\.webp")]
-                                                     (when on-complete (on-complete slide-id url)))))
-                                   (j/call :catch (fn [e]
-                                                    (println "Firebase download URL error")
-                                                    (js/console.error e))))))))))
+(defn get-thumbnails [{:keys [presentation-id on-complete]}]
+  (ls/get-thumbnails presentation-id on-complete))
 
-(defn get-user [user-id]
-  (-> (doc db "users" user-id) getDoc))
+;; ============ User Functions (now no-op for offline mode) ============
 
-(defn get-presentation-info [user-id]
-  (getDocs (query (collection db "presentations") (where "user_id" "==" user-id))))
+(defn get-user [_user-id]
+  "Returns a mock document that 'exists' for offline mode."
+  (js/Promise.resolve
+    #js {:exists (fn [] true)
+         :data (fn [] #js {:id "local-user"})}))
+
+(defn get-presentation-info [_user-id]
+  "Get presentation info - returns all local presentations."
+  (js/Promise.
+    (fn [resolve _reject]
+      (-> (ls/get-all-presentations)
+          (j/call :then (fn [presentations]
+                          (if (seq presentations)
+                            (let [first-pres (first presentations)]
+                              (resolve #js {:docs #js [#js {:data (fn []
+                                                                    #js {:id (:id first-pres)
+                                                                         :title (:title first-pres)
+                                                                         :user_id "local-user"})}]}))
+                            ;; No presentations exist yet
+                            (resolve #js {:docs #js []}))))
+          (j/call :catch (fn [_]
+                           (resolve #js {:docs #js []})))))))
 
 (defn get-presentation-info-by-id [id]
-  (getDocs (query (collection db "presentations") (where "id" "==" id))))
+  "Get presentation info by ID."
+  (js/Promise.
+    (fn [resolve _reject]
+      (-> (ls/get-presentation id)
+          (j/call :then (fn [result]
+                          (if result
+                            (resolve #js {:docs #js [#js {:data (fn []
+                                                                  #js {:id (:id result)
+                                                                       :title (:title result)
+                                                                       :user_id "local-user"})}]})
+                            (resolve #js {:docs #js []}))))
+          (j/call :catch (fn [_]
+                           (resolve #js {:docs #js []})))))))
 
-(defn set-user [user]
-  (let [ref (doc db "users" (:id user))]
-    (setDoc ref (clj->js user) #js{:merge true})))
+(defn set-user [_user]
+  "No-op for offline mode."
+  (js/Promise.resolve true))
 
 (defn set-presentation-info [data]
-  (let [ref (doc db "presentations" (:id data))]
-    (setDoc ref (clj->js data) #js{:merge true})))
+  "Update presentation info in local storage."
+  (-> (ls/get-presentation (:id data))
+      (j/call :then (fn [existing]
+                      (when existing
+                        (ls/save-presentation {:id (:id data)
+                                               :title (or (:title data) (:title existing))
+                                               :data (:data existing)}))))))
 
-(defn init-user-and-presentation [{:keys [user presentation]}]
-  (runTransaction
-    db
-    (fn [tx]
-      (let [user-ref (doc db "users" (:id user))
-            presentation-ref (doc db "presentations" (:id presentation))]
-        (j/call tx :set user-ref (clj->js user))
-        (j/call tx :set presentation-ref (clj->js (assoc presentation :user_id (:id user))))
-        (js/Promise.resolve)))))
+(defn init-user-and-presentation [{:keys [presentation]}]
+  "Initialize a new presentation in local storage."
+  (ls/save-presentation {:id (:id presentation)
+                         :title (:title presentation)
+                         :data []}))
 
-(defn update-presentation-title [{:keys [user-id presentation-id title]}]
-  (set-presentation-info {:id presentation-id
-                          :title title
-                          :user_id user-id}))
+(defn update-presentation-title [{:keys [presentation-id title]}]
+  "Update presentation title."
+  (-> (ls/get-presentation presentation-id)
+      (j/call :then (fn [existing]
+                      (when existing
+                        (ls/save-presentation {:id presentation-id
+                                               :title title
+                                               :data (:data existing)}))))))
 
 (comment
-  (j/call (get-user "!23")
-          :then (fn []
-                  (println "Success!"))
-          :catch (fn []
-                   (println "Something is off")))
   (init-app)
-  (get-download-url "images/schaltbau/logo.png")
-  (get-last-uploaded-files "user_2c20lPttd6jIbGObJJhbKwN3tLh")
   )

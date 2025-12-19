@@ -4,7 +4,6 @@
     [clojure.string :as str]
     [immersa.common.communication :refer [fire]]
     [immersa.common.firebase :as firebase]
-    [immersa.ui.crisp-chat :as crisp-chat]
     [immersa.ui.events]
     [medley.core :refer [dissoc-in]]
     [re-frame.core :refer [reg-event-db reg-event-fx reg-fx]]))
@@ -75,11 +74,6 @@
       {:scene {:type :update-background-brightness
                :data {:value value}}
        :analytics {:event "scene-background-brightness-update"}})))
-
-#_(reg-event-db
-    ::update-scene-background-color-success
-    (fn [db [_ rgb]]
-      (assoc-in db [:editor :scene :background-color] rgb)))
 
 (reg-event-fx
   ::resize-scene
@@ -293,13 +287,8 @@
 (reg-event-fx
   ::open-crisp-chat
   (fn []
-    {:fx [[::open-crisp-chat]]
-     :analytics {:event "feedback-open"}}))
-
-(reg-fx
-  ::open-crisp-chat
-  (fn []
-    (crisp-chat/toggle)))
+    ;; No-op: Crisp Chat disabled in offline mode
+    {:analytics {:event "feedback-open"}}))
 
 (reg-event-db
   ::init-user
@@ -411,11 +400,9 @@
 (reg-event-fx
   ::update-presentation-title
   (fn [{:keys [db]} [_ title]]
-    (let [id (-> db :editor :slides :id)
-          user-id (-> db :user :id)]
+    (let [id (-> db :editor :slides :id)]
       {:db (assoc-in db [:editor :slides :title] title)
-       :update-presentation-title {:user-id user-id
-                                   :presentation-id id
+       :update-presentation-title {:presentation-id id
                                    :title title}
        ::set-title title
        :analytics {:event "title-update"}})))

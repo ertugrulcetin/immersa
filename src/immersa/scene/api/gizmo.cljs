@@ -9,7 +9,6 @@
     [immersa.scene.slide :as slide]
     [immersa.scene.ui-notifier :as ui.notifier]
     [immersa.scene.undo-redo :as undo.redo]
-    [immersa.scene.utils :as utils]
     [immersa.ui.editor.events :as events]
     [re-frame.core :refer [dispatch]]))
 

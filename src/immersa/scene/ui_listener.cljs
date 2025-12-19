@@ -5,7 +5,6 @@
     [com.rpl.specter :as sp]
     [goog.functions :as functions]
     [immersa.common.communication :refer [event-bus-pub]]
-    [immersa.common.mixpanel :as mixpanel]
     [immersa.common.utils :as common.utils]
     [immersa.scene.api.camera :as api.camera]
     [immersa.scene.api.component :as api.component]
@@ -201,9 +200,7 @@
     (if (and value (slide/camera-locked?))
       (api.core/attach-pointer-drag-behav mesh)
       (api.core/detach-pointer-drag-behav mesh)))
-  (ui.notifier/notify-camera-lock-state value)
-  (mixpanel/track {:event "camera-lock-update"
-                   :data {:locked? value}}))
+  (ui.notifier/notify-camera-lock-state value))
 
 (defmethod handle-ui-update :toggle-ground-enabled [{{:keys [value]} :data}]
   (slide/update-slide-data :ground :enabled? value)

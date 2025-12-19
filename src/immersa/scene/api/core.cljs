@@ -26,7 +26,7 @@
     ["@babylonjs/core/Misc/tools" :refer [Tools]]
     ["@babylonjs/core/Particles/pointsCloudSystem" :refer [PointsCloudSystem]]
     ["@babylonjs/core/scene" :refer [Scene]]
-    ["@babylonjs/loaders"]
+    ["@babylonjs/loaders/glTF"]
     ;; ["@babylonjs/inspector"]
     ["p5" :as p5]
     [applied-science.js-interop :as j]

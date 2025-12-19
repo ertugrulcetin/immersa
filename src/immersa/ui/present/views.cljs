@@ -69,12 +69,14 @@
                                                              :borderRadius "3px"}})]
                (dispatch [::events/add-progress-bar bar]))))}])
 
-(defn- immersa-home-page-button []
-  [:button
-   {:on-click #(js/window.open "https://immersa.app" "_blank")
-    :class [(styles/immersa-button)
-            (styles/immersa-button-glow)
-            (styles/immersa-button-gradient-border)]}
+(defn- immersa-logo []
+  [:div
+   {:style {:display "flex"
+            :align-items "center"
+            :gap "4px"
+            :padding "3px 8px"
+            :border-radius "4px"
+            :background "rgba(255,255,255,0.1)"}}
    [:img {:src "img/logo_white.png"
           :style {:width "70px"
                   :padding "3px"}}]])
@@ -127,14 +129,16 @@
                       path (j/get js/location :pathname)
                       slide-id (last (str/split path #"-+"))]
                   (m/js-await [q (firebase/get-presentation-info-by-id slide-id)]
-                    (let [{:keys [id user_id title]} (j/lookup (j/call-in q [:docs 0 :data]))]
-                      (m/js-await [presentation-url (firebase/get-presentation id user_id)]
-                        (m/js-await [response (js/fetch presentation-url)]
-                          (m/js-await [presentation (j/call response :text)]
-                            (init-app {:title title
-                                       :slides (cljs.reader/read-string presentation)
-                                       :user-id user_id
-                                       :presentation-id id})))))
+                    (let [docs (j/get q :docs)]
+                      (when (and docs (> (j/get docs :length) 0))
+                        (let [{:keys [id user_id title]} (j/lookup (j/call-in q [:docs 0 :data]))]
+                          (m/js-await [presentation-url (firebase/get-presentation id user_id)]
+                            (m/js-await [response (js/fetch presentation-url)]
+                              (m/js-await [presentation (j/call response :text)]
+                                (init-app {:title title
+                                           :slides (cljs.reader/read-string presentation)
+                                           :user-id user_id
+                                           :presentation-id id})))))))
                     (catch e
                            (js/console.log e)))))
               #js[]))
@@ -190,11 +194,4 @@
                                                           (j/call :then (fn [] (reset! full-screen? true)))))
                                          :cursor "pointer"}]
              :content "Full screen"}])
-         [immersa-home-page-button]
-         #_[icon/chat {:size 24
-                       :color "white"
-                       :cursor "pointer"}]
-         #_[icon/dots {:size 24
-                       :color "white"
-                       :weight "bold"
-                       :cursor "pointer"}]]]]]]))
+         [immersa-logo]]]]]]))
