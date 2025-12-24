@@ -1,8 +1,10 @@
 {
   "name": "Immersa",
+  "version": "1.0.0",
   "author": "Ertuğrul Çetin",
   "description": "A Web-based 3D Presentation Tool - Offline Local-First",
   "license": "MIT",
+  "main": "electron.js",
   "scripts": {
     "ancient": "clojure -Sdeps '{:deps {com.github.liquidz/antq {:mvn/version \"RELEASE\"}}}' -m antq.core",
     "watch": "sh ./sh/copy_havok.sh && npx shadow-cljs watch app",
@@ -12,7 +14,30 @@
     "ci": "npx shadow-cljs compile karma-test && npx karma start --single-run --reporters junit,dots",
     "clean": "rm -rf .shadow-cljs resources/public/js/compiled target",
     "clean-all": "rm -rf .shadow-cljs resources/public/js/compiled node_modules package-lock.json target",
-    "postinstall": "patch-package --exclude nothing"
+    "postinstall": "patch-package --exclude nothing",
+    "electron": "electron .",
+    "electron:build": "npm run release && electron-builder --mac --arm64"
+  },
+  "build": {
+    "appId": "com.immersa.app",
+    "productName": "Immersa",
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["arm64"]
+        }
+      ]
+    },
+    "files": [
+      "electron.js",
+      "resources/**/*",
+      "node_modules/**/*"
+    ],
+    "directories": {
+      "output": "dist"
+    }
   },
   "dependencies": {
     "@babylonjs/core": "^6.46.0",
@@ -40,12 +65,14 @@
     "p5": "^1.9.0",
     "progressbar.js": "^1.1.1",
     "react": "17.0.2",
-    "react-dom": "17.0.2",
     "react-color": "^2.19.3",
-    "react-device-detect": "^2.2.3"
+    "react-device-detect": "^2.2.3",
+    "react-dom": "17.0.2"
   },
   "devDependencies": {
     "@babylonjs/inspector": "^6.41.0",
+    "electron": "^39.2.7",
+    "electron-builder": "^26.0.12",
     "karma": "6.4.0",
     "karma-chrome-launcher": "3.1.1",
     "karma-cljs-test": "0.1.0",
