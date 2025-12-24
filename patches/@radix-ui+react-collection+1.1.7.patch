@@ -1,0 +1,175 @@
+diff --git a/node_modules/@radix-ui/react-collection/dist/index.js b/node_modules/@radix-ui/react-collection/dist/index.js
+index b83d878..69cbbb3 100644
+--- a/node_modules/@radix-ui/react-collection/dist/index.js
++++ b/node_modules/@radix-ui/react-collection/dist/index.js
+@@ -113,19 +113,19 @@ var import_react_slot2 = require("@radix-ui/react-slot");
+ 
+ // src/ordered-dictionary.ts
+ var __instanciated = /* @__PURE__ */ new WeakMap();
+-var OrderedDict = class _OrderedDict extends Map {
+-  #keys;
++var OrderedDict = class OrderedDict extends Map {
++  _keys;
+   constructor(entries) {
+     super(entries);
+-    this.#keys = [...super.keys()];
++    this._keys = [...super.keys()];
+     __instanciated.set(this, true);
+   }
+   set(key, value) {
+     if (__instanciated.get(this)) {
+       if (this.has(key)) {
+-        this.#keys[this.#keys.indexOf(key)] = key;
++        this._keys[this._keys.indexOf(key)] = key;
+       } else {
+-        this.#keys.push(key);
++        this._keys.push(key);
+       }
+     }
+     super.set(key, value);
+@@ -133,7 +133,7 @@ var OrderedDict = class _OrderedDict extends Map {
+   }
+   insert(index, key, value) {
+     const has = this.has(key);
+-    const length = this.#keys.length;
++    const length = this._keys.length;
+     const relativeIndex = toSafeInteger(index);
+     let actualIndex = relativeIndex >= 0 ? relativeIndex : length + relativeIndex;
+     const safeIndex = actualIndex < 0 || actualIndex >= length ? -1 : actualIndex;
+@@ -145,7 +145,7 @@ var OrderedDict = class _OrderedDict extends Map {
+     if (relativeIndex < 0) {
+       actualIndex++;
+     }
+-    const keys = [...this.#keys];
++    const keys = [...this._keys];
+     let nextValue;
+     let shouldSkip = false;
+     for (let i = actualIndex; i < size; i++) {
+@@ -173,12 +173,12 @@ var OrderedDict = class _OrderedDict extends Map {
+     return this;
+   }
+   with(index, key, value) {
+-    const copy = new _OrderedDict(this);
++    const copy = new OrderedDict(this);
+     copy.insert(index, key, value);
+     return copy;
+   }
+   before(key) {
+-    const index = this.#keys.indexOf(key) - 1;
++    const index = this._keys.indexOf(key) - 1;
+     if (index < 0) {
+       return void 0;
+     }
+@@ -188,14 +188,14 @@ var OrderedDict = class _OrderedDict extends Map {
+    * Sets a new key-value pair at the position before the given key.
+    */
+   setBefore(key, newKey, value) {
+-    const index = this.#keys.indexOf(key);
++    const index = this._keys.indexOf(key);
+     if (index === -1) {
+       return this;
+     }
+     return this.insert(index, newKey, value);
+   }
+   after(key) {
+-    let index = this.#keys.indexOf(key);
++    let index = this._keys.indexOf(key);
+     index = index === -1 || index === this.size - 1 ? -1 : index + 1;
+     if (index === -1) {
+       return void 0;
+@@ -206,7 +206,7 @@ var OrderedDict = class _OrderedDict extends Map {
+    * Sets a new key-value pair at the position after the given key.
+    */
+   setAfter(key, newKey, value) {
+-    const index = this.#keys.indexOf(key);
++    const index = this._keys.indexOf(key);
+     if (index === -1) {
+       return this;
+     }
+@@ -219,13 +219,13 @@ var OrderedDict = class _OrderedDict extends Map {
+     return this.entryAt(-1);
+   }
+   clear() {
+-    this.#keys = [];
++    this._keys = [];
+     return super.clear();
+   }
+   delete(key) {
+     const deleted = super.delete(key);
+     if (deleted) {
+-      this.#keys.splice(this.#keys.indexOf(key), 1);
++      this._keys.splice(this._keys.indexOf(key), 1);
+     }
+     return deleted;
+   }
+@@ -237,22 +237,22 @@ var OrderedDict = class _OrderedDict extends Map {
+     return false;
+   }
+   at(index) {
+-    const key = at(this.#keys, index);
++    const key = at(this._keys, index);
+     if (key !== void 0) {
+       return this.get(key);
+     }
+   }
+   entryAt(index) {
+-    const key = at(this.#keys, index);
++    const key = at(this._keys, index);
+     if (key !== void 0) {
+       return [key, this.get(key)];
+     }
+   }
+   indexOf(key) {
+-    return this.#keys.indexOf(key);
++    return this._keys.indexOf(key);
+   }
+   keyAt(index) {
+-    return at(this.#keys, index);
++    return at(this._keys, index);
+   }
+   from(key, offset) {
+     const index = this.indexOf(key);
+@@ -303,7 +303,7 @@ var OrderedDict = class _OrderedDict extends Map {
+       }
+       index++;
+     }
+-    return new _OrderedDict(entries);
++    return new OrderedDict(entries);
+   }
+   map(callbackfn, thisArg) {
+     const entries = [];
+@@ -312,7 +312,7 @@ var OrderedDict = class _OrderedDict extends Map {
+       entries.push([entry[0], Reflect.apply(callbackfn, thisArg, [entry, index, this])]);
+       index++;
+     }
+-    return new _OrderedDict(entries);
++    return new OrderedDict(entries);
+   }
+   reduce(...args) {
+     const [callbackfn, initialValue] = args;
+@@ -343,10 +343,10 @@ var OrderedDict = class _OrderedDict extends Map {
+   }
+   toSorted(compareFn) {
+     const entries = [...this.entries()].sort(compareFn);
+-    return new _OrderedDict(entries);
++    return new OrderedDict(entries);
+   }
+   toReversed() {
+-    const reversed = new _OrderedDict();
++    const reversed = new OrderedDict();
+     for (let index = this.size - 1; index >= 0; index--) {
+       const key = this.keyAt(index);
+       const element = this.get(key);
+@@ -357,10 +357,10 @@ var OrderedDict = class _OrderedDict extends Map {
+   toSpliced(...args) {
+     const entries = [...this.entries()];
+     entries.splice(...args);
+-    return new _OrderedDict(entries);
++    return new OrderedDict(entries);
+   }
+   slice(start, end) {
+-    const result = new _OrderedDict();
++    const result = new OrderedDict();
+     let stop = this.size - 1;
+     if (start === void 0) {
+       return result;

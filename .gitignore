@@ -36,3 +36,4 @@ Thumbs.db
 # Build artifacts
 /resources/public/js/compiled/
 /resources/public/cljs-runtime/
+/dist/
