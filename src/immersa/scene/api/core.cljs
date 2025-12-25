@@ -492,8 +492,8 @@
                                                                         (reject (or exception message)))
                                                                       ".glb"))))))))
                                    (add-mesh-task {:name (str "mesh-" index)
-                                                  :meshes-names ""
-                                                  :url path}))))
+                                                   :meshes-names ""
+                                                   :url path}))))
                       (let [am-promise (j/call-in db [:assets-manager :loadAsync])
                             all-promises (cond-> [am-promise]
                                            (seq @manual-model-loads) (into @manual-model-loads))]

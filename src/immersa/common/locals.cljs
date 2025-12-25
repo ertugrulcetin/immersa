@@ -3,8 +3,8 @@
    Maintains the same API for backwards compatibility."
   (:refer-clojure :exclude [list])
   (:require
-    [immersa.common.local-storage :as ls]
-    [applied-science.js-interop :as j]))
+    [applied-science.js-interop :as j]
+    [immersa.common.local-storage :as ls]))
 
 ;; No-op initialization (previously initialized Firebase)
 (defn init-app []

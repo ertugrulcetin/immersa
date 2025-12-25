@@ -5,9 +5,9 @@
   "license": "MIT",
   "scripts": {
     "ancient": "clojure -Sdeps '{:deps {com.github.liquidz/antq {:mvn/version \"RELEASE\"}}}' -m antq.core",
-    "watch": "sh ./sh/copy_havok.sh && npx shadow-cljs watch app",
+    "watch": "npx shadow-cljs watch app",
     "test": "npx shadow-cljs watch browser-test karma-test",
-    "release": "sh ./sh/copy_havok.sh && npx shadow-cljs release app",
+    "release": "npx shadow-cljs release app",
     "build-report": "npx shadow-cljs run shadow.cljs.build-report app target/build-report.html",
     "ci": "npx shadow-cljs compile karma-test && npx karma start --single-run --reporters junit,dots",
     "clean": "rm -rf .shadow-cljs resources/public/js/compiled target",
@@ -17,7 +17,6 @@
   "dependencies": {
     "@babylonjs/core": "^6.46.0",
     "@babylonjs/gui": "^6.46.0",
-    "@babylonjs/havok": "^1.3.1",
     "@babylonjs/loaders": "^6.46.0",
     "@babylonjs/materials": "^6.46.0",
     "@dnd-kit/core": "^6.1.0",

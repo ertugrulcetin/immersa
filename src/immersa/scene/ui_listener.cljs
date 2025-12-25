@@ -1,10 +1,10 @@
 (ns immersa.scene.ui-listener
   (:require
-    ["@babylonjs/core/Maths/math" :refer [Vector3]]
     ["@babylonjs/core/Loading/sceneLoader" :refer [SceneLoader]]
+    ["@babylonjs/core/Maths/math" :refer [Vector3]]
     [applied-science.js-interop :as j]
-    [com.rpl.specter :as sp]
     [clojure.string :as str]
+    [com.rpl.specter :as sp]
     [goog.functions :as functions]
     [immersa.common.communication :refer [event-bus-pub]]
     [immersa.common.local-storage :as local-storage]
@@ -116,19 +116,19 @@
   (let [mesh (api.core/selected-mesh)
         current-text (api.core/get-node-attr mesh :text)]
     (slide/update-text-mesh-with-debounce {:text value
-                                          :mesh mesh})
+                                           :mesh mesh})
     (undo.redo/create-action-with-debounce {:type :update-text-content
-                                           :id (api.core/get-object-name mesh)
-                                           :params {:from current-text
-                                                    :to value}})))
+                                            :id (api.core/get-object-name mesh)
+                                            :params {:from current-text
+                                                     :to value}})))
 
 (defmethod handle-ui-update :update-selected-mesh-text-depth-or-size [{{:keys [update value]} :data}]
   (let [mesh (api.core/selected-mesh)]
     (slide/update-text-mesh (hash-map update value :mesh mesh))
     (undo.redo/create-action {:type (if (= update :size) :update-text-size :update-text-depth)
-                             :id (api.core/get-object-name mesh)
-                             :params {:from (api.core/get-node-attr mesh (if (= update :size) :size :depth))
-                                      :to value}})))
+                              :id (api.core/get-object-name mesh)
+                              :params {:from (api.core/get-node-attr mesh (if (= update :size) :size :depth))
+                                       :to value}})))
 
 (defmethod handle-ui-update :update-selected-mesh-face-to-screen? [{{:keys [value]} :data}]
   (when-let [mesh (api.core/selected-mesh)]
@@ -169,14 +169,14 @@
 (defmethod handle-ui-update :add-slide [{:keys [index]}]
   (let [[index slide] (slide/add-slide index)]
     (undo.redo/create-action {:type :duplicate-slide
-                             :params {:index index
-                                      :slide slide}})))
+                              :params {:index index
+                                       :slide slide}})))
 
 (defmethod handle-ui-update :blank-slide [_]
   (let [[index slide] (slide/blank-slide)]
     (undo.redo/create-action {:type :blank-slide
-                             :params {:index index
-                                      :slide slide}})))
+                              :params {:index index
+                                       :slide slide}})))
 
 (defmethod handle-ui-update :delete-slide [{:keys [index]}]
   (let [current-index @slide/current-slide-index
@@ -184,16 +184,16 @@
         slide (get @slide/all-slides index)]
     (slide/delete-slide index)
     (undo.redo/create-action {:type :delete-slide
-                             :params {:index index
-                                      :selected-index-before current-index
-                                      :slide slide}})))
+                              :params {:index index
+                                       :selected-index-before current-index
+                                       :slide slide}})))
 
 (defmethod handle-ui-update :re-order-slides [{{:keys [value]} :data}]
   (let [[old-index new-index] value]
     (slide/re-order-slides old-index new-index)
     (undo.redo/create-action {:type :re-order-slides
-                             :params {:old-index old-index
-                                      :new-index new-index}})))
+                              :params {:old-index old-index
+                                       :new-index new-index}})))
 
 (defmethod handle-ui-update :create-slide-thumbnail [_]
   (slide/update-thumbnail))
@@ -242,8 +242,8 @@
                    (update :color api.core/color->v))]
     (slide/add-slide-data mesh params)
     (undo.redo/create-action {:type :create-text
-                             :id uuid
-                             :params params})
+                              :id uuid
+                              :params params})
     (api.core/attach-to-mesh mesh)))
 
 (defmethod handle-ui-update :add-image [{{:keys [value]} :data}]
@@ -409,8 +409,8 @@
 (defmethod handle-ui-update :create-go-to-slide-action [{{:keys [from to]} :data}]
   (when (not= from to)
     (undo.redo/create-action {:type :go-to-slide
-                             :params {:from from
-                                      :to to}})))
+                              :params {:from from
+                                       :to to}})))
 
 (defmethod handle-ui-update :update-present-mode [{{:keys [enabled]} :data}]
   (j/assoc! api.core/db :present? enabled)

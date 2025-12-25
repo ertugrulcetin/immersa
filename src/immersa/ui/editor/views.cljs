@@ -234,7 +234,7 @@
     :on-complete (fn [file url]
                    (dispatch [::events/add-image url])
                    (dispatch [::events/add-uploaded-image {:name (j/get file :name)
-                                                          :url url}]))}])
+                                                           :url url}]))}])
 
 (defn- invisible-model-file-input []
   [invisible-file-input
@@ -245,7 +245,7 @@
                    ;; Keep the original filename so Babylon can pick the right loader (or we can force it).
                    (dispatch [::events/add-model {:url url :name (j/get file :name)}])
                    (dispatch [::events/add-uploaded-model {:name (j/get file :name)
-                                                          :url url}]))}])
+                                                           :url url}]))}])
 
 (defn- image-component []
   (let [images @(subscribe [::subs/uploaded-images])]
@@ -461,10 +461,10 @@
 
 (defn- upload-first-slide-and-thumbnail [{:keys [title presentation-id]}]
   (m/js-await [_ (locals/upload-presentation {:presentation-id presentation-id
-                                                :presentation-data slides})]
+                                              :presentation-data slides})]
     (m/js-await [_ (locals/upload-thumbnail {:presentation-id presentation-id
-                                               :slide-id "14e4ee76-bb27-4904-9d30-360a40d8abb7"
-                                               :thumbnail (get thumbnails "14e4ee76-bb27-4904-9d30-360a40d8abb7")})]
+                                             :slide-id "14e4ee76-bb27-4904-9d30-360a40d8abb7"
+                                             :thumbnail (get thumbnails "14e4ee76-bb27-4904-9d30-360a40d8abb7")})]
       (init-app {:title title
                  :slides slides
                  :thumbnails thumbnails
@@ -474,8 +474,8 @@
 
 (defn- init-thumbnails [{:keys [presentation-id]}]
   (locals/get-thumbnails {:presentation-id presentation-id
-                            :on-complete (fn [slide-id url]
-                                           (dispatch [::events/add-thumbnail slide-id url]))}))
+                          :on-complete (fn [slide-id url]
+                                         (dispatch [::events/add-thumbnail slide-id url]))}))
 
 (defn- get-presentation-and-start []
   (m/js-await [q (locals/get-presentation-info "local-user")]
