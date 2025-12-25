@@ -619,8 +619,8 @@
         (dispatch [::editor.events/sync-thumbnails (:thumbnails @thumbnails)])
         ;; Save thumbnail to local storage
         (locals/upload-thumbnail {:slide-id id
-                                    :presentation-id (j/get-in api.core/db [:presentation :id])
-                                    :thumbnail base64}))
+                                  :presentation-id (j/get-in api.core/db [:presentation :id])
+                                  :thumbnail base64}))
       (swap! thumbnails assoc :last-time-thumbnail-updated (js/Date.now)))))
 
 (defn get-slide-data [obj k]

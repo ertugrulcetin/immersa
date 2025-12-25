@@ -345,4 +345,3 @@
   (-> (get-all-presentations)
       (.then #(js/console.log "All presentations:" (clj->js %))))
   )
-
