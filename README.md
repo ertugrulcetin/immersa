@@ -83,6 +83,35 @@ npm run release
 
 The production build will be in `resources/public/js/compiled/`.
 
+### Running as Electron Desktop App
+
+Immersa can run as a standalone desktop application using Electron.
+
+1. **Start the development server first**
+   ```bash
+   npm run watch
+   ```
+
+2. **In a separate terminal, launch Electron**
+   ```bash
+   npm run electron
+   ```
+
+### Building Electron App
+
+To create a distributable desktop application:
+
+```bash
+npm run electron:build
+```
+
+This will:
+- Build the production version of the app
+- Package it as a macOS DMG installer (Apple Silicon/ARM64)
+- Output the installer to the `dist/` directory
+
+**Note**: The current build configuration targets macOS ARM64. To build for other platforms, modify the `build` section in `package.json`.
+
 ## Usage Guide
 
 ### Keyboard Shortcuts
