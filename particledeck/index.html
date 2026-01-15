@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ParticleDeck - Particle Network Slide Generator</title>
+
+    <!-- Fonts: Inter (Sans), Fraunces (Serif), JetBrains Mono (Mono) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,400&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/editor.css">
+    <link rel="stylesheet" href="css/preview.css">
+</head>
+<body>
+    <!-- App Container -->
+    <div class="app-container">
+
+        <!-- Left Sidebar: Slide List & Editor -->
+        <aside class="sidebar">
+            <header class="sidebar-header">
+                <h1 class="app-title">ParticleDeck</h1>
+                <button class="btn-add-slide" id="addSlideBtn">
+                    <span class="btn-icon">+</span> New Slide
+                </button>
+            </header>
+
+            <!-- Slide List -->
+            <div class="slide-list" id="slideList">
+                <!-- Slides will be dynamically added here -->
+            </div>
+
+            <!-- Slide Editor -->
+            <div class="slide-editor" id="slideEditor">
+                <div class="editor-header">
+                    <h3>Edit Slide</h3>
+                    <button class="btn-delete-slide" id="deleteSlideBtn" title="Delete Slide">
+                        <span>🗑️</span>
+                    </button>
+                </div>
+
+                <!-- Content Editor -->
+                <div class="editor-section">
+                    <label class="editor-label">Content (Markdown)</label>
+                    <textarea
+                        class="editor-textarea"
+                        id="contentEditor"
+                        placeholder="# Your Title&#10;&#10;Your content here. Use **bold**, *italic*, and markdown formatting."
+                    ></textarea>
+                    <div class="editor-hint">
+                        Supports: **bold**, *italic*, # headings
+                    </div>
+                </div>
+
+                <!-- Shape Selector -->
+                <div class="editor-section">
+                    <label class="editor-label">Particle Shape</label>
+                    <select class="editor-select" id="shapeSelector">
+                        <option value="sphere">Sphere</option>
+                        <option value="ellipse">Ellipse</option>
+                        <option value="tree">Tree Structure</option>
+                        <option value="sphere3d">3D Sphere</option>
+                        <option value="wave">Wave</option>
+                        <option value="scatter">Scatter</option>
+                        <option value="grid">Grid</option>
+                        <option value="clusters">Clusters</option>
+                        <option value="spiral">Spiral</option>
+                        <option value="curve">Curve</option>
+                        <option value="bars">Bar Chart</option>
+                        <option value="network">Network Nodes</option>
+                        <option value="galaxy">Galaxy</option>
+                        <option value="line">Diagonal Line</option>
+                    </select>
+                    <input
+                        type="text"
+                        class="editor-input"
+                        id="customShapeInput"
+                        placeholder="Or describe a custom shape..."
+                    >
+                </div>
+
+                <!-- Alignment Options -->
+                <div class="editor-section">
+                    <label class="editor-label">Text Alignment</label>
+                    <div class="alignment-buttons">
+                        <button class="alignment-btn" data-align="center">Center</button>
+                        <button class="alignment-btn" data-align="left">Left</button>
+                        <button class="alignment-btn" data-align="right">Right</button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Right: Preview Area -->
+        <main class="preview-area">
+            <!-- Particle Canvas Background -->
+            <canvas id="particleCanvas" class="particle-canvas"></canvas>
+
+            <!-- Slide Content Overlay -->
+            <div class="slide-preview" id="slidePreview">
+                <div class="preview-content" id="previewContent">
+                    <!-- Slide content will be rendered here -->
+                </div>
+            </div>
+
+            <!-- Preview Controls -->
+            <div class="preview-controls">
+                <button class="preview-btn" id="prevBtn">←</button>
+                <span class="slide-counter" id="slideCounter">1 / 1</span>
+                <button class="preview-btn" id="nextBtn">→</button>
+            </div>
+
+            <!-- Export Button -->
+            <div class="export-controls">
+                <button class="btn-export" id="exportBtn">Export HTML</button>
+                <button class="btn-present" id="presentBtn">Present Mode</button>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/shapes.js"></script>
+    <script src="js/particles.js"></script>
+    <script src="js/markdown.js"></script>
+    <script src="js/slideManager.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

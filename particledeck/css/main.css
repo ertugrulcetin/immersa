@@ -1,0 +1,74 @@
+:root {
+    --bg-color: #020408;
+    --bg-gradient: radial-gradient(circle at 50% 30%, #0d1826 0%, #000000 100%);
+    --dubai-gold: #C2A25F;
+    --dubai-bronze: #8c6b26;
+    --text-white: #f0f2f5;
+    --text-grey: #94a3b8;
+    --sidebar-bg: rgba(10, 15, 20, 0.95);
+    --sidebar-border: rgba(194, 162, 95, 0.15);
+
+    /* Fonts */
+    --font-heading: 'Fraunces', serif;
+    --font-body: 'Inter', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-body);
+    background: var(--bg-color);
+    color: var(--text-white);
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+}
+
+.app-container {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+}
+
+/* Buttons */
+button {
+    cursor: pointer;
+    font-family: var(--font-body);
+    border: none;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    transform: translateY(-2px);
+}
+
+/* Gold Accent Text */
+.gold-accent {
+    background: linear-gradient(to right, #fbf5e6, var(--dubai-gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--dubai-gold);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--dubai-bronze);
+}
